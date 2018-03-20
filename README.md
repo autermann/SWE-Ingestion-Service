@@ -40,6 +40,66 @@ The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deplo
 	 
   3. Set the correct filepaths to your executable *.jar files in the Tests [here](https://github.com/MojioMS/SWE-Ingestion-Service/blob/dev/RestController/src/test/java/org/n52/stream/seadatacloud/restcontroller/test/RegisterAppsOnStartTest.java#L26), [here](https://github.com/MojioMS/SWE-Ingestion-Service/blob/dev/RestController/src/test/java/org/n52/stream/seadatacloud/restcontroller/test/RegisterAppsOnStartTest.java#L33), [here](https://github.com/MojioMS/SWE-Ingestion-Service/blob/dev/RestController/src/test/java/org/n52/stream/seadatacloud/restcontroller/test/RegisterAppsOnStartTest.java#L35), and [here](https://github.com/MojioMS/SWE-Ingestion-Service/blob/dev/RestController/src/test/java/org/n52/stream/seadatacloud/restcontroller/test/RegisterAppsOnStartTest.java#L42).
 
+	 OR: use the [Dashboard interface](http://localhost:9393/dashboard/#/apps) and add each of the four built *.jar applications into your local Spring Cloud DataFlow server instance.
+  
+## How to Run
+
+  1. Start `RestController`.
+  
+## API:
+
+#### Sources:
+
+  * GET api/sources: [http://localhost:8080/api/sources](http://localhost:8080/api/sources) - gets all registeres sources.
+  
+#### Processors:
+
+  * GET api/processors: [http://localhost:8080/api/processors](http://localhost:8080/api/processors) - gets all registered processors.
+  
+#### Sinks:
+
+  * GET api/sinks: [http://localhost:8080/api/sinks](http://localhost:8080/api/sinks) - gets all registered sinks.
+  
+#### Streams:
+
+  * GET api/streams: [http://localhost:8080/api/streams](http://localhost:8080/api/streams) - gets all registered streams.
+
+  * GET api/streams/{streamName} - gets the registered stream with name `streamName` or expactation_failed error if that stream does not exist.
+  
+  * POST api/streams Content-Type: application/json - registers a new Stream. 
+    RequestBody payload example:
+	```
+	{
+		"name": "MarineCTD",
+		"source": {
+			"name": "mqttrabbitsource",
+			"url": "tcp://mqtt.marine.ie",
+			"port": "1883",
+			"topic": "spiddal-ctd"
+		},
+		"processor": {
+			"name": "MarineCTDProcessor"
+		},
+		"sink": {
+			"name": "LogSink"
+		}
+	}
+	```
+    Response: 
+    * 201 - Created (success), 
+    * 409 - Conflict (error - A stream with that name already exists),
+    * 417 - Expactation failed (error - The streamdefinition is not valid)
+  
+  * POST api/streams Content-Type: application/xml - (see previous)
+  * PUT api/streams/{streamName} - switches status of stream with name `streamName` from `deployed` (`undeployed`) to `undeployed` (`deployed`).
+    * 201 - Created (success), 
+    * 409 - Conflict (error - A stream with that name does not exist),
+    * 417 - Expactation failed (error - The stream is currently deploying)
+  * DELETE api/streams/{streamName} - unregisters a stream with name `streamName`. 
+  
+
+	
+
 ## Configuration
 
 #### Configure application address and ports:

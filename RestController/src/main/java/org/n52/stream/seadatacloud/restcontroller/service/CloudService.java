@@ -232,7 +232,7 @@ public class CloudService {
             conn.disconnect();
             response = res.toString() + "success.";
         } catch (Exception e) {
-            response = e.getMessage();
+            response = e.getMessage() + "failed.";
         }
         return response;
     }

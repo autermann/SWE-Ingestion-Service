@@ -45,7 +45,7 @@ public class StreamController {
             String streamDefinition = "";
             String streamName = (String) payload.get("name");
             Stream stream = service.getStream(streamName);
-            if (stream != null){
+            if (stream != null) {
                 return new ResponseEntity("{Error: Stream " + streamName + " already exists.}", HttpStatus.CONFLICT);
             }
             Map<String, Object> source = (Map<String, Object>) payload.get("source");
@@ -85,9 +85,12 @@ public class StreamController {
             String sinkLabel = (String) sink.get("label");
             streamDefinition += " | " + processorName + " | " + sinkName;
 
-            String result = streamName + " created.";
-            this.createStream(streamName, streamDefinition, false);
-            return new ResponseEntity(result, HttpStatus.CREATED);
+            String attempt = this.createStream(streamName, streamDefinition, false);
+            if (attempt.endsWith("success.")) {
+                return new ResponseEntity(attempt, HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity(attempt, HttpStatus.EXPECTATION_FAILED);
+            }
         } catch (Exception e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -156,13 +159,13 @@ public class StreamController {
     }
 
     @RequestMapping(value = "/createStream", method = RequestMethod.GET)
-    public ResponseEntity<String> createStream(
+    public String createStream(
             @RequestParam("streamName") String streamName,
             @RequestParam("streamDefinition") String streamDefinition,
             @RequestParam("deploy") boolean deploy
     ) {
         String result = "";
         result = service.createStream(streamName, streamDefinition, deploy);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return result;
     }
 }
