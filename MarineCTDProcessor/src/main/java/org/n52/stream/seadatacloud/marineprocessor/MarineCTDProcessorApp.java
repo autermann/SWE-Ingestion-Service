@@ -21,7 +21,7 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
-public class MarineProcessorApp {
+public class MarineCTDProcessorApp {
 
     private MarineWeatherData parseWeather(String input) {
         MarineWeatherData parsed = new MarineWeatherData();
@@ -43,7 +43,7 @@ public class MarineProcessorApp {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(MarineProcessorApp.class, args);
+        SpringApplication.run(MarineCTDProcessorApp.class, args);
     }
 
 }
