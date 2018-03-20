@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.n52.stream.seadatacloud.marineprocessor;
+package org.n52.stream.seadatacloud.marinectd;
 
 import java.time.Instant;
 import java.util.Date;
@@ -21,7 +21,7 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
-public class MarineWeatherProcessorApp {
+public class MarineCTDProcessorApp {
 
     private MarineWeatherData parseWeather(String input) {
         MarineWeatherData parsed = new MarineWeatherData();
@@ -43,7 +43,7 @@ public class MarineWeatherProcessorApp {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(MarineWeatherProcessorApp.class, args);
+        SpringApplication.run(MarineCTDProcessorApp.class, args);
     }
 
 }

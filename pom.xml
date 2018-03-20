@@ -20,10 +20,10 @@
     
     <modules>
         <module>LogSink</module>
-        <module>MarineCTDProcessor</module>
+        <module>MarineCTDProcessor</module>        
+        <module>MarineWeatherProcessor</module>
         <module>RestController</module>
         <module>core</module>
-        <module>org.n52.stream.seadatacloud_MarineCTDProcessor_jar_0.0.1-SNAPSHOT</module>
     </modules>
 
     <properties>
