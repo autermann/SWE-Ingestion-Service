@@ -16,7 +16,9 @@
  */
 package org.n52.stream.seadatacloud.logsink;
 
-import org.n52.stream.core.MarineWeatherData;
+import org.n52.stream.core.Dataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -24,20 +26,22 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 
 /**
- *
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @SpringBootApplication
 @EnableBinding(Sink.class)
 public class LogSinkApplication {
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(LogSinkApplication.class);
+
     @StreamListener(Sink.INPUT)
-    public void input(MarineWeatherData mqtt){
-        System.out.println(mqtt.toString());
+    public void input(Dataset dataset){
+        LOG.info("Received processor output:\n{}", dataset);
     }
-    
+
     public static void main(String[] args){
         SpringApplication.run(LogSinkApplication.class, args);
     }
-    
+
 }

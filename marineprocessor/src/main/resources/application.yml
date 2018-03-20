@@ -14,3 +14,8 @@ spring:
 
 server:
   port: 8083
+
+processor:
+  config:
+    feature:
+      id: "application.yml-feature"
