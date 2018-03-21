@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.n52.stream.seadatacloud</groupId>
     <artifactId>marine-processor</artifactId>
-    <name>MarineProcessor</name>
+    <name>MarineProcessor with CTD and Weather</name>
     <packaging>jar</packaging>
     
     <dependencies>
