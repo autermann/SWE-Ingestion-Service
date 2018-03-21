@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.stream.seadatacloud.marineprocessor;
+package org.n52.stream.seadatacloud.marinectd;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
@@ -31,34 +31,34 @@ import org.n52.stream.core.Timeseries;
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-public class MarineProcessorAppTest {
+public class MarineCTDProcessorAppTest {
 
     private String validInput = "2018-03-12T12:59:58.787Z|I-OCEAN7-304-0616641|  25.38   7.594  33.354  32.310 1477.9968 13:00:10.22M";
     private Dataset dataset;
 
     @Before
     public void process() {
-        dataset = new MarineProcessorApp().process(validInput);
+        dataset = new MarineCTDProcessorApp().process(validInput);
     }
 
     @Test(expected=RuntimeException.class)
     public void shouldThrowRuntimeExceptionsWhenProcessingNull() {
-        new MarineProcessorApp().process(null);
+        new MarineCTDProcessorApp().process(null);
     }
 
     @Test(expected=RuntimeException.class)
     public void shouldThrowRuntimeExceptionsWhenProcessingEmptyString() {
-        new MarineProcessorApp().process("");
+        new MarineCTDProcessorApp().process("");
     }
 
     @Test(expected=RuntimeException.class)
     public void shouldThrowRuntimeExceptionsWhenProcessingInvalidString() {
-        new MarineProcessorApp().process("this-is-a-string-in-wrong-format");
+        new MarineCTDProcessorApp().process("this-is-a-string-in-wrong-format");
     }
 
     @Test(expected=RuntimeException.class)
     public void shouldThrowRuntimeExceptionsWhenProcessingInvalidStringWithPipe() {
-        new MarineProcessorApp().process("2018-03-12T12:59:58.787Z|a-string-|in-wrong-format");
+        new MarineCTDProcessorApp().process("2018-03-12T12:59:58.787Z|a-string-|in-wrong-format");
     }
 
     @Test

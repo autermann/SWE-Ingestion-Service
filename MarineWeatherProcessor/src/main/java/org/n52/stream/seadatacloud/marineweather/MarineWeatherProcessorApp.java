@@ -5,9 +5,10 @@
  */
 package org.n52.stream.seadatacloud.marineweather;
 
-import java.time.Instant;
-import java.util.Date;
-import org.n52.stream.core.MarineWeatherData;
+import java.time.OffsetDateTime;
+import org.n52.stream.core.Dataset;
+import org.n52.stream.core.Measurement;
+import org.n52.stream.core.Timeseries;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -16,29 +17,33 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.cloud.stream.messaging.Processor;
 
 /**
- *
  * @author Maurin Radtke <m.radtke@52north.org>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
 public class MarineWeatherProcessorApp {
 
-    private MarineWeatherData parseWeather(String input) {
-        MarineWeatherData parsed = new MarineWeatherData();
+    private Dataset parseWeather(String input) {
+        Dataset dataset = new Dataset();
         if (input != null && input.length() > 0) {
-            String parsedDate = input.substring(0,24);
-            System.out.println(parsedDate);
-            Date date = Date.from(Instant.parse(parsedDate));
-            parsed.setDate(date);
+            String timestampString = input.substring(0,24);
+            System.out.println(timestampString);
+            OffsetDateTime timestamp = OffsetDateTime.parse(timestampString);
+            Timeseries timeseries = new Timeseries();
+            Measurement<Object> measurement = new Measurement<>();
+            measurement.setTimestamp(timestamp);
+            timeseries.addMeasurementsItem(measurement );
+            dataset.addTimeseriesItem(timeseries);
         }
-        return parsed;
+        return dataset;
     }
 
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public MarineWeatherData process(String mqtt) {
+    public Dataset process(String mqtt) {
         // TODO: processing
-        MarineWeatherData mwd = parseWeather(mqtt);
+        Dataset mwd = parseWeather(mqtt);
         return mwd;
     }
 

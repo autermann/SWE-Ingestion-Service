@@ -60,16 +60,16 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
-public class MarineProcessorApp {
+public class MarineCTDProcessorApp {
 
     // TODO set default value
     @Value("${processor.config.feature.id}")
     private String featureIdentifier;
 
-    private static final Logger LOG = LoggerFactory.getLogger(MarineProcessorApp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MarineCTDProcessorApp.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(MarineProcessorApp.class, args);
+        SpringApplication.run(MarineCTDProcessorApp.class, args);
     }
 
     @StreamListener(Processor.INPUT)
