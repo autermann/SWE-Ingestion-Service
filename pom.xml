@@ -19,10 +19,9 @@
     </parent>
     
     <modules>
-        <module>LogSink</module>
-        <module>MarineCTDProcessor</module>        
-        <module>MarineWeatherProcessor</module>
-        <module>RestController</module>
+        <module>log-sink</module>
+        <module>marine-processor</module>
+        <module>rest-controller</module>
         <module>core</module>
     </modules>
 

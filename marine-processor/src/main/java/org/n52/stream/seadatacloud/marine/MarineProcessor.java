@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.stream.seadatacloud.marinectd;
+package org.n52.stream.seadatacloud.marine;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -60,16 +60,16 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
-public class MarineCTDProcessorApp {
+public class MarineProcessor {
 
     // TODO set default value
     @Value("${processor.config.feature.id}")
     private String featureIdentifier;
 
-    private static final Logger LOG = LoggerFactory.getLogger(MarineCTDProcessorApp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MarineProcessor.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(MarineCTDProcessorApp.class, args);
+        SpringApplication.run(MarineProcessor.class, args);
     }
 
     @StreamListener(Processor.INPUT)
