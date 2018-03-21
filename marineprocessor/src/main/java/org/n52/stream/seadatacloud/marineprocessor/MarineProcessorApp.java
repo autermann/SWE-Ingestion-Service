@@ -43,7 +43,7 @@ import org.springframework.cloud.stream.messaging.Processor;
  * <em>Topics</em>: <code>spiddal-ctd</code><br>
  * <br>
  * <em>Raw Payload</em>:
- * <code>2018-03-12T12:59:58.787Z|I-OCEAN7-304-0616641|  25.38   7.594  33.354  32.310 1477.9968 13:00:10.22</code><br>
+ * <code>2018-03-12T12:59:58.787Z|I-OCEAN7-304-0616641|  25.38   7.594  33.354  32.310 1477.9968 13:00:10.22M</code><br>
  * <br>
  * <em>Formatted Payload</em>:<br>
  * <em>Shore Station Time</em>: 2018-03-12T12:59:58.787Z<br>
