@@ -8,7 +8,7 @@
     </parent>
     
     <groupId>org.n52.stream.seadatacloud</groupId>
-    <artifactId>LogSink</artifactId>
+    <artifactId>log-sink</artifactId>
     <packaging>jar</packaging>
     
     <dependencies>

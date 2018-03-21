@@ -8,7 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <groupId>org.n52.stream.seadatacloud</groupId>
-    <artifactId>MarineProcessor</artifactId>
+    <artifactId>marine-processor</artifactId>
     <name>MarineProcessor</name>
     <packaging>jar</packaging>
     
