@@ -16,11 +16,10 @@ server:
   port: 8083
 
 processor:
-  ctd:
-    sensors: I-OCEAN7-304-0616641
-    feature:
-      id: "Galway Bay Cable Observatory"
-  weather:
-    sensors: AIRMAR-RINVILLE-1
-    feature:
-      id: "Galway Bay Cable Observatory"
+  marine:
+    ctd:
+      sensors: I-OCEAN7-304-0616641
+      feature-id: "Galway Bay Cable Observatory"
+    weather:
+      sensors: AIRMAR-RINVILLE-1
+      feature-id: "Galway Bay Cable Observatory"
