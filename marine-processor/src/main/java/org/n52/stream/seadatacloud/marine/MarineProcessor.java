@@ -44,6 +44,7 @@ import org.springframework.cloud.stream.messaging.Processor;
 @EnableConfigurationProperties(MarineProcessorConfiguration.class)
 public class MarineProcessor {
 
+    private int msgCount = 0;
 
     @Autowired
     private MarineProcessorConfiguration properties = new MarineProcessorConfiguration();
@@ -57,6 +58,7 @@ public class MarineProcessor {
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
     public Dataset process(String mqttMessagePayload) {
+        msgCount++;
         if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
             String msg = "Empty MQTT payload received.";
             LOG.error(msg);
@@ -64,7 +66,8 @@ public class MarineProcessor {
         }
         LOG.trace("Received MQTT payload: '{}'", mqttMessagePayload);
         Dataset processedDataset = processMarineMqttPayload(mqttMessagePayload);
-        LOG.info("Processed dataset: {}", processedDataset);
+        LOG.info("Processed dataset #{}", msgCount);
+        LOG.trace("Dataset: \n{}", processedDataset);
         return processedDataset;
     }
 
