@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Processes MQTT messages from:<br>
  * <em>Host</em>: <code>mqtt.marine.ie</code><br>
  * <em>Port</em>: <code>1883</code><br>
- * <em>Topics</em>: <code>spiddal-ctd</code><br>
+ * <em>Topic</em>: <code>spiddal-ctd</code><br>
  * <br>
  * <em>Raw Payload</em>:
  * <code>2018-03-12T12:59:58.787Z|I-OCEAN7-304-0616641|  25.38   7.594  33.354  32.310 1477.9968 13:00:10.22M</code><br>
