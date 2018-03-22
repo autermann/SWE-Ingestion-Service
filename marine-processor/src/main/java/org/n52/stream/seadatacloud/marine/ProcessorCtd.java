@@ -25,8 +25,6 @@ import org.n52.stream.core.Dataset;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Processes MQTT messages from:<br>
@@ -51,16 +49,16 @@ import org.slf4j.LoggerFactory;
  */
 public class ProcessorCtd extends ProcessorSkeleton {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessorCtd.class);
-
     public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
         validateInput(timestamp, sensorId, featureId, values);
         if (values.size() != 6) {
-            String msg = String.format(
-                    "Received mqtt payload not in correct format. Expected six '\t' separated chunks: '%s'",
-                    values);
-            LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
+            String valuesString = values.toString();
+            if ("[Press, Temp, Cond, Sal, SoundV]".equalsIgnoreCase(valuesString) ||
+                    "[Acquisition:, <^C>Stop]".equalsIgnoreCase(valuesString)) {
+                // TODO throw exception or log something?
+                return null;
+            }
+            throw createInvalidNumberOfValuesException("six", values);
         }
 
         Dataset result = new Dataset();

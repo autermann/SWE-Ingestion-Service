@@ -102,6 +102,8 @@ public class MarineProcessor {
             return new ProcessorCtd().process(timestamp, sensor, properties.getCtd().getFeatureId(), values);
         } else if (properties.getWeather().getSensors().contains(sensor)) {
             return new ProcessorWeather().process(timestamp, sensor, properties.getWeather().getFeatureId(), values);
+        } else if (properties.getFluorometer().getSensors().contains(sensor)) {
+            return new ProcessorFluorometer().process(timestamp, sensor, properties.getFluorometer().getFeatureId(), values);
         } else {
             String msg = String.format("Could not identify processor for sensor '%s'.", sensor);
             LOG.error(msg);

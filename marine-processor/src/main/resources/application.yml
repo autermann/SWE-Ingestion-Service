@@ -23,3 +23,6 @@ processor:
     weather:
       sensors: AIRMAR-RINVILLE-1
       feature-id: "Galway Bay Cable Observatory"
+    fluorometer:
+      sensors: WL-ECO-FLNTU-4476
+      feature-id: "Galway Bay Cable Observatory"

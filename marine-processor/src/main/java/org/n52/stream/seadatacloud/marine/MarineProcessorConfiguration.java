@@ -34,12 +34,18 @@ public class MarineProcessorConfiguration {
 
     private final TopicConfiguration weather = new TopicConfiguration();
 
+    private final TopicConfiguration fluorometer = new TopicConfiguration();
+
     public TopicConfiguration getWeather() {
         return weather;
     }
 
     public TopicConfiguration getCtd() {
         return topicConfiguration;
+    }
+
+    public TopicConfiguration getFluorometer() {
+        return fluorometer;
     }
 
     public static class TopicConfiguration {
