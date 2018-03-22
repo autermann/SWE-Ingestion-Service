@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-public class WeatherProcessor extends ProcessorSkeleton {
+public class ProcessorWeather extends ProcessorSkeleton {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WeatherProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorWeather.class);
 
     public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
         validateInput(timestamp, sensorId, featureId, values);

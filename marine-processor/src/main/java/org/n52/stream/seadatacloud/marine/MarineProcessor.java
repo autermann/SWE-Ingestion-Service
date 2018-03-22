@@ -96,9 +96,9 @@ public class MarineProcessor {
         // switch depending on sensor to different marine processors
         // which one to choose is configured in application.yml::processor.marine.*.sensors
         if (properties.getCtd().getSensors().contains(sensor)) {
-            return new CtdProcessor().process(timestamp, sensor, properties.getCtd().getFeatureId(), values);
+            return new ProcessorCtd().process(timestamp, sensor, properties.getCtd().getFeatureId(), values);
         } else if (properties.getWeather().getSensors().contains(sensor)) {
-            return new WeatherProcessor().process(timestamp, sensor, properties.getWeather().getFeatureId(), values);
+            return new ProcessorWeather().process(timestamp, sensor, properties.getWeather().getFeatureId(), values);
         } else {
             String msg = String.format("Could not identify processor for sensor '%s'.", sensor);
             LOG.error(msg);

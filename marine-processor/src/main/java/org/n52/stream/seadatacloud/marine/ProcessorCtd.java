@@ -49,9 +49,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-public class CtdProcessor extends ProcessorSkeleton {
+public class ProcessorCtd extends ProcessorSkeleton {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CtdProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorCtd.class);
 
     public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
         validateInput(timestamp, sensorId, featureId, values);

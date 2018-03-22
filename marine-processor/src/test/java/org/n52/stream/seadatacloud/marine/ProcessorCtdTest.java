@@ -32,14 +32,14 @@ import org.n52.stream.core.Timeseries;
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-public class CtdProcessorTest {
+public class ProcessorCtdTest {
 
 
     private Dataset dataset;
 
     @Before
     public void process() {
-        dataset = new CtdProcessor().process(OffsetDateTime.parse("2018-03-12T12:59:58.787Z"),
+        dataset = new ProcessorCtd().process(OffsetDateTime.parse("2018-03-12T12:59:58.787Z"),
                 "I-OCEAN7-304-0616641",
                 "Galway Bay Cable Observatory",
                 Arrays.asList("25.38","7.594","33.354","32.310","1477.9968","13:00:10.22M"));
