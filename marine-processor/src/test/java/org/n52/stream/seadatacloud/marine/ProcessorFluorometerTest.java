@@ -1,6 +1,7 @@
 package org.n52.stream.seadatacloud.marine;
 
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -26,9 +27,17 @@ public class ProcessorFluorometerTest {
                 Arrays.asList("03/12/18","12:57:07","695","43","700","55","554"));
     }
 
+
+    @Test
+    public void shouldProcessTimestamp() {
+        assertThat(dataset, notNullValue());
+        assertThat(dataset.getTimeseries().get(0).getMeasurements().get(0).getTimestamp(),
+                is(OffsetDateTime.parse("2018-03-12T12:57:07Z")));
+    }
+
     @Test
     public void shouldProcessFluorescenceWaveLength() throws Exception {
-        Timeseries timeseries = dataset.getTimeseries().get(0);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(0);
         assertThat(timeseries.getPhenomenon(), is("fluorescence-wavelength"));
         assertThat(timeseries.getUnit(), is("nm"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -38,7 +47,7 @@ public class ProcessorFluorometerTest {
 
     @Test
     public void shouldProcessCHLCounts() throws Exception {
-        Timeseries timeseries = dataset.getTimeseries().get(1);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(1);
         assertThat(timeseries.getPhenomenon(), is("CHL"));
         assertThat(timeseries.getUnit(), is(nullValue()));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -48,7 +57,7 @@ public class ProcessorFluorometerTest {
 
     @Test
     public void shouldProcessTurbidityWaveLength() throws Exception {
-        Timeseries timeseries = dataset.getTimeseries().get(2);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(2);
         assertThat(timeseries.getPhenomenon(), is("turbidity-wavelength"));
         assertThat(timeseries.getUnit(), is("nm"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -58,7 +67,7 @@ public class ProcessorFluorometerTest {
 
     @Test
     public void shouldProcessNTUCounts() throws Exception {
-        Timeseries timeseries = dataset.getTimeseries().get(3);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(3);
         assertThat(timeseries.getPhenomenon(), is("NTU"));
         assertThat(timeseries.getUnit(), is(nullValue()));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -68,7 +77,7 @@ public class ProcessorFluorometerTest {
 
     @Test
     public void shouldProcessThermistorValues() throws Exception {
-        Timeseries timeseries = dataset.getTimeseries().get(4);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(4);
         assertThat(timeseries.getPhenomenon(), is("thermistor"));
         assertThat(timeseries.getUnit(), is(nullValue()));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -78,12 +87,12 @@ public class ProcessorFluorometerTest {
 
     @Test
     public void shouldProcessInstrumentTimeDeviationValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(5);
-        assertThat(timeseries.getPhenomenon(), is("instrument-time-deviation"));
-        assertThat(timeseries.getUnit(), is("ms"));
+        Timeseries<?> timeseries = dataset.getTimeseries().get(5);
+        assertThat(timeseries.getPhenomenon(), is("receiver-latency"));
+        assertThat(timeseries.getUnit(), is("s"));
         Object value = timeseries.getMeasurements().get(0).getValue();
         assertThat(value, is(instanceOf(Long.class)));
-        assertThat(value, is(new Long("212035")));
+        assertThat(value, is(new Long("212")));
     }
 
 }

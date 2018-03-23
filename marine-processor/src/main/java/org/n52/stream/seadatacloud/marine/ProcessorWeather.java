@@ -38,7 +38,7 @@ public class ProcessorWeather extends ProcessorSkeleton {
 
         Dataset dataset = new Dataset();
         LOG.info("Weather data processing: " + timestamp);
-        Timeseries timeseries = new Timeseries().
+        Timeseries<Object> timeseries = new Timeseries<>().
                 feature(new Feature().id(featureId)).
                 sensor(sensorId);
         Measurement<Object> measurement = new Measurement<>();

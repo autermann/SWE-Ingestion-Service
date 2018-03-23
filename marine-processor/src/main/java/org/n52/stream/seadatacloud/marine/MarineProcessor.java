@@ -84,8 +84,8 @@ public class MarineProcessor {
         }
 
         // TIMESTAMP
-        LOG.trace("Timestamp chunk: '{}'", payloadChunks[0]);
-        OffsetDateTime timestamp = OffsetDateTime.parse(payloadChunks[0]);
+        LOG.trace("Receiver Station Timestamp chunk: '{}'", payloadChunks[0]);
+        OffsetDateTime receiverStationTimestamp = OffsetDateTime.parse(payloadChunks[0]);
 
         // Sensor
         String sensor = payloadChunks[1];
@@ -99,11 +99,14 @@ public class MarineProcessor {
         // switch depending on sensor to different marine processors
         // which one to choose is configured in application.yml::processor.marine.*.sensors
         if (properties.getCtd().getSensors().contains(sensor)) {
-            return new ProcessorCtd().process(timestamp, sensor, properties.getCtd().getFeatureId(), values);
+            return new ProcessorCtd().process(receiverStationTimestamp, sensor, properties.getCtd().getFeatureId(),
+                    values);
         } else if (properties.getWeather().getSensors().contains(sensor)) {
-            return new ProcessorWeather().process(timestamp, sensor, properties.getWeather().getFeatureId(), values);
+            return new ProcessorWeather().process(receiverStationTimestamp, sensor,
+                    properties.getWeather().getFeatureId(), values);
         } else if (properties.getFluorometer().getSensors().contains(sensor)) {
-            return new ProcessorFluorometer().process(timestamp, sensor, properties.getFluorometer().getFeatureId(), values);
+            return new ProcessorFluorometer().process(receiverStationTimestamp, sensor,
+                    properties.getFluorometer().getFeatureId(), values);
         } else {
             String msg = String.format("Could not identify processor for sensor '%s'.", sensor);
             LOG.error(msg);

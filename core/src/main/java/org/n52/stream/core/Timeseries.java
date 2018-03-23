@@ -24,10 +24,21 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 
 /**
- * Timeseries
+ * <b>Timeseries&lt;T&gt;</b><br>
+ * <br>
+ * is a collection of {@link Measurement}s which share the following properties:
+ * <ul>
+ * <li>Unit</li>
+ * <li>Phenomenon</li>
+ * <li>Sensor</li>
+ * <li>Feature</li>
+ * </ul>
+ * as explicit ones and the type as implicit via the generic parameter T.
+ *
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @Validated
-public class Timeseries {
+public class Timeseries<T> {
 
     @JsonProperty("id")
     private String id = null;
@@ -46,9 +57,9 @@ public class Timeseries {
 
     @JsonProperty("measurements")
     @Valid
-    private List<Measurement> measurements = null;
+    private List<Measurement<T>> measurements = null;
 
-    public Timeseries id(String id) {
+    public Timeseries<T> id(String id) {
         this.id = id;
         return this;
     }
@@ -61,7 +72,7 @@ public class Timeseries {
         this.id = id;
     }
 
-    public Timeseries unit(String unit) {
+    public Timeseries<T> unit(String unit) {
         this.unit = unit;
         return this;
     }
@@ -74,7 +85,7 @@ public class Timeseries {
         this.unit = unit;
     }
 
-    public Timeseries phenomenon(String phenomenon) {
+    public Timeseries<T> phenomenon(String phenomenon) {
         this.phenomenon = phenomenon;
         return this;
     }
@@ -87,7 +98,7 @@ public class Timeseries {
         this.phenomenon = phenomenon;
     }
 
-    public Timeseries sensor(String sensor) {
+    public Timeseries<T> sensor(String sensor) {
         this.sensor = sensor;
         return this;
     }
@@ -100,7 +111,7 @@ public class Timeseries {
         this.sensor = sensor;
     }
 
-    public Timeseries feature(Feature feature) {
+    public Timeseries<T> feature(Feature feature) {
         this.feature = feature;
         return this;
     }
@@ -114,12 +125,12 @@ public class Timeseries {
         this.feature = feature;
     }
 
-    public Timeseries measurements(List<Measurement> measurements) {
+    public Timeseries<T> measurements(List<Measurement<T>> measurements) {
         this.measurements = measurements;
         return this;
     }
 
-    public Timeseries addMeasurementsItem(Measurement measurementsItem) {
+    public Timeseries<T> addMeasurementsItem(Measurement<T> measurementsItem) {
         if (measurements == null) {
             measurements = new ArrayList<>();
         }
@@ -128,11 +139,11 @@ public class Timeseries {
     }
 
     @Valid
-    public List<Measurement> getMeasurements() {
+    public List<Measurement<T>> getMeasurements() {
         return measurements;
     }
 
-    public void setMeasurements(List<Measurement> measurements) {
+    public void setMeasurements(List<Measurement<T>> measurements) {
         this.measurements = measurements;
     }
 
@@ -144,7 +155,7 @@ public class Timeseries {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Timeseries timeseries = (Timeseries) o;
+        Timeseries<?> timeseries = (Timeseries<?>) o;
         return Objects.equals(id, timeseries.id) &&
                 Objects.equals(unit, timeseries.unit) &&
                 Objects.equals(phenomenon, timeseries.phenomenon) &&

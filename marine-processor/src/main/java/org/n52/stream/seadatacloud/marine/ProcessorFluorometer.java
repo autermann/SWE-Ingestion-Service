@@ -19,6 +19,7 @@ package org.n52.stream.seadatacloud.marine;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -51,100 +52,97 @@ import org.n52.stream.core.Timeseries;
  */
 public class ProcessorFluorometer extends ProcessorSkeleton {
 
-    public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
-        validateInput(timestamp, sensorId, featureId, values);
+    public Dataset process(OffsetDateTime receiverStationTimestamp, String sensorId, String featureId, List<String> values) {
+        validateInput(receiverStationTimestamp, sensorId, featureId, values);
         if (values.size() != 7) {
             String valuesString = values.toString();
             if ("[Press, Temp, Cond, Sal, SoundV]".equalsIgnoreCase(valuesString) ||
                     "[Acquisition:, <^C>Stop]".equalsIgnoreCase(valuesString)) {
-                // TODO throw exception or log something?
                 // TODO is this valid here?
                 return null;
             }
             throw createInvalidNumberOfValuesException("seven", values);
         }
 
-        Dataset result = new Dataset();
         Feature feature = new Feature();
         feature.setId(featureId);
 
+        String dateTimeString = new StringBuilder(values.get(0)).append(" ").append(values.get(1)).toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss");
+        OffsetDateTime instrumentTimestamp = OffsetDateTime.of(
+                LocalDateTime.parse(dateTimeString, formatter),
+                ZoneOffset.UTC);
+
+        Measurement<Long> instrumentTimeDeviationMeasurement = new Measurement<>();
+        Long instrumentTimeDeviation = ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp);
+        instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
+        instrumentTimeDeviationMeasurement.setTimestamp(instrumentTimestamp);
+
+        Timeseries<Long> instrumentTimeDeviationTimeseries = new Timeseries<>();
+        instrumentTimeDeviationTimeseries.setFeature(feature);
+        instrumentTimeDeviationTimeseries.setPhenomenon("receiver-latency");
+        instrumentTimeDeviationTimeseries.setSensor(sensorId);
+        instrumentTimeDeviationTimeseries.setUnit("s");
+        instrumentTimeDeviationTimeseries.addMeasurementsItem(instrumentTimeDeviationMeasurement);
+
         Measurement<BigDecimal> fluorescenceWavelengthMeasurement = new Measurement<>();
         fluorescenceWavelengthMeasurement.setValue(new BigDecimal(values.get(2)));
-        fluorescenceWavelengthMeasurement.setTimestamp(timestamp);
+        fluorescenceWavelengthMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries fluorescenceWavelengthTimeseries = new Timeseries();
+        Timeseries<BigDecimal> fluorescenceWavelengthTimeseries = new Timeseries<>();
         fluorescenceWavelengthTimeseries.setFeature(feature);
-        fluorescenceWavelengthTimeseries.setPhenomenon("fluorescence-wavelength");
         fluorescenceWavelengthTimeseries.setSensor(sensorId);
+        fluorescenceWavelengthTimeseries.setPhenomenon("fluorescence-wavelength");
         fluorescenceWavelengthTimeseries.setUnit("nm");
         fluorescenceWavelengthTimeseries.addMeasurementsItem(fluorescenceWavelengthMeasurement);
 
-        result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
-
         Measurement<Integer> chlMeasurement = new Measurement<>();
         chlMeasurement.setValue(Integer.parseInt(values.get(3)));
-        chlMeasurement.setTimestamp(timestamp);
+        chlMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries chlTimeseries = new Timeseries();
+        Timeseries<Integer> chlTimeseries = new Timeseries<>();
         chlTimeseries.setFeature(feature);
-        chlTimeseries.setPhenomenon("CHL");
         chlTimeseries.setSensor(sensorId);
+        chlTimeseries.setPhenomenon("CHL");
         chlTimeseries.addMeasurementsItem(chlMeasurement);
-
-        result.addTimeseriesItem(chlTimeseries);
 
         Measurement<BigDecimal> turbidityWavelengthMeasurement = new Measurement<>();
         turbidityWavelengthMeasurement.setValue(new BigDecimal(values.get(4)));
-        turbidityWavelengthMeasurement.setTimestamp(timestamp);
+        turbidityWavelengthMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries turbidityWavelengthTimeseries = new Timeseries();
+        Timeseries<BigDecimal> turbidityWavelengthTimeseries = new Timeseries<>();
         turbidityWavelengthTimeseries.setFeature(feature);
-        turbidityWavelengthTimeseries.setPhenomenon("turbidity-wavelength");
         turbidityWavelengthTimeseries.setSensor(sensorId);
+        turbidityWavelengthTimeseries.setPhenomenon("turbidity-wavelength");
         turbidityWavelengthTimeseries.setUnit("nm");
         turbidityWavelengthTimeseries.addMeasurementsItem(turbidityWavelengthMeasurement);
 
-        result.addTimeseriesItem(turbidityWavelengthTimeseries);
-
         Measurement<Integer> ntuMeasurement = new Measurement<>();
         ntuMeasurement.setValue(Integer.parseInt(values.get(5)));
-        ntuMeasurement.setTimestamp(timestamp);
+        ntuMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries ntuTimeseries = new Timeseries();
+        Timeseries<Integer> ntuTimeseries = new Timeseries<>();
         ntuTimeseries.setFeature(feature);
-        ntuTimeseries.setPhenomenon("NTU");
         ntuTimeseries.setSensor(sensorId);
+        ntuTimeseries.setPhenomenon("NTU");
         ntuTimeseries.addMeasurementsItem(ntuMeasurement);
-
-        result.addTimeseriesItem(ntuTimeseries);
 
         Measurement<Integer> thermistorMeasurement = new Measurement<>();
         thermistorMeasurement.setValue(Integer.parseInt(values.get(6)));
-        thermistorMeasurement.setTimestamp(timestamp);
+        thermistorMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries thermistorTimeseries = new Timeseries();
+        Timeseries<Integer> thermistorTimeseries = new Timeseries<>();
         thermistorTimeseries.setFeature(feature);
         thermistorTimeseries.setPhenomenon("thermistor");
         thermistorTimeseries.setSensor(sensorId);
         thermistorTimeseries.addMeasurementsItem(thermistorMeasurement);
 
+        Dataset result = new Dataset();
+        result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
+        result.addTimeseriesItem(chlTimeseries);
+        result.addTimeseriesItem(turbidityWavelengthTimeseries);
+        result.addTimeseriesItem(ntuTimeseries);
         result.addTimeseriesItem(thermistorTimeseries);
-
-        Measurement<Long> instrumentTimeDeviationMeasurement = new Measurement<>();
-        String dateTimeString = new StringBuilder(values.get(0)).append(" ").append(values.get(1)).toString();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss");
-        LocalDateTime instrumentTimestamp = LocalDateTime.parse(dateTimeString, formatter);
-        Long instrumentTimeDeviation = ChronoUnit.MILLIS.between(instrumentTimestamp, timestamp);
-        instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
-        instrumentTimeDeviationMeasurement.setTimestamp(timestamp);
-
-        Timeseries instrumentTimeDeviationTimeseries = new Timeseries();
-        instrumentTimeDeviationTimeseries.setFeature(feature);
-        instrumentTimeDeviationTimeseries.setPhenomenon("instrument-time-deviation");
-        instrumentTimeDeviationTimeseries.setSensor(sensorId);
-        instrumentTimeDeviationTimeseries.setUnit("ms");
-        instrumentTimeDeviationTimeseries.addMeasurementsItem(instrumentTimeDeviationMeasurement);
-
         result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
 
         return result;

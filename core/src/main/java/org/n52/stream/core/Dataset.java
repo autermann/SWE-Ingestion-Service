@@ -38,7 +38,7 @@ public class Dataset {
 
     @JsonProperty("timeseries")
     @Valid
-    private List<Timeseries> timeseries = null;
+    private List<Timeseries<?>> timeseries = null;
 
     public Dataset id(String id) {
         this.id = id;
@@ -53,12 +53,12 @@ public class Dataset {
         this.id = id;
     }
 
-    public Dataset timeseries(List<Timeseries> timeseries) {
+    public Dataset timeseries(List<Timeseries<?>> timeseries) {
         this.timeseries = timeseries;
         return this;
     }
 
-    public Dataset addTimeseriesItem(Timeseries timeseriesItem) {
+    public Dataset addTimeseriesItem(Timeseries<?> timeseriesItem) {
         if (timeseries == null) {
             timeseries = new ArrayList<>();
         }
@@ -67,11 +67,11 @@ public class Dataset {
     }
 
     @Valid
-    public List<Timeseries> getTimeseries() {
+    public List<Timeseries<?>> getTimeseries() {
         return timeseries;
     }
 
-    public void setTimeseries(List<Timeseries> timeseries) {
+    public void setTimeseries(List<Timeseries<?>> timeseries) {
         this.timeseries = timeseries;
     }
 

@@ -16,8 +16,10 @@
  */package org.n52.stream.seadatacloud.marine;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -49,8 +51,8 @@ import org.n52.stream.core.Timeseries;
  */
 public class ProcessorCtd extends ProcessorSkeleton {
 
-    public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
-        validateInput(timestamp, sensorId, featureId, values);
+    public Dataset process(OffsetDateTime receiverStationtimestamp, String sensorId, String featureId, List<String> values) {
+        validateInput(receiverStationtimestamp, sensorId, featureId, values);
         if (values.size() != 6) {
             String valuesString = values.toString();
             if ("[Press, Temp, Cond, Sal, SoundV]".equalsIgnoreCase(valuesString) ||
@@ -61,89 +63,97 @@ public class ProcessorCtd extends ProcessorSkeleton {
             throw createInvalidNumberOfValuesException("six", values);
         }
 
-        Dataset result = new Dataset();
         Feature feature = new Feature();
         feature.setId(featureId);
+
+        LocalTime instrumentTime = LocalTime.parse(values.get(5).substring(0, values.get(5).length()-1));
+        LocalDate instrumentDate = receiverStationtimestamp.toLocalDate();
+        OffsetDateTime timestamp = OffsetDateTime.of(instrumentDate, instrumentTime, ZoneOffset.UTC);;
+        Long receiverLatency = ChronoUnit.SECONDS.between(timestamp, receiverStationtimestamp);
+        if (receiverLatency < 0) {
+            instrumentDate = instrumentDate.minus(1, ChronoUnit.DAYS);
+            timestamp = OffsetDateTime.of(instrumentDate, instrumentTime, ZoneOffset.UTC);
+            receiverLatency = ChronoUnit.SECONDS.between(timestamp, receiverStationtimestamp);
+        }
+
+        Measurement<Long> receiverLatencyMeasurement = new Measurement<>();
+        receiverLatencyMeasurement.setValue(receiverLatency);
+        receiverLatencyMeasurement.setTimestamp(timestamp);
+
+        Timeseries<Long> receiverLatencyTimeseries = new Timeseries<>();
+        receiverLatencyTimeseries.setFeature(feature);
+        receiverLatencyTimeseries.setSensor(sensorId);
+        receiverLatencyTimeseries.setPhenomenon("receiver-latency");
+        receiverLatencyTimeseries.setUnit("s");
+        receiverLatencyTimeseries.addMeasurementsItem(receiverLatencyMeasurement);
+
 
         Measurement<BigDecimal> pressureMeasurement = new Measurement<>();
         pressureMeasurement.setValue(new BigDecimal(values.get(0)));
         pressureMeasurement.setTimestamp(timestamp);
 
-        Timeseries pressureTimeseries = new Timeseries();
+        Timeseries<BigDecimal> pressureTimeseries = new Timeseries<>();
         pressureTimeseries.setFeature(feature);
-        pressureTimeseries.setPhenomenon("pressure");
         pressureTimeseries.setSensor(sensorId);
+        pressureTimeseries.setPhenomenon("pressure");
         pressureTimeseries.setUnit("dbar");
         pressureTimeseries.addMeasurementsItem(pressureMeasurement);
 
-        result.addTimeseriesItem(pressureTimeseries);
 
         Measurement<BigDecimal> subseaTemperatureMeasurement = new Measurement<>();
         subseaTemperatureMeasurement.setValue(new BigDecimal(values.get(1)));
         subseaTemperatureMeasurement.setTimestamp(timestamp);
 
-        Timeseries subseaTemperatureTimeseries = new Timeseries();
+        Timeseries<BigDecimal> subseaTemperatureTimeseries = new Timeseries<>();
         subseaTemperatureTimeseries.setFeature(feature);
-        subseaTemperatureTimeseries.setPhenomenon("subsea-temperature");
         subseaTemperatureTimeseries.setSensor(sensorId);
+        subseaTemperatureTimeseries.setPhenomenon("subsea-temperature");
         subseaTemperatureTimeseries.setUnit("°C");
         subseaTemperatureTimeseries.addMeasurementsItem(subseaTemperatureMeasurement);
 
-        result.addTimeseriesItem(subseaTemperatureTimeseries);
 
         Measurement<BigDecimal> conductivityMeasurement = new Measurement<>();
         conductivityMeasurement.setValue(new BigDecimal(values.get(2)));
         conductivityMeasurement.setTimestamp(timestamp);
 
-        Timeseries conductivityTimeseries = new Timeseries();
+        Timeseries<BigDecimal> conductivityTimeseries = new Timeseries<>();
         conductivityTimeseries.setFeature(feature);
-        conductivityTimeseries.setPhenomenon("conductivity");
         conductivityTimeseries.setSensor(sensorId);
+        conductivityTimeseries.setPhenomenon("conductivity");
         conductivityTimeseries.setUnit("mS/cm");
         conductivityTimeseries.addMeasurementsItem(conductivityMeasurement);
 
-        result.addTimeseriesItem(conductivityTimeseries);
 
         Measurement<BigDecimal> salinityMeasurement = new Measurement<>();
         salinityMeasurement.setValue(new BigDecimal(values.get(3)));
         salinityMeasurement.setTimestamp(timestamp);
 
-        Timeseries salinityTimeseries = new Timeseries();
+        Timeseries<BigDecimal> salinityTimeseries = new Timeseries<>();
         salinityTimeseries.setFeature(feature);
-        salinityTimeseries.setPhenomenon("salinity");
         salinityTimeseries.setSensor(sensorId);
+        salinityTimeseries.setPhenomenon("salinity");
         salinityTimeseries.setUnit("PSU");
         salinityTimeseries.addMeasurementsItem(salinityMeasurement);
 
-        result.addTimeseriesItem(salinityTimeseries);
 
         Measurement<BigDecimal> soundVelocitiyMeasurement = new Measurement<>();
         soundVelocitiyMeasurement.setValue(new BigDecimal(values.get(4)));
         soundVelocitiyMeasurement.setTimestamp(timestamp);
 
-        Timeseries soundVelocitiyTimeseries = new Timeseries();
+        Timeseries<BigDecimal> soundVelocitiyTimeseries = new Timeseries<>();
         soundVelocitiyTimeseries.setFeature(feature);
-        soundVelocitiyTimeseries.setPhenomenon("sound-velocitiy");
         soundVelocitiyTimeseries.setSensor(sensorId);
+        soundVelocitiyTimeseries.setPhenomenon("sound-velocitiy");
         soundVelocitiyTimeseries.setUnit("m/s");
         soundVelocitiyTimeseries.addMeasurementsItem(soundVelocitiyMeasurement);
 
+        Dataset result = new Dataset();
+        result.addTimeseriesItem(pressureTimeseries);
+        result.addTimeseriesItem(subseaTemperatureTimeseries);
+        result.addTimeseriesItem(conductivityTimeseries);
+        result.addTimeseriesItem(salinityTimeseries);
         result.addTimeseriesItem(soundVelocitiyTimeseries);
-
-        Measurement<Long> instrumentTimeDeviationMeasurement = new Measurement<>();
-        LocalTime instrumentTime = LocalTime.parse(values.get(5).substring(0, values.get(5).length()-1));
-        Long instrumentTimeDeviation = ChronoUnit.MILLIS.between(instrumentTime, timestamp);
-        instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
-        instrumentTimeDeviationMeasurement.setTimestamp(timestamp);
-
-        Timeseries instrumentTimeDeviationTimeseries = new Timeseries();
-        instrumentTimeDeviationTimeseries.setFeature(feature);
-        instrumentTimeDeviationTimeseries.setPhenomenon("instrument-time-deviation");
-        instrumentTimeDeviationTimeseries.setSensor(sensorId);
-        instrumentTimeDeviationTimeseries.setUnit("ms");
-        instrumentTimeDeviationTimeseries.addMeasurementsItem(instrumentTimeDeviationMeasurement);
-
-        result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
+        result.addTimeseriesItem(receiverLatencyTimeseries);
 
         return result;
     }

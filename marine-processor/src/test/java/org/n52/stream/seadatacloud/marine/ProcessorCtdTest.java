@@ -22,7 +22,9 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +51,7 @@ public class ProcessorCtdTest {
     public void shouldProcessTimestamp() {
         assertThat(dataset, notNullValue());
         assertThat(dataset.getTimeseries().get(0).getMeasurements().get(0).getTimestamp(),
-                is(OffsetDateTime.parse("2018-03-12T12:59:58.787Z")));
+                is(OffsetDateTime.parse("2018-03-11T13:00:10.220Z")));
     }
 
     @Test
@@ -59,7 +61,7 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessPressureValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(0);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(0);
         assertThat(timeseries.getPhenomenon(), is("pressure"));
         assertThat(timeseries.getUnit(), is("dbar"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -69,7 +71,7 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessSubseaTemperatureValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(1);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(1);
         assertThat(timeseries.getPhenomenon(), is("subsea-temperature"));
         assertThat(timeseries.getUnit(), is("°C"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -79,7 +81,7 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessConductivityValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(2);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(2);
         assertThat(timeseries.getPhenomenon(), is("conductivity"));
         assertThat(timeseries.getUnit(), is("mS/cm"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -89,7 +91,7 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessSalinityValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(3);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(3);
         assertThat(timeseries.getPhenomenon(), is("salinity"));
         assertThat(timeseries.getUnit(), is("PSU"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -99,7 +101,7 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessSoundVelocitiyValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(4);
+        Timeseries<?> timeseries = dataset.getTimeseries().get(4);
         assertThat(timeseries.getPhenomenon(), is("sound-velocitiy"));
         assertThat(timeseries.getUnit(), is("m/s"));
         Object value = timeseries.getMeasurements().get(0).getValue();
@@ -109,11 +111,25 @@ public class ProcessorCtdTest {
 
     @Test
     public void shouldProcessInstrumentTimeDeviationValue() {
-        Timeseries timeseries = dataset.getTimeseries().get(5);
-        assertThat(timeseries.getPhenomenon(), is("instrument-time-deviation"));
-        assertThat(timeseries.getUnit(), is("ms"));
+        Timeseries<?> timeseries = dataset.getTimeseries().get(5);
+        assertThat(timeseries.getPhenomenon(), is("receiver-latency"));
+        assertThat(timeseries.getUnit(), is("s"));
         Object value = timeseries.getMeasurements().get(0).getValue();
         assertThat(value, is(instanceOf(Long.class)));
-        assertThat(value, is(new Long("-11433")));
+        assertThat(value, is(new Long("86388")));
     }
+
+    @Test
+    public void instrumentDateCalculation() {
+        LocalTime instrumentTime = LocalTime.parse("22:50:40");
+        OffsetDateTime receiverStationtimestamp = OffsetDateTime.parse("2018-03-23T13:50:40Z");
+        Long receiverLatency = ChronoUnit.HOURS.between(instrumentTime, receiverStationtimestamp);
+        assertThat(receiverLatency, is(-9L));
+
+        instrumentTime = LocalTime.parse("13:40:40");
+        receiverStationtimestamp = OffsetDateTime.parse("2018-03-23T13:50:40Z");
+        receiverLatency = ChronoUnit.MINUTES.between(instrumentTime, receiverStationtimestamp);
+        assertThat(receiverLatency, is(10L));
+    }
+
 }
