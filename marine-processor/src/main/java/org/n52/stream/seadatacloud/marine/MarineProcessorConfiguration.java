@@ -30,7 +30,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("processor.marine")
 public class MarineProcessorConfiguration {
 
-    private final TopicConfiguration topicConfiguration = new TopicConfiguration();
+    private final TopicConfiguration ctd = new TopicConfiguration();
 
     private final TopicConfiguration weather = new TopicConfiguration();
 
@@ -41,7 +41,7 @@ public class MarineProcessorConfiguration {
     }
 
     public TopicConfiguration getCtd() {
-        return topicConfiguration;
+        return ctd;
     }
 
     public TopicConfiguration getFluorometer() {
