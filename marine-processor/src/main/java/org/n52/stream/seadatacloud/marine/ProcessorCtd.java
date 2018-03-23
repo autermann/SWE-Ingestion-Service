@@ -57,7 +57,6 @@ public class ProcessorCtd extends ProcessorSkeleton {
             String valuesString = values.toString();
             if ("[Press, Temp, Cond, Sal, SoundV]".equalsIgnoreCase(valuesString) ||
                     "[Acquisition:, <^C>Stop]".equalsIgnoreCase(valuesString)) {
-                // TODO throw exception or log something?
                 return null;
             }
             throw createInvalidNumberOfValuesException("six", values);
