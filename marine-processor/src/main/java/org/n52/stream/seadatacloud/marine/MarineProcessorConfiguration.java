@@ -16,9 +16,6 @@
  */
 package org.n52.stream.seadatacloud.marine;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,7 +24,7 @@ import org.springframework.validation.annotation.Validated;
  *
  */
 @Validated
-@ConfigurationProperties("processor.marine")
+@ConfigurationProperties("processor")
 public class MarineProcessorConfiguration {
 
     private final TopicConfiguration ctd = new TopicConfiguration();
@@ -50,7 +47,7 @@ public class MarineProcessorConfiguration {
 
     public static class TopicConfiguration {
 
-        private List<String> sensors = Collections.emptyList();
+        private String topic = "";
 
         private String featureId = "";
 
@@ -62,12 +59,12 @@ public class MarineProcessorConfiguration {
             return featureId;
         }
 
-        public void setSensors(List<String> sensors) {
-            this.sensors = sensors;
+        public void setTopic(String topic) {
+            this.topic = topic;
         }
 
-        public List<String> getSensors() {
-            return sensors;
+        public String getTopic() {
+            return topic;
         }
     }
 

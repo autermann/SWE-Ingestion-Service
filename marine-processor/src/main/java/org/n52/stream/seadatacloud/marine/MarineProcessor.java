@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
 
 import org.springframework.cloud.stream.messaging.Processor;
@@ -57,21 +58,32 @@ public class MarineProcessor {
 
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public Dataset process(String mqttMessagePayload) {
+    public Dataset process(Message<String> mqttMessage) {
+        if (mqttMessage == null) {
+            String msg = "NO MQTT message received! Input is 'null'.";
+            LOG.error(msg);
+            throw new RuntimeException(new IllegalArgumentException(msg));
+        }
+        String mqttMessagePayload = mqttMessage.getPayload();
+        String mqttTopic = mqttMessage.getHeaders().get("mqtt_receivedTopic", String.class);
         msgCount++;
+        if (mqttTopic == null || mqttTopic.isEmpty()) {
+            String msg = "MQTT topic not specified.";
+            LOG.error(msg);
+            throw new RuntimeException(new IllegalArgumentException(msg));
+        }
         if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
             String msg = "Empty MQTT payload received.";
             LOG.error(msg);
             throw new RuntimeException(new IllegalArgumentException(msg));
         }
-        LOG.trace("Received MQTT payload: '{}'", mqttMessagePayload);
-        Dataset processedDataset = processMarineMqttPayload(mqttMessagePayload);
+        Dataset processedDataset = processMarineMqttPayload(mqttTopic, mqttMessagePayload);
         LOG.info("Processed dataset #{}", msgCount);
         LOG.trace("Dataset: \n{}", processedDataset);
         return processedDataset;
     }
 
-    private Dataset processMarineMqttPayload(String mqttMessagePayload) {
+    private Dataset processMarineMqttPayload(String mqttTopic, String mqttMessagePayload) {
         LOG.trace("MQTT-Payload received: {}", mqttMessagePayload);
 
         String[] payloadChunks = mqttMessagePayload.split("\\|");
@@ -96,19 +108,19 @@ public class MarineProcessor {
         List<String> values = Stream.of(payloadChunks[2].split("\\s+"))
                 .filter(value -> (value!=null && !value.isEmpty()))
                 .collect(Collectors.toList());
-        // switch depending on sensor to different marine processors
-        // which one to choose is configured in application.yml::processor.marine.*.sensors
-        if (properties.getCtd().getSensors().contains(sensor)) {
+        // switch depending on topic to different marine processors
+        // which one to choose is configured in application.yml::processor.*.topic
+        if (properties.getCtd().getTopic().equals(mqttTopic)) {
             return new ProcessorCtd().process(receiverStationTimestamp, sensor, properties.getCtd().getFeatureId(),
                     values);
-        } else if (properties.getWeather().getSensors().contains(sensor)) {
+        } else if (properties.getWeather().getTopic().equals(mqttTopic)) {
             return new ProcessorWeather().process(receiverStationTimestamp, sensor,
                     properties.getWeather().getFeatureId(), values);
-        } else if (properties.getFluorometer().getSensors().contains(sensor)) {
+        } else if (properties.getFluorometer().getTopic().equals(mqttTopic)) {
             return new ProcessorFluorometer().process(receiverStationTimestamp, sensor,
                     properties.getFluorometer().getFeatureId(), values);
         } else {
-            String msg = String.format("Could not identify processor for sensor '%s'.", sensor);
+            String msg = String.format("Could not identify processor for topic '%s'.", mqttTopic);
             LOG.error(msg);
             throw new RuntimeException(new IllegalArgumentException(msg));
         }

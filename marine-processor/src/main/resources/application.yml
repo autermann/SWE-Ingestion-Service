@@ -16,13 +16,13 @@ server:
   port: 8083
 
 processor:
-  marine:
-    ctd:
-      sensors: I-OCEAN7-304-0616641
-      feature-id: "Galway Bay Cable Observatory"
-    weather:
-      sensors: AIRMAR-RINVILLE-1
-      feature-id: "Galway Bay Cable Observatory"
-    fluorometer:
-      sensors: WL-ECO-FLNTU-4476
-      feature-id: "Galway Bay Cable Observatory"
+  ctd:
+    topic: spiddal-ctd
+    feature-id: "Galway Bay Cable Observatory"
+  weather:
+    topic: airmar-rinville-1
+    feature-id: "Galway Bay Cable Observatory"
+  fluorometer:
+    topic: spiddal-fluorometer
+    feature-id: "Galway Bay Cable Observatory"
+

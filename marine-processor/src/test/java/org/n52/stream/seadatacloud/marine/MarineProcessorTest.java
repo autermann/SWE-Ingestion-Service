@@ -16,12 +16,18 @@
  */
 package org.n52.stream.seadatacloud.marine;
 
+import java.util.Collections;
+
 import org.junit.Test;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.GenericMessage;
 
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 public class MarineProcessorTest {
+
+    MessageHeaders headers = new MessageHeaders(Collections.singletonMap("mqtt_receivedTopic", "spiddal-ctd"));
 
     @Test(expected=RuntimeException.class)
     public void shouldThrowExcptionOnNullInput() throws Exception {
@@ -29,28 +35,49 @@ public class MarineProcessorTest {
     }
 
     @Test(expected=RuntimeException.class)
-    public void shouldThrowExcptionOnEmptyInput() throws Exception {
-        new MarineProcessor().process("");
+    public void shouldThrowExcptionOnNullPayload() throws Exception {
+        new MarineProcessor().process(new GenericMessage<>(null, headers));
     }
 
     @Test(expected=RuntimeException.class)
-    public void shouldThrowExcptionOnWrongInput() throws Exception {
-        new MarineProcessor().process("wrong-input|not enough pipe separated chunks");
+    public void shouldThrowExcptionOnEmptyPayload() throws Exception {
+        new MarineProcessor().process(new GenericMessage<>("", headers));
     }
 
     @Test(expected=RuntimeException.class)
-    public void shouldThrowExcptionOnWrongTimestampFormat() throws Exception {
-        new MarineProcessor().process("wrong-input|not enough pipe |separated chunks");
+    public void shouldThrowExcptionOnWrongPayload() throws Exception {
+        new MarineProcessor().process(new GenericMessage<>("wrong-input|not enough pipe separated chunks", headers));
     }
 
     @Test(expected=RuntimeException.class)
-    public void shouldThrowExcptionOnWrongChunkFormat() throws Exception {
-        new MarineProcessor().process("2018-03-12T12:59:58.787Z|enough pipe |separated chunks");
+    public void shouldThrowExcptionOnWrongPayloadTimestampFormat() throws Exception {
+        new MarineProcessor().process(new GenericMessage<>("wrong-input|not enough pipe |separated chunks", headers));
     }
 
     @Test(expected=RuntimeException.class)
-    public void shouldThrowExcptionOnWrongSensor() throws Exception {
-        new MarineProcessor().process("2018-03-12T12:59:58.787Z|enough pipe |separated chunks six we need now");
+    public void shouldThrowExcptionOnWrongPayloadChunkFormat() throws Exception {
+        new MarineProcessor().process(new GenericMessage<>("2018-03-12T12:59:58.787Z|enough pipe |separated chunks", headers));
+    }
+
+    @Test(expected=RuntimeException.class)
+    public void shouldThrowExcptionOnEmptyTopic() throws Exception {
+        MessageHeaders headers = new MessageHeaders(Collections.singletonMap("mqtt_receivedTopic", ""));
+        new MarineProcessor().process(new GenericMessage<>("2018-03-12T12:59:58.787Z|enough pipe |separated chunks six we need now",
+                headers));
+    }
+
+    @Test(expected=RuntimeException.class)
+    public void shouldThrowExcptionOnNullTopic() throws Exception {
+        MessageHeaders headers = new MessageHeaders(Collections.singletonMap("mqtt_receivedTopic", null));
+        new MarineProcessor().process(new GenericMessage<>("2018-03-12T12:59:58.787Z|enough pipe |separated chunks six we need now",
+                headers));
+    }
+
+    @Test(expected=RuntimeException.class)
+    public void shouldThrowExcptionOnWrongTopic() throws Exception {
+        MessageHeaders headers = new MessageHeaders(Collections.singletonMap("mqtt_receivedTopic", "not-supported-topic"));
+        new MarineProcessor().process(new GenericMessage<>("2018-03-12T12:59:58.787Z|enough pipe |separated chunks six we need now",
+                headers));
     }
 
 }
