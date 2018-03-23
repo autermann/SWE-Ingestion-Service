@@ -26,3 +26,6 @@ processor:
     topic: spiddal-fluorometer
     feature-id: "Galway Bay Cable Observatory"
 
+logging:
+  level:
+    org.n52.stream.seadatacloud.marine: TRACE
