@@ -30,15 +30,6 @@ public class ProcessorSkeleton {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessorSkeleton.class);
 
 
-    protected RuntimeException createInvalidNumberOfValuesException(String numberOfExpectedValues, List<String> values) {
-        String msg = String.format(
-                "Received mqtt payload not in correct format. Expected %s 'space' separated chunks: '%s'",
-                numberOfExpectedValues,
-                values);
-        LOG.error(msg);
-        return new RuntimeException(new IllegalArgumentException(msg));
-    }
-
     public void validateInput(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values)
             throws RuntimeException {
         if (timestamp == null) {
@@ -53,6 +44,15 @@ public class ProcessorSkeleton {
         if (values == null || values.isEmpty()) {
             throwException("values", values);
         }
+    }
+
+    protected RuntimeException createInvalidNumberOfValuesException(String numberOfExpectedValues, List<String> values) {
+        String msg = String.format(
+                "Received mqtt payload not in correct format. Expected %s 'space' separated chunks: '%s'",
+                numberOfExpectedValues,
+                values);
+        LOG.error(msg);
+        return new RuntimeException(new IllegalArgumentException(msg));
     }
 
     private void throwException(String parameterName, Object parameter) throws RuntimeException {
