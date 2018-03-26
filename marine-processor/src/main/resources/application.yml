@@ -17,10 +17,15 @@ server:
 
 processor:
   ctd:
-    sensors: I-OCEAN7-304-0616641
-    feature:
-      id: "Galway Bay Cable Observatory"
+    topic: spiddal-ctd
+    feature-id: "Galway Bay Cable Observatory"
   weather:
-    sensors: AIRMAR-RINVILLE-1
-    feature:
-      id: "Galway Bay Cable Observatory"
+    topic: airmar-rinville-1
+    feature-id: "Galway Bay Cable Observatory"
+  fluorometer:
+    topic: spiddal-fluorometer
+    feature-id: "Galway Bay Cable Observatory"
+
+logging:
+  level:
+    org.n52.stream.seadatacloud.marine: TRACE

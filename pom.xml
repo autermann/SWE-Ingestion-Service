@@ -6,10 +6,8 @@
     <groupId>org.n52.stream</groupId>
     <artifactId>seadatacloud</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <name>SeaDataCloud - SWE Ingestion Service</name>
     <packaging>pom</packaging>
-
-    <name>seadatacloud</name>
-    <description>Demo project for Spring Boot</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

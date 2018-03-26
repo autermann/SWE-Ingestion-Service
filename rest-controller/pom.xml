@@ -8,6 +8,7 @@
     </parent>
     <groupId>org.n52.stream.seadatacloud</groupId>
     <artifactId>rest-controller</artifactId>
+    <name>Rest Controller</name>
     <packaging>jar</packaging>
     
     <dependencies>
@@ -40,5 +41,4 @@
             <type>jar</type>
         </dependency>
     </dependencies>
-    
 </project>
