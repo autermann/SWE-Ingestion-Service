@@ -23,7 +23,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -51,7 +51,7 @@ import org.n52.stream.core.Timeseries;
  */
 public class ProcessorCtd extends ProcessorSkeleton {
 
-    public Dataset process(OffsetDateTime receiverStationtimestamp, String sensorId, String featureId, List<String> values) {
+    public DataMessage process(OffsetDateTime receiverStationtimestamp, String sensorId, String featureId, List<String> values) {
         validateInput(receiverStationtimestamp, sensorId, featureId, values);
         if (values.size() != 6) {
             String valuesString = values.toString();
@@ -146,7 +146,7 @@ public class ProcessorCtd extends ProcessorSkeleton {
         soundVelocitiyTimeseries.setUnit("m/s");
         soundVelocitiyTimeseries.addMeasurementsItem(soundVelocitiyMeasurement);
 
-        Dataset result = new Dataset();
+        DataMessage result = new DataMessage();
         result.addTimeseriesItem(pressureTimeseries);
         result.addTimeseriesItem(subseaTemperatureTimeseries);
         result.addTimeseriesItem(conductivityTimeseries);

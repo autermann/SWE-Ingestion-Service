@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -52,7 +52,7 @@ import org.n52.stream.core.Timeseries;
  */
 public class ProcessorFluorometer extends ProcessorSkeleton {
 
-    public Dataset process(OffsetDateTime receiverStationTimestamp, String sensorId, String featureId, List<String> values) {
+    public DataMessage process(OffsetDateTime receiverStationTimestamp, String sensorId, String featureId, List<String> values) {
         validateInput(receiverStationTimestamp, sensorId, featureId, values);
         if (values.size() != 7) {
             String valuesString = values.toString();
@@ -138,7 +138,7 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
         thermistorTimeseries.setSensor(sensorId);
         thermistorTimeseries.addMeasurementsItem(thermistorMeasurement);
 
-        Dataset result = new Dataset();
+        DataMessage result = new DataMessage();
         result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
         result.addTimeseriesItem(chlTimeseries);
         result.addTimeseriesItem(turbidityWavelengthTimeseries);

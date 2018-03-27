@@ -16,7 +16,7 @@
  */
 package org.n52.stream.seadatacloud.logsink;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -36,8 +36,8 @@ public class LogSinkApplication {
     private static final Logger LOG = LoggerFactory.getLogger(LogSinkApplication.class);
 
     @StreamListener(Sink.INPUT)
-    public void input(Dataset dataset){
-        LOG.info("Received processor output:\n{}", dataset);
+    public void input(DataMessage dataMessage){
+        LOG.info("Received processor output:\n{}", dataMessage);
     }
 
     public static void main(String[] args){

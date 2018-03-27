@@ -19,7 +19,7 @@ package org.n52.stream.seadatacloud.marine;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -33,10 +33,10 @@ public class ProcessorWeather extends ProcessorSkeleton {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProcessorWeather.class);
 
-    public Dataset process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
+    public DataMessage process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
         validateInput(timestamp, sensorId, featureId, values);
 
-        Dataset dataset = new Dataset();
+        DataMessage dataMessage = new DataMessage();
         LOG.info("Weather data processing: " + timestamp);
         Timeseries<Object> timeseries = new Timeseries<>().
                 feature(new Feature().id(featureId)).
@@ -44,9 +44,9 @@ public class ProcessorWeather extends ProcessorSkeleton {
         Measurement<Object> measurement = new Measurement<>();
         measurement.setTimestamp(timestamp);
         timeseries.addMeasurementsItem(measurement);
-        dataset.addTimeseriesItem(timeseries);
-        dataset.setId("weather-" + dataset.hashCode());
-        return dataset;
+        dataMessage.addTimeseriesItem(timeseries);
+        dataMessage.setId("weather-" + dataMessage.hashCode());
+        return dataMessage;
     }
 
 }
