@@ -21,10 +21,12 @@ import org.springframework.util.Assert;
 public class RegisterAppsOnStartTest {
 
     @Test
-    public void registerSourcesTest() {
+    public void registerSinksTest() {
         CloudService service = new CloudService();
         String logSink = service.registerApp("LogSink", "sink", "file://C:/Develop/2018/SWE-Ingestion-Service/LogSink/target/LogSink-0.0.1-SNAPSHOT.jar");
+        String dbSink = service.registerApp("DbSink", "sink", "file://C:/Develop/2018/SWE-Ingestion-Service/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar");
         Assert.isTrue(logSink.equals("success.") || logSink.contains("409"), "could not register Spring DataFlow Server application: LogSink");
+        Assert.isTrue(dbSink.equals("success.") || dbSink.contains("409"), "could not register Spring DataFlow Server application: DbSink");
     }
 
     @Test
@@ -37,7 +39,7 @@ public class RegisterAppsOnStartTest {
     }
 
     @Test
-    public void registerSinksTest() {
+    public void registerSourcesTest() {
         CloudService service = new CloudService();
         String rabbitmqttsource = service.registerApp("mqttrabbitsource", "source", "file://C:/Develop/mqt/mqtt/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
         Assert.isTrue(rabbitmqttsource.equals("success.") || rabbitmqttsource.contains("409"), "could not register Spring DataFlow Server application: mqttrabbitsource");
