@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: sink-app
+
+  cloud:
+    stream:
+      bindings:
+        input:
+          group: haliho
+          destination: log
+  
+  datasource:
+      url: jdbc:postgresql://localhost:5432/sos
+      username: postgres
+      password: postgres
+      testWhileIdle: true
+      validationQuery: SELECT 1
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+       dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+  
+server:
+  port: 8082
