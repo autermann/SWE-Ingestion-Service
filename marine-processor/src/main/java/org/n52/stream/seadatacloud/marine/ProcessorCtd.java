@@ -75,11 +75,11 @@ public class ProcessorCtd extends ProcessorSkeleton {
             receiverLatency = ChronoUnit.SECONDS.between(timestamp, receiverStationtimestamp);
         }
 
-        Measurement<Long> receiverLatencyMeasurement = new Measurement<>();
-        receiverLatencyMeasurement.setValue(receiverLatency);
+        Measurement<BigDecimal> receiverLatencyMeasurement = new Measurement<>();
+        receiverLatencyMeasurement.setValue(BigDecimal.valueOf(receiverLatency));
         receiverLatencyMeasurement.setTimestamp(timestamp);
 
-        Timeseries<Long> receiverLatencyTimeseries = new Timeseries<>();
+        Timeseries<BigDecimal> receiverLatencyTimeseries = new Timeseries<>();
         receiverLatencyTimeseries.setFeature(feature);
         receiverLatencyTimeseries.setSensor(sensorId);
         receiverLatencyTimeseries.setPhenomenon("receiver-latency");

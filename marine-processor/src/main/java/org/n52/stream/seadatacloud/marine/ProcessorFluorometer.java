@@ -73,12 +73,13 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
                 LocalDateTime.parse(dateTimeString, formatter),
                 ZoneOffset.UTC);
 
-        Measurement<Long> instrumentTimeDeviationMeasurement = new Measurement<>();
-        Long instrumentTimeDeviation = ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp);
+        Measurement<BigDecimal> instrumentTimeDeviationMeasurement = new Measurement<>();
+        BigDecimal instrumentTimeDeviation =
+                BigDecimal.valueOf(ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp));
         instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
         instrumentTimeDeviationMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries<Long> instrumentTimeDeviationTimeseries = new Timeseries<>();
+        Timeseries<BigDecimal> instrumentTimeDeviationTimeseries = new Timeseries<>();
         instrumentTimeDeviationTimeseries.setFeature(feature);
         instrumentTimeDeviationTimeseries.setPhenomenon("receiver-latency");
         instrumentTimeDeviationTimeseries.setSensor(sensorId);

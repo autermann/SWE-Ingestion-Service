@@ -115,8 +115,8 @@ public class ProcessorCtdTest {
         assertThat(timeseries.getPhenomenon(), is("receiver-latency"));
         assertThat(timeseries.getUnit(), is("s"));
         Object value = timeseries.getMeasurements().get(0).getValue();
-        assertThat(value, is(instanceOf(Long.class)));
-        assertThat(value, is(new Long("86388")));
+        assertThat(value, is(instanceOf(BigDecimal.class)));
+        assertThat(value, is(new BigDecimal("86388")));
     }
 
     @Test
