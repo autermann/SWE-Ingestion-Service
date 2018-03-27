@@ -90,7 +90,7 @@ public class Dataset {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, timeseries);
+        return Objects.hash(timeseries);
     }
 
     @Override

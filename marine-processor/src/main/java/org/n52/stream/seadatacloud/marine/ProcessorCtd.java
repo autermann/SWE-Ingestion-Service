@@ -153,6 +153,7 @@ public class ProcessorCtd extends ProcessorSkeleton {
         result.addTimeseriesItem(salinityTimeseries);
         result.addTimeseriesItem(soundVelocitiyTimeseries);
         result.addTimeseriesItem(receiverLatencyTimeseries);
+        result.setId("ctd-" + result.hashCode());
 
         return result;
     }

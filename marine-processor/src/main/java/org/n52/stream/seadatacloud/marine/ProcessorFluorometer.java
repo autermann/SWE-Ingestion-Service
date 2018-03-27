@@ -144,6 +144,7 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
         result.addTimeseriesItem(ntuTimeseries);
         result.addTimeseriesItem(thermistorTimeseries);
         result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
+        result.setId("fluorometer-" + result.hashCode());
 
         return result;
     }

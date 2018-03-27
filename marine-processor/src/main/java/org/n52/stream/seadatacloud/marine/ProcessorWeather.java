@@ -45,6 +45,7 @@ public class ProcessorWeather extends ProcessorSkeleton {
         measurement.setTimestamp(timestamp);
         timeseries.addMeasurementsItem(measurement);
         dataset.addTimeseriesItem(timeseries);
+        dataset.setId("weather-" + dataset.hashCode());
         return dataset;
     }
 
