@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class MarineProcessor {
 
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public Dataset process(Message<String> mqttMessage) {
+    public DataMessage process(Message<String> mqttMessage) {
         if (mqttMessage == null) {
             String msg = "NO MQTT message received! Input is 'null'.";
             LOG.error(msg);
@@ -77,13 +77,13 @@ public class MarineProcessor {
             LOG.error(msg);
             throw new RuntimeException(new IllegalArgumentException(msg));
         }
-        Dataset processedDataset = processMarineMqttPayload(mqttTopic, mqttMessagePayload);
+        DataMessage processedDataset = processMarineMqttPayload(mqttTopic, mqttMessagePayload);
         LOG.info("Processed dataset #{}", msgCount);
-        LOG.trace("Dataset: \n{}", processedDataset);
+        LOG.trace("DataMessage: \n{}", processedDataset);
         return processedDataset;
     }
 
-    private Dataset processMarineMqttPayload(String mqttTopic, String mqttMessagePayload) {
+    private DataMessage processMarineMqttPayload(String mqttTopic, String mqttMessagePayload) {
         LOG.trace("MQTT-Payload received: {}", mqttMessagePayload);
 
         String[] payloadChunks = mqttMessagePayload.split("\\|");

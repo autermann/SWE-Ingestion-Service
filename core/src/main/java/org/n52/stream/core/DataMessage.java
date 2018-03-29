@@ -27,11 +27,11 @@ import org.springframework.validation.annotation.Validated;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Dataset
+ * DataMessage
  */
 @Validated
 
-public class Dataset {
+public class DataMessage {
 
     @JsonProperty("id")
     private String id = null;
@@ -40,7 +40,7 @@ public class Dataset {
     @Valid
     private List<Timeseries<?>> timeseries = null;
 
-    public Dataset id(String id) {
+    public DataMessage id(String id) {
         this.id = id;
         return this;
     }
@@ -53,12 +53,12 @@ public class Dataset {
         this.id = id;
     }
 
-    public Dataset timeseries(List<Timeseries<?>> timeseries) {
+    public DataMessage timeseries(List<Timeseries<?>> timeseries) {
         this.timeseries = timeseries;
         return this;
     }
 
-    public Dataset addTimeseriesItem(Timeseries<?> timeseriesItem) {
+    public DataMessage addTimeseriesItem(Timeseries<?> timeseriesItem) {
         if (timeseries == null) {
             timeseries = new ArrayList<>();
         }
@@ -83,20 +83,20 @@ public class Dataset {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Dataset dataset = (Dataset) o;
-        return Objects.equals(id, dataset.id) &&
-                Objects.equals(timeseries, dataset.timeseries);
+        DataMessage dataMessage = (DataMessage) o;
+        return Objects.equals(id, dataMessage.id) &&
+                Objects.equals(timeseries, dataMessage.timeseries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, timeseries);
+        return Objects.hash(timeseries);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("class Dataset {\n");
+        sb.append("class DataMessage {\n");
 
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    timeseries: ").append(toIndentedString(timeseries)).append("\n");

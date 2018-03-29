@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -52,7 +52,7 @@ import org.n52.stream.core.Timeseries;
  */
 public class ProcessorFluorometer extends ProcessorSkeleton {
 
-    public Dataset process(OffsetDateTime receiverStationTimestamp, String sensorId, String featureId, List<String> values) {
+    public DataMessage process(OffsetDateTime receiverStationTimestamp, String sensorId, String featureId, List<String> values) {
         validateInput(receiverStationTimestamp, sensorId, featureId, values);
         if (values.size() != 7) {
             String valuesString = values.toString();
@@ -73,12 +73,13 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
                 LocalDateTime.parse(dateTimeString, formatter),
                 ZoneOffset.UTC);
 
-        Measurement<Long> instrumentTimeDeviationMeasurement = new Measurement<>();
-        Long instrumentTimeDeviation = ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp);
+        Measurement<BigDecimal> instrumentTimeDeviationMeasurement = new Measurement<>();
+        BigDecimal instrumentTimeDeviation =
+                BigDecimal.valueOf(ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp));
         instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
         instrumentTimeDeviationMeasurement.setTimestamp(instrumentTimestamp);
 
-        Timeseries<Long> instrumentTimeDeviationTimeseries = new Timeseries<>();
+        Timeseries<BigDecimal> instrumentTimeDeviationTimeseries = new Timeseries<>();
         instrumentTimeDeviationTimeseries.setFeature(feature);
         instrumentTimeDeviationTimeseries.setPhenomenon("receiver-latency");
         instrumentTimeDeviationTimeseries.setSensor(sensorId);
@@ -137,13 +138,14 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
         thermistorTimeseries.setSensor(sensorId);
         thermistorTimeseries.addMeasurementsItem(thermistorMeasurement);
 
-        Dataset result = new Dataset();
+        DataMessage result = new DataMessage();
         result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
         result.addTimeseriesItem(chlTimeseries);
         result.addTimeseriesItem(turbidityWavelengthTimeseries);
         result.addTimeseriesItem(ntuTimeseries);
         result.addTimeseriesItem(thermistorTimeseries);
         result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
+        result.setId("fluorometer-" + result.hashCode());
 
         return result;
     }
