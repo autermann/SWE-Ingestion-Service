@@ -157,28 +157,28 @@ public class DatasetDao extends AbstractDao {
         return DatasetEntity.DEFAULT_VALUE_TYPE;
     }
     
-    private void addValuesToSeries(DatasetEntity series, Timeseries<?> timeseries, AbstractProcess process) {
-        if (series.getProcedure() == null) {
-            series.setProcedure(getProcedure(timeseries.getSensor()));
+    private void addValuesToSeries(DatasetEntity datasetEntity, Timeseries<?> series, AbstractProcess process) {
+        if (datasetEntity.getProcedure() == null) {
+            datasetEntity.setProcedure(getProcedure(series.getSensor()));
         }
-        if (series.getOffering() == null) {
-            series.setOffering(getOffering(timeseries.getSensor()));
+        if (datasetEntity.getOffering() == null) {
+            datasetEntity.setOffering(getOffering(series.getSensor()));
         }
-        if (series.getPhenomenon() == null) {
-            series.setPhenomenon(getPhenomenon(timeseries.getSensor()));
+        if (datasetEntity.getPhenomenon() == null) {
+            datasetEntity.setPhenomenon(getPhenomenon(series.getPhenomenon()));
         }
-        if (series.getCategory() == null) {
-            series.setCategory(getCategory(timeseries.getSensor()));
+        if (datasetEntity.getCategory() == null) {
+            datasetEntity.setCategory(getCategory(series.getPhenomenon()));
         }
-        if (series.getFeature() == null) {
-            series.setFeature(getOrInsertFeature(timeseries.getFeature()));
+        if (datasetEntity.getFeature() == null) {
+            datasetEntity.setFeature(getOrInsertFeature(series.getFeature()));
         }
-        if (timeseries.getUnit() != null && !timeseries.getUnit().isEmpty() && series.getUnit() == null) {
-            series.setUnit(getOrInsertUnit(timeseries.getUnit()));
+        if (series.getUnit() != null && !series.getUnit().isEmpty() && datasetEntity.getUnit() == null) {
+            datasetEntity.setUnit(getOrInsertUnit(series.getUnit()));
         } else {
-            SweAbstractDataComponent component = getComponent(timeseries.getPhenomenon(), process.getOutputs());
+            SweAbstractDataComponent component = getComponent(series.getPhenomenon(), process.getOutputs());
             if (component != null && component instanceof SweAbstractUomType && ((SweAbstractUomType)component).isSetUom()) {
-                series.setUnit(getOrInsertUnit(((SweAbstractUomType)component).getUomObject()));
+                datasetEntity.setUnit(getOrInsertUnit(((SweAbstractUomType)component).getUomObject()));
             }
         }
     }

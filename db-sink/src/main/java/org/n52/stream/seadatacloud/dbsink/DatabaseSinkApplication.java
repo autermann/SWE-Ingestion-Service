@@ -1,22 +1,32 @@
 package org.n52.stream.seadatacloud.dbsink;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManagerFactory;
 
+import org.apache.xmlbeans.XmlObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.data.Data;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
-import org.n52.stream.core.Dataset;
+import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
 import org.n52.stream.seadatacloud.dbsink.dao.DaoFactory;
 import org.n52.stream.seadatacloud.dbsink.dao.DatasetDao;
 import org.n52.stream.seadatacloud.dbsink.dao.ObservationDao;
 import org.n52.stream.seadatacloud.dbsink.dao.OfferingDao;
+import org.n52.svalbard.decode.Decoder;
+import org.n52.svalbard.decode.DecoderRepository;
+import org.n52.svalbard.util.CodingHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +35,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
 @SpringBootApplication
 @EnableTransactionManagement
 @Transactional
+@ImportResource("classpath:svalbard-*.xml")
 @EnableBinding(Sink.class)
 public class DatabaseSinkApplication {
     
@@ -39,11 +52,14 @@ public class DatabaseSinkApplication {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
     
+    @Autowired
+    private DecoderRepository decoderRepository;
+    
     private Map<String, AbstractProcess> descriptions = new LinkedHashMap<>();
     
     @Transactional(rollbackFor=Exception.class)
     @StreamListener(Sink.INPUT)
-    public synchronized void input(Dataset dataset) {
+    public synchronized void input(DataMessage message) {
         Session session = null;
         try {
             session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
@@ -51,19 +67,19 @@ public class DatabaseSinkApplication {
             session.beginTransaction();
             DatasetDao datasetDao = daoFactory.getDatasetDao();
             OfferingDao offeringDao = daoFactory.getOfferingDao();
-            for (Timeseries<?> timeseries : dataset.getTimeseries()) {
-                if (timeseries.getMeasurements() != null && !timeseries.getMeasurements().isEmpty()) {
-                    ProcedureEntity procedure = daoFactory.getProcedureDAO().get(timeseries.getSensor());
-                    if (procedure != null && descriptions.containsKey(timeseries.getSensor())) {
-                        DatasetEntity datasetEntity = datasetDao.getOrInsert(timeseries, descriptions.get(timeseries.getSensor()));
+            for (Timeseries<?> series : message.getTimeseries()) {
+                if (series.getMeasurements() != null && !series.getMeasurements().isEmpty()) {
+                    ProcedureEntity procedure = daoFactory.getProcedureDAO().get(series.getSensor());
+                    if (procedure != null && descriptions.containsKey(series.getSensor())) {
+                        DatasetEntity datasetEntity = datasetDao.getOrInsert(series, descriptions.get(series.getSensor()));
                         if (datasetEntity != null) {
                             ObservationDao observationDao = daoFactory.getObservationDao();
                             Data<?> first = null;
                             Data<?> last = null;
-                            for (Measurement<?> m : timeseries.getMeasurements()) {
+                            for (Measurement<?> m : series.getMeasurements()) {
                                 Data<?> data = observationDao.persist(m, datasetEntity,
                                         observationDao.getComponent(datasetEntity.getPhenomenon().getIdentifier(),
-                                                descriptions.get(timeseries.getSensor()).getOutputs()));
+                                                descriptions.get(series.getSensor()).getOutputs()));
                                 first = updateFirst(first, data);
                                 last = updateLast(last, data);
                             }
@@ -84,7 +100,7 @@ public class DatabaseSinkApplication {
                 session.close();
             }
         }
-        LOG.info("Received processor output:\n{}", dataset);
+        LOG.info("Received processor output:\n{}", message);
     }
 
     private Data<?> updateFirst(Data<?> first, Data<?> data) {
@@ -93,6 +109,32 @@ public class DatabaseSinkApplication {
 
     private Data<?> updateLast(Data<?> last, Data<?> data) {
         return last == null ||last.getSamplingTimeEnd().before(data.getSamplingTimeEnd()) ? data : last;
+    }
+    
+    @PostConstruct
+    private void loadDescriptions() {
+        try {
+            decoderRepository.init();
+            Path p = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensor");
+            Set<Path> collect = Files.find(p, 1, (path, basicFileAttributes) -> path.getFileName().toString().endsWith(".xml")).collect(Collectors.toSet());
+            for (Path path : collect) {
+                XmlObject xml;
+                try {
+                    xml = XmlObject.Factory.parse(Files.newInputStream(path));
+                    Decoder<Object, Object> decoder = decoderRepository.getDecoder(CodingHelper.getDecoderKey(xml));
+                    if (decoder != null) {
+                        Object decode = decoder.decode(xml);
+                        if (decode instanceof AbstractProcess) {
+                            descriptions.put(((AbstractProcess) decode).getIdentifier(), (AbstractProcess) decode);
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while parsing sensor description!", e);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error while loading sensor descriptionfrom file!", e);
+        }
     }
 
     public static void main(String[] args) {
