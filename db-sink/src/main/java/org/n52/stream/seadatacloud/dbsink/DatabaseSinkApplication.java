@@ -24,6 +24,7 @@ import org.n52.stream.seadatacloud.dbsink.dao.DaoFactory;
 import org.n52.stream.seadatacloud.dbsink.dao.DatasetDao;
 import org.n52.stream.seadatacloud.dbsink.dao.ObservationDao;
 import org.n52.stream.seadatacloud.dbsink.dao.OfferingDao;
+import org.n52.stream.util.DecoderHelper;
 import org.n52.svalbard.decode.Decoder;
 import org.n52.svalbard.decode.DecoderRepository;
 import org.n52.svalbard.util.CodingHelper;
@@ -43,7 +44,6 @@ import org.springframework.util.ResourceUtils;
 @SpringBootApplication
 @EnableTransactionManagement
 @Transactional
-@ImportResource("classpath:svalbard-*.xml")
 @EnableBinding(Sink.class)
 public class DatabaseSinkApplication {
     
@@ -53,7 +53,7 @@ public class DatabaseSinkApplication {
     private EntityManagerFactory entityManagerFactory;
     
     @Autowired
-    private DecoderRepository decoderRepository;
+    private DecoderHelper decoderHelper;
     
     private Map<String, AbstractProcess> descriptions = new LinkedHashMap<>();
     
@@ -114,19 +114,15 @@ public class DatabaseSinkApplication {
     @PostConstruct
     private void loadDescriptions() {
         try {
-            decoderRepository.init();
             Path p = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensor");
-            Set<Path> collect = Files.find(p, 1, (path, basicFileAttributes) -> path.getFileName().toString().endsWith(".xml")).collect(Collectors.toSet());
+            Set<Path> collect =
+                    Files.find(p, 1, (path, basicFileAttributes) -> path.getFileName().toString().endsWith(".xml"))
+                            .collect(Collectors.toSet());
             for (Path path : collect) {
-                XmlObject xml;
                 try {
-                    xml = XmlObject.Factory.parse(Files.newInputStream(path));
-                    Decoder<Object, Object> decoder = decoderRepository.getDecoder(CodingHelper.getDecoderKey(xml));
-                    if (decoder != null) {
-                        Object decode = decoder.decode(xml);
-                        if (decode instanceof AbstractProcess) {
-                            descriptions.put(((AbstractProcess) decode).getIdentifier(), (AbstractProcess) decode);
-                        }
+                    Object decode = decoderHelper.decode(path);
+                    if (decode instanceof AbstractProcess) {
+                        descriptions.put(((AbstractProcess) decode).getIdentifier(), (AbstractProcess) decode);
                     }
                 } catch (Exception e) {
                     LOG.error("Error while parsing sensor description!", e);

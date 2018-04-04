@@ -29,6 +29,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>Finchley.M8</spring-cloud.version>
+        <arctic-sea.version>4.2.0-SNAPSHOT</arctic-sea.version>
     </properties>
 
     <dependencyManagement>
@@ -39,6 +40,21 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard-xmlbeans</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>shetland</artifactId>
+                <version>${arctic-sea.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -86,8 +102,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>test</scope>
-            <version>4.11</version>
         </dependency>
     </dependencies>
 </project>
