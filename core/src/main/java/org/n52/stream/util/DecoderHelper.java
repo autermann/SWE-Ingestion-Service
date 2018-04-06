@@ -45,7 +45,7 @@ public class DecoderHelper {
         return decode(Files.newInputStream(path));
     }
     
-    protected void setDecoderRepository(DecoderRepository decoderRepository) {
+    public void setDecoderRepository(DecoderRepository decoderRepository) {
         this.decoderRepository = decoderRepository;
     }
 }
