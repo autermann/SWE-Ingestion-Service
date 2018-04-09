@@ -192,5 +192,93 @@ public class InsertSensorGenerator {
                 return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE;
         }
     }
-    
+
+    /**
+     * Check if featureOfInterest has no geometry and a SML position is defined,
+     * then create feature geometry from SML position.
+     * 
+     * @param process
+     *            {@link AbstractProcess} to check
+     */
+    private void checkForFeature(AbstractProcess process) {
+        if (process instanceof AbstractPhysicalProcess && ((AbstractPhysicalProcess) process).getPosition() != null
+                && (((AbstractPhysicalProcess) process).getPosition().isSetPosition()
+                        || ((AbstractPhysicalProcess) process).getPosition().isSetVector())) {
+            AbstractPhysicalProcess app = (AbstractPhysicalProcess) process;
+            if (app.isSetSmlFeatureOfInterest()) {
+                for (AbstractFeature feature : app.getSmlFeatureOfInterest().getFeaturesOfInterestMap().values()) {
+                    if (feature != null && feature instanceof AbstractSamplingFeature
+                            && !((AbstractSamplingFeature) feature).isSetGeometry()) {
+                        ((AbstractSamplingFeature) feature).setGeometry(createGeometry(app.getPosition()));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Create a {@link Geometry} from {@link SmlPosition}
+     * 
+     * @param position
+     *            {@link SmlPosition} to create {@link Geometry} from
+     * 
+     * @return {@link Geometry} or null if northing/easting can not be parsed.
+     */
+    private Geometry createGeometry(SmlPosition position) {
+        String northing = getNorthing(position.getPosition());
+        String easting = getEasting(position.getPosition());
+        if (northing != null && easting != null) {
+            String wkt = "POINT (" + northing + " " + easting + ")";
+            int srid = 4326;
+            if (position.isSetReferenceFrame()) {
+                String rf = position.getReferenceFrame();
+                try {
+                    srid = Integer.parseInt(rf.startsWith("http") ? rf.substring(rf.lastIndexOf("/"))
+                            : rf.startsWith("urn") ? rf.substring(rf.lastIndexOf(":")) : "4326");
+                } catch (Exception e) {
+                    LOG.warn("The referenceFrame contains an unknown format!", e);
+                }
+
+            }
+            try {
+                return JTSHelper.createGeometryFromWKT(wkt, srid);
+            } catch (ParseException e) {
+                LOG.error("Error while creating geometry", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get northing coordinate
+     * 
+     * @param position
+     *            {@link SweCoordinate}s to check for northing coordinate
+     * @return the northing coordinate
+     */
+    private String getNorthing(List<? extends SweCoordinate<? extends Number>> position) {
+        for (SweCoordinate<? extends Number> c : position) {
+            if (SweCoordinateNames.isY(c.getName())) {
+                return c.getValue().getValue().toString();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get easting coordinate
+     * 
+     * @param position
+     *            {@link SweCoordinate}s to check for easting coordinate
+     * @return the easting coordinate
+     */
+    private String getEasting(List<? extends SweCoordinate<? extends Number>> position) {
+        for (SweCoordinate<? extends Number> c : position) {
+            if (SweCoordinateNames.isX(c.getName())) {
+                return c.getValue().getValue().toString();
+            }
+        }
+        return null;
+    }
+
 }
