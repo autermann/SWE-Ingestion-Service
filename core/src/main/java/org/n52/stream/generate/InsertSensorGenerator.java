@@ -7,31 +7,67 @@ import java.util.List;
 import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.n52.shetland.ogc.gml.AbstractFeature;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.ogc.om.features.samplingFeatures.AbstractSamplingFeature;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.elements.SmlPosition;
+import org.n52.shetland.ogc.sensorML.v20.AbstractPhysicalProcess;
 import org.n52.shetland.ogc.sensorML.v20.AbstractProcessV20;
+import org.n52.shetland.ogc.sensorML.v20.SmlFeatureOfInterest;
 import org.n52.shetland.ogc.sos.Sos2Constants;
 import org.n52.shetland.ogc.sos.SosInsertionMetadata;
 import org.n52.shetland.ogc.sos.SosProcedureDescription;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
 import org.n52.shetland.ogc.swe.SweConstants;
+import org.n52.shetland.ogc.swe.SweConstants.SweCoordinateNames;
+import org.n52.shetland.ogc.swe.SweCoordinate;
+import org.n52.shetland.util.JTSHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Helper class to create a {@link InsertSensorRequest} from the
+ * {@link AbstractProcess}
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class InsertSensorGenerator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InsertSensorGenerator.class);
+
+    /**
+     * Create {@link InsertSensorRequest} from {@link AbstractProcess}
+     * 
+     * @param process
+     *            The {@link AbstractProcess} to create
+     *            {@link InsertSensorRequest} from
+     * @return The generated {@link InsertSensorRequest}.
+     */
     public InsertSensorRequest generate(AbstractProcess process) {
         InsertSensorRequest request = new InsertSensorRequest(Sos2Constants.SOS, Sos2Constants.SERVICEVERSION);
         request.setProcedureDescription(new SosProcedureDescription<AbstractFeature>(process));
         request.setProcedureDescriptionFormat(process.getDefaultElementEncoding());
         request.setObservableProperty(getObservableProperties(process));
+        checkForFeature(process);
         request.setMetadata(getSosInsertionMetadata(process));
         return request;
     }
 
+    /**
+     * Get the observable properties identifier from the outputs of the
+     * {@link AbstractProcess}
+     * 
+     * @param process
+     *            the {@link AbstractProcess} to process
+     * @return {@link List} of observable properties identifier
+     */
     private List<String> getObservableProperties(AbstractProcess process) {
         List<String> list = new LinkedList<>();
         if (process.isSetOutputs()) {
@@ -44,13 +80,28 @@ public class InsertSensorGenerator {
         return list;
     }
 
+    /**
+     * Create the {@link SosInsertionMetadata} from the {@link AbstractProcess}
+     * 
+     * @param process
+     *            the {@link AbstractProcess} to process
+     * @return Created {@link SosInsertionMetadata}
+     */
     private SosInsertionMetadata getSosInsertionMetadata(AbstractProcess process) {
+
         SosInsertionMetadata metadata = new SosInsertionMetadata();
         metadata.setFeatureOfInterestTypes(getFeatureTypes(process));
         metadata.setObservationTypes(getObservationType(process));
         return metadata;
     }
 
+    /**
+     * Get the observation types from the swe elements defined in the output.
+     * 
+     * @param process
+     *            the {@link AbstractProcess} to process
+     * @return {@link Collection} of observation types
+     */
     private Collection<String> getObservationType(AbstractProcess process) {
         List<String> list = new LinkedList<>();
         if (process.isSetOutputs()) {
@@ -61,6 +112,14 @@ public class InsertSensorGenerator {
         return list;
     }
 
+    /**
+     * Get observation type from {@link SweAbstractDataComponent}. Default is
+     * {@link OmConstants#OBS_TYPE_UNKNOWN}
+     * 
+     * @param ioValue
+     *            The {@link SweAbstractDataComponent} to get type from
+     * @return the observation type
+     */
     private String getObservationTypeByOutput(SweAbstractDataComponent ioValue) {
         SweConstants.SweDataComponentType.values();
         switch (ioValue.getDataComponentType()) {
@@ -80,21 +139,30 @@ public class InsertSensorGenerator {
                 return OmConstants.OBS_TYPE_TEXT_OBSERVATION;
             case Time:
                 return OmConstants.OBS_TYPE_TEMPORAL_OBSERVATION;
-            
             default:
                 return OmConstants.OBS_TYPE_UNKNOWN;
         }
     }
 
+    /**
+     * Get the feature types from the {@link SmlFeatureOfInterest}. If features
+     * are encoded, get from type or from geometry. Default value is
+     * {@link SfConstants#SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT}
+     * 
+     * @param process
+     *            the {@link AbstractProcess} to process
+     * @return {@link Collection} of feature types
+     */
     private Collection<String> getFeatureTypes(AbstractProcess process) {
         Set<String> set = new HashSet<>();
         if (process instanceof AbstractProcessV20 && ((AbstractProcessV20) process).isSetSmlFeatureOfInterest()) {
-            for (AbstractFeature feature : ((AbstractProcessV20) process).getSmlFeatureOfInterest().getFeaturesOfInterestMap().values()) {
+            for (AbstractFeature feature : ((AbstractProcessV20) process).getSmlFeatureOfInterest()
+                    .getFeaturesOfInterestMap().values()) {
                 if (feature != null && feature instanceof AbstractSamplingFeature) {
-                    if (((AbstractSamplingFeature)feature).isSetFeatureType()) {
-                        set.add(((AbstractSamplingFeature)feature).getFeatureType());
-                    } else if (((AbstractSamplingFeature)feature).isSetGeometry()) {
-                        set.add(getFeatureTypeByGeometry(((AbstractSamplingFeature)feature).getGeometry()));
+                    if (((AbstractSamplingFeature) feature).isSetFeatureType()) {
+                        set.add(((AbstractSamplingFeature) feature).getFeatureType());
+                    } else if (((AbstractSamplingFeature) feature).isSetGeometry()) {
+                        set.add(getFeatureTypeByGeometry(((AbstractSamplingFeature) feature).getGeometry()));
                     }
                 }
             }
@@ -105,6 +173,13 @@ public class InsertSensorGenerator {
         return set;
     }
 
+    /**
+     * Get feature type from geometry type
+     * 
+     * @param geometry
+     *            the {@link Geometry} to get type from
+     * @return the feature type
+     */
     private String getFeatureTypeByGeometry(Geometry geometry) {
         switch (geometry.getGeometryType()) {
             case "Point":

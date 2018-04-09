@@ -12,24 +12,45 @@ import org.apache.xmlbeans.XmlObject;
 import org.n52.svalbard.decode.Decoder;
 import org.n52.svalbard.decode.DecoderRepository;
 import org.n52.svalbard.decode.exception.DecodingException;
+import org.n52.svalbard.decode.exception.XmlDecodingException;
 import org.n52.svalbard.util.CodingHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Component;
 
+/**
+ * Helper class to decode XML documents, e.g. the process description
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 @ImportResource("classpath:svalbard-*.xml")
 @Component
 public class DecoderHelper {
-    
+
     @Autowired
     private DecoderRepository decoderRepository;
-    
+
+    /**
+     * init method
+     */
     @PostConstruct
     protected void init() {
         decoderRepository.init();
     }
 
-    public Object decode(XmlObject xml) throws IOException, DecodingException, XmlException {
+    /**
+     * Decodes an XML document to an representation from arctic-sea/shetland
+     * 
+     * @param xml
+     *            XML object to decode
+     * @return Decoded object
+     * @throws DecodingException
+     *             If an error occurs during decoding.
+     */
+    public Object decode(XmlObject xml)
+            throws DecodingException {
         Decoder<Object, Object> decoder = decoderRepository.getDecoder(CodingHelper.getDecoderKey(xml));
         if (decoder != null) {
             return decoder.decode(xml);
@@ -37,14 +58,70 @@ public class DecoderHelper {
         return null;
     }
 
-    public Object decode(InputStream inputStream) throws XmlException, IOException, DecodingException {
+    /**
+     * Decode a XML input stream
+     * 
+     * @param inputStream
+     *            XML input stream
+     * @return Decoded object
+     * @throws XmlException
+     *             If an error occurs when parsing XML {@link InputStream} to
+     *             {@link XmlObject}
+     * @throws IOException
+     *             If an error occurs when processing XML {@link InputStream}
+     * @throws DecodingException
+     *             If an error occurs during decoding.
+     */
+    public Object decode(InputStream inputStream)
+            throws DecodingException,
+            XmlException,
+            IOException {
         return decode(XmlObject.Factory.parse(inputStream));
     }
-    
-    public Object decode(Path path) throws IOException, DecodingException, XmlException {
+
+    /**
+     * Decode a XML file from {@link Path}
+     * 
+     * @param path
+     *            XML file path
+     * @return Decoded object
+     * @throws IOException
+     *             If an error occurs when processing {@link Path}
+     * @throws DecodingException
+     *             If an error occurs during decoding.
+     * @throws XmlException
+     *             If an error occurs when parsing XML file from {@link Path} to
+     *             {@link XmlObject}
+     */
+    public Object decode(Path path)
+            throws DecodingException,
+            XmlException,
+            IOException {
         return decode(Files.newInputStream(path));
     }
-    
+
+    /**
+     * Decode a XML string
+     * 
+     * @param xml
+     *            XML string to decode
+     * @return Decoded object
+     * @throws XmlDecodingException
+     *             If an error occurs when parsing string to {@link XmlObject}
+     * @throws DecodingException
+     *             If an error occurs during decoding.
+     */
+    public Object decode(String xml)
+            throws XmlDecodingException,
+            DecodingException {
+        return decode(CodingHelper.readXML(xml));
+    }
+
+    /**
+     * Set {@link DecoderRepository}
+     * 
+     * @param decoderRepository
+     */
     public void setDecoderRepository(DecoderRepository decoderRepository) {
         this.decoderRepository = decoderRepository;
     }
