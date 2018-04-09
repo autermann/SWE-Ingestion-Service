@@ -26,9 +26,6 @@ spring:
        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
        temp:
          use_jdbc_metadata_defaults: false
-       show_sql: true
-       use_sql_comments: true
-       format_sql: true
 
 server:
   port: 8082
