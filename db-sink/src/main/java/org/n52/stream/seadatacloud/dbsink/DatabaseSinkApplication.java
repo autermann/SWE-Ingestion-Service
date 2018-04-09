@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
