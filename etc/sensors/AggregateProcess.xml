@@ -79,10 +79,10 @@
                                           </swe:Text>
                                        </swe:field>
                                        <swe:field name="Instument_datetime">
-                                          <swe:Text definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
+                                          <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
                                              <swe:label>Instrument date</swe:label>
                                              <swe:description>Instrument clock date in the format MM/DD/YYYY</swe:description>
-                                          </swe:Text>
+                                          </swe:Time>
                                        </swe:field>
                                        <swe:field name="Wavelength_for_Fluorescence_Measurements">
                                           <swe:Quantity>
@@ -131,22 +131,22 @@
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="mqtt_broker_url">
-                                    <swe:Text definition="mqtt_broker_url">
-                                       <swe:value>wss://mqtt.marine.ie</swe:value>
+                                    <swe:Text definition="url">
+                                       <swe:value>tcp://mqtt.marine.ie</swe:value>
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="mqtt_broker_username">
-                                    <swe:Text definition="mqtt_broker_username">
+                                    <swe:Text definition="username">
                                        <swe:value>username</swe:value>
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="mqtt_broker_password">
-                                    <swe:Text definition="mqtt_broker_password">
+                                    <swe:Text definition="password">
                                        <swe:value>password</swe:value>
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="topic_name">
-                                    <swe:Text definition="topic_name">
+                                    <swe:Text definition="topic">
                                        <swe:value>spiddal-fluorometer</swe:value>
                                     </swe:Text>
                                  </swe:field>
