@@ -14,6 +14,7 @@ public abstract class AbstractDao {
         this.daoFactory = daoFactory;
     }
     
+    
     public DaoFactory getDaoFactory( ) {
         return daoFactory;
     }
@@ -32,5 +33,9 @@ public abstract class AbstractDao {
             }
         }
         return null;
+    }
+    
+    public String getOfferingIdentifier(String sensorId) {
+        return sensorId  + "/observations";
     }
 }

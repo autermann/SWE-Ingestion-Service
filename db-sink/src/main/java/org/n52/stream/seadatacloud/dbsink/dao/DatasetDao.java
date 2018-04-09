@@ -162,7 +162,8 @@ public class DatasetDao extends AbstractDao {
             datasetEntity.setProcedure(getProcedure(series.getSensor()));
         }
         if (datasetEntity.getOffering() == null) {
-            datasetEntity.setOffering(getOffering(series.getSensor()));
+            // TODO should be defined by config parameter!!!
+            datasetEntity.setOffering(getOffering(getOfferingIdentifier(series.getSensor())));
         }
         if (datasetEntity.getPhenomenon() == null) {
             datasetEntity.setPhenomenon(getPhenomenon(series.getPhenomenon()));
@@ -228,7 +229,7 @@ public class DatasetDao extends AbstractDao {
         c.createCriteria(DatasetEntity.PROPERTY_PROCEDURE)
                 .add(Restrictions.eq(ProcedureEntity.PROPERTY_IDENTIFIER, t.getSensor()));
         c.createCriteria(DatasetEntity.PROPERTY_OFFERING)
-                .add(Restrictions.eq(OfferingEntity.PROPERTY_IDENTIFIER, t.getSensor()));
+                .add(Restrictions.eq(OfferingEntity.PROPERTY_IDENTIFIER, getOfferingIdentifier(t.getSensor())));
         c.createCriteria(DatasetEntity.PROPERTY_CATEGORY)
                 .add(Restrictions.eq(CategoryEntity.PROPERTY_IDENTIFIER, t.getPhenomenon()));
     }
