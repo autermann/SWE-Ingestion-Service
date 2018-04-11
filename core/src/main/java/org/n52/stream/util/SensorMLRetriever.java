@@ -37,22 +37,31 @@ import javax.inject.Named;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.n52.shetland.ogc.ows.exception.OwsExceptionReport;
+import org.apache.xmlbeans.XmlException;
+import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.svalbard.decode.exception.DecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
+ */
 @Configuration
 public class SensorMLRetriever {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorMLRetriever.class);
 
+    @Autowired
+    private DecoderHelper decoderHelper;
+
     @Bean
     @Named("sensorml")
-    public Object loadSensorML(@Value("${org.n52.stream.sensorml-url}") String url) {
-        //http request und parse;
+    public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensorml-url}") String url)
+            throws DecodingException, XmlException, IOException {
         URL sensormlUrl = null;
         try {
             sensormlUrl = new URL(url);
@@ -71,25 +80,20 @@ public class SensorMLRetriever {
         if (getResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             logAndThrowException(sensormlUrl, new RuntimeException("HttpResponseCode != " + HttpStatus.SC_OK));
         }
-        return getResponse;
+        try (InputStream content = getResponse.getEntity().getContent()) {
+            Object decodedGetResponse = decoderHelper.decode(content);
+            if (decodedGetResponse instanceof AggregateProcess) {
+                return (AggregateProcess) decodedGetResponse;
+            } else {
+                String msg = String.format(
+                        "XML document received from '%s' isn't sml2.0:AggregateProcess! Received: %s",
+                        sensormlUrl,
+                        decodedGetResponse.getClass());
+                LOG.error(msg);
+                throw new IllegalArgumentException(msg);
+            }
+        }
     }
-
-//    private Object decodeResponse(HttpResponse response)
-//            throws OwsExceptionReport, DecodingException, XmlException, IOException {
-//        try (InputStream content = response.getEntity().getContent()) {
-//            XmlObject xmlResponse = XmlObject.Factory.parse(content);
-//            DecoderKey decoderKey = CodingHelper.getDecoderKey(xmlResponse);
-//            Decoder<Object, Object> decoder = getDecoderRepository().getDecoder(decoderKey);
-//            if (decoder == null) {
-//                throw new NoDecoderForKeyException(decoderKey);
-//            }
-//            Object decode = decoder.decode(xmlResponse);
-//            if (decode instanceof OwsExceptionReport) {
-//                throw (OwsExceptionReport) decode;
-//            }
-//            return decode;
-//        }
-//    }
 
     private void logAndThrowException(URL sensormlUrl, Exception e) throws RuntimeException {
         String msg = String.format("Error while retrieving file from sensorml-url ('%s') :"
