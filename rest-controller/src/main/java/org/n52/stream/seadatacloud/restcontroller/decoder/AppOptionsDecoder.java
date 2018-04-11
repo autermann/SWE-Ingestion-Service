@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,11 +25,6 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
- */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
  */
 package org.n52.stream.seadatacloud.restcontroller.decoder;
 

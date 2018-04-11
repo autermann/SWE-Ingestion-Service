@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -64,23 +64,23 @@ public class AppController {
     CloudService service;
 
     @RequestMapping(value = "/sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public Sources getSources() {
+    public ResponseEntity<Sources> getSources() {
         Sources result = service.getSources();
-        return result;
+        return new ResponseEntity(result, HttpStatus.ACCEPTED);
     }
     
     @RequestMapping(value = "/processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public Processors getProcessors() {
+    public ResponseEntity<Processors> getProcessors() {
         Processors result = service.getProcessors();
-        return result;
+        return new ResponseEntity(result, HttpStatus.ACCEPTED);
     }
     
     @RequestMapping(value = "/sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public Sinks getSinks() {
+    public ResponseEntity<Sinks> getSinks() {
         Sinks result = service.getSinks();
-        return result;
+        return new ResponseEntity(result, HttpStatus.ACCEPTED);
     }
-
+    
     @RequestMapping(value = "/registerApp", method = RequestMethod.GET)
     public ResponseEntity<String> registerApp(
             @RequestParam("name") String appName,

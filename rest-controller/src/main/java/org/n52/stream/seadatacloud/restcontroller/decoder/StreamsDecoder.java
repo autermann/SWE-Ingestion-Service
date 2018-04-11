@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -53,12 +53,13 @@ public class StreamsDecoder extends BaseDeserializer<Streams> {
         JsonNode node = jp.readValueAsTree();
 
         JsonNode embedded = node.get("_embedded");
+        List<Stream> streamList = new ArrayList();
         if (embedded == null) {
-            results.setStreams(new ArrayList());
+            results.setStreams(streamList);
+            return results;
         } else {
             ArrayNode appRegistrationResourceList = (ArrayNode) embedded.get("streamDefinitionResourceList");
 
-            List<Stream> streamList = new ArrayList();
             appRegistrationResourceList.forEach((stream) -> {
                 Stream current = new Stream();
                 current.setName(stream.get("name").asText());

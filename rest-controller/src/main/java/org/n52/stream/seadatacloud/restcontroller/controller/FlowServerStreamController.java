@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -34,7 +34,9 @@ import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -210,7 +212,12 @@ public class FlowServerStreamController {
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         Stream result = service.getStream(streamId);
+        if (result == null) {
+            return new ResponseEntity("{ \"error\": \"stream with name '"+streamId+"' not found.\"}", headers, HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity(result, HttpStatus.OK);
     }
     

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,6 +33,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Named;
+
+import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,18 +59,42 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication
 @EnableBinding(Processor.class)
-@EnableConfigurationProperties(MarineProcessorConfiguration.class)
+@EnableConfigurationProperties(Configuration.class)
 public class MarineProcessor {
 
     private int msgCount = 0;
 
     @Autowired
-    private MarineProcessorConfiguration properties = new MarineProcessorConfiguration();
+    private Configuration properties;
+
+    @Autowired
+    @Named("sensorml")
+    private AggregateProcess processDescription;
 
     private static final Logger LOG = LoggerFactory.getLogger(MarineProcessor.class);
 
     public static void main(String[] args) {
         SpringApplication.run(MarineProcessor.class, args);
+    }
+
+    /**
+     * Init the processor by checking the properties and finalize the custom configuration
+     */
+    @PostConstruct
+    public void init() {
+        LOG.info("init(); processor called");
+        checkSetting("offering", properties.getOffering());
+        checkSetting("sensor", properties.getSensor());
+        checkSetting("sensorml-url", properties.getSensormlUrl());
+    }
+
+    private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
+        if (setting == null || setting.isEmpty()) {
+            String msg = String.format("setting '%s' not set correct. Received value: '%s'.", settingName, setting);
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        LOG.trace("'{}': '{}'", settingName, setting);
     }
 
     @StreamListener(Processor.INPUT)
@@ -74,20 +103,24 @@ public class MarineProcessor {
         if (mqttMessage == null) {
             String msg = "NO MQTT message received! Input is 'null'.";
             LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
+            throw new IllegalArgumentException(msg);
         }
+        // check property value
+        // download sensorML
+        // parse sensorml
+        // configure csv parser
         String mqttMessagePayload = mqttMessage.getPayload();
         String mqttTopic = mqttMessage.getHeaders().get("mqtt_receivedTopic", String.class);
         msgCount++;
         if (mqttTopic == null || mqttTopic.isEmpty()) {
             String msg = "MQTT topic not specified.";
             LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
+            throw new IllegalArgumentException(msg);
         }
         if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
             String msg = "Empty MQTT payload received.";
             LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
+            throw new IllegalArgumentException(msg);
         }
         DataMessage processedDataset = processMarineMqttPayload(mqttTopic, mqttMessagePayload);
         LOG.info("Processed dataset #{}", msgCount);
@@ -104,7 +137,7 @@ public class MarineProcessor {
                     "Received mqtt payload not in correct format. Expected three '|' separated chunks: '%s'",
                     mqttMessagePayload);
             LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
+            throw new IllegalArgumentException(msg);
         }
 
         // TIMESTAMP
@@ -120,22 +153,9 @@ public class MarineProcessor {
         List<String> values = Stream.of(payloadChunks[2].split("\\s+"))
                 .filter(value -> (value!=null && !value.isEmpty()))
                 .collect(Collectors.toList());
-        // switch depending on topic to different marine processors
-        // which one to choose is configured in application.yml::processor.*.topic
-        if (properties.getCtd().getTopic().equals(mqttTopic)) {
-            return new ProcessorCtd().process(receiverStationTimestamp, sensor, properties.getCtd().getFeatureId(),
-                    values);
-        } else if (properties.getWeather().getTopic().equals(mqttTopic)) {
-            return new ProcessorWeather().process(receiverStationTimestamp, sensor,
-                    properties.getWeather().getFeatureId(), values);
-        } else if (properties.getFluorometer().getTopic().equals(mqttTopic)) {
-            return new ProcessorFluorometer().process(receiverStationTimestamp, sensor,
-                    properties.getFluorometer().getFeatureId(), values);
-        } else {
-            String msg = String.format("Could not identify processor for topic '%s'.", mqttTopic);
-            LOG.error(msg);
-            throw new RuntimeException(new IllegalArgumentException(msg));
-        }
+        String msg = String.format("Generic Processor not yet implemented.");
+        LOG.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 
 }

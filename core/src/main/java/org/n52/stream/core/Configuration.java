@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.marine;
+package org.n52.stream.core;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -36,48 +36,37 @@ import org.springframework.validation.annotation.Validated;
  *
  */
 @Validated
-@ConfigurationProperties("processor")
-public class MarineProcessorConfiguration {
+@ConfigurationProperties("org.n52.stream")
+public class Configuration {
 
-    private final TopicConfiguration ctd = new TopicConfiguration();
+    private String sensormlUrl = "";
 
-    private final TopicConfiguration weather = new TopicConfiguration();
+    private String offering = "";
 
-    private final TopicConfiguration fluorometer = new TopicConfiguration();
+    private String sensor = "";
 
-    public TopicConfiguration getWeather() {
-        return weather;
+    public String getSensormlUrl() {
+        return sensormlUrl;
     }
 
-    public TopicConfiguration getCtd() {
-        return ctd;
+    public String getOffering() {
+        return offering;
     }
 
-    public TopicConfiguration getFluorometer() {
-        return fluorometer;
+    public void setSensormlUrl(String sensormlUrl) {
+        this.sensormlUrl = sensormlUrl;
     }
 
-    public static class TopicConfiguration {
+    public void setOffering(String offering) {
+        this.offering = offering;
+    }
 
-        private String topic = "";
+    public void setSensor(String sensor) {
+        this.sensor = sensor;
+    }
 
-        private String featureId = "";
-
-        public void setFeatureId(String featureId) {
-            this.featureId = featureId;
-        }
-
-        public String getFeatureId() {
-            return featureId;
-        }
-
-        public void setTopic(String topic) {
-            this.topic = topic;
-        }
-
-        public String getTopic() {
-            return topic;
-        }
+    public String getSensor() {
+        return sensor;
     }
 
 }

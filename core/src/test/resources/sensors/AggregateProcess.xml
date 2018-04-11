@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+    Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
     Software GmbH
 
     This program is free software; you can redistribute it and/or modify it
@@ -108,10 +108,11 @@
                                              <swe:description>Instrument-ID is a unique identifier for the instrument based on its manufacturer, model number and serial number</swe:description>
                                           </swe:Text>
                                        </swe:field>
-                                       <swe:field name="Instument_datetime">
+                                       <swe:field name="Instrument_datetime">
                                           <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
                                              <swe:label>Instrument date</swe:label>
                                              <swe:description>Instrument clock date in the format MM/DD/YYYY</swe:description>
+                                             <swe:uom/>
                                           </swe:Time>
                                        </swe:field>
                                        <swe:field name="Wavelength_for_Fluorescence_Measurements">

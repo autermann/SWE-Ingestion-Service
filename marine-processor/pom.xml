@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+    Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
     Software GmbH
 
     This program is free software; you can redistribute it and/or modify it
@@ -41,7 +41,6 @@
     <artifactId>marine-processor</artifactId>
     <name>MarineProcessor with topic specific processors</name>
     <packaging>jar</packaging>
-    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -59,7 +58,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -76,12 +74,18 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.n52.stream.seadatacloud</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.arctic-sea</groupId>
+            <artifactId>shetland</artifactId>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

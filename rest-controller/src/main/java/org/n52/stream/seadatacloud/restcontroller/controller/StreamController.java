@@ -1,4 +1,63 @@
 /*
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+/*
+<<<<<<< HEAD
+=======
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+/*
+>>>>>>> origin/dev
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -65,7 +124,7 @@ public class StreamController {
     public ResponseEntity<Stream> uploadConfig(
             @RequestBody byte[] requestBody) {
 
-        try {
+       try {
             Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "tmp.xml");
             String fileName = path.toAbsolutePath().toString();
             Files.write(Paths.get(fileName), requestBody);
@@ -96,7 +155,7 @@ public class StreamController {
                     SweText sweText = (SweText) current.getElement();
                     if (sweText.getDefinition().equals("source")) {
                         sourceName = sweText.getValue();
-                        source = appController.getSourceByName(sourceName);
+//                        source = appController.getSourceByName(sourceName);
                         if (source == null) {
                             return new ResponseEntity("Source '" + sourceName + "' not found", HttpStatus.NOT_FOUND);
                         }
@@ -114,22 +173,22 @@ public class StreamController {
                     SweText sweText = (SweText) current.getElement();
                     if (!sweText.getDefinition().equals("source")) {
                         String appOptionName = sweText.getDefinition();
-                        AppOption ao = appController.getSourceOptionByName(source, appOptionName);
-                        if (ao == null) {
+//                        AppOption ao = appController.getSourceOptionByName(source, appOptionName);
+//                        if (ao == null) {
                             return new ResponseEntity("Option '" + appOptionName + "' is not supported by source '" + sourceName + "'.", HttpStatus.EXPECTATION_FAILED);
                         }
-                        streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
+//                        streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                     }
                 };
-                if (streamSourceDefinition.length() > 0) {
-                    streamDefinition = sourceName + " " + streamSourceDefinition + " ";
-                } else {
-                    streamDefinition = sourceName + " ";
-                }
-                
-                // TODO: parse processor...
-                // TODO: parse sink...
-                streamDefinition += "| log-sink --semsormlurl="+path;
+//                if (streamSourceDefinition.length() > 0) {
+//                    streamDefinition = sourceName + " " + streamSourceDefinition + " ";
+//                } else {
+//                    streamDefinition = sourceName + " ";
+//                }
+//                
+//                // TODO: parse processor...
+//                // TODO: parse sink...
+//                streamDefinition += "| log-sink --semsormlurl="+path;
                 
                 Stream createdStream = service.createStream("aStreamName", streamDefinition, false);
                 if (createdStream != null) {
@@ -145,31 +204,31 @@ public class StreamController {
         }
     }
 
-    private DecoderRepository initDecoderRepository() {
-        DecoderRepository decoderRepository = new DecoderRepository();
-
-        SensorMLDecoderV20 sensorMLDecoderV20 = new SensorMLDecoderV20();
-        sensorMLDecoderV20.setDecoderRepository(decoderRepository);
-        sensorMLDecoderV20.setXmlOptions(XmlOptions::new);
-
-        SweCommonDecoderV20 sweCommonDecoderV20 = new SweCommonDecoderV20();
-        sweCommonDecoderV20.setDecoderRepository(decoderRepository);
-        sweCommonDecoderV20.setXmlOptions(XmlOptions::new);
-
-        GmlDecoderv321 gmlDecoderv321 = new GmlDecoderv321();
-        gmlDecoderv321.setDecoderRepository(decoderRepository);
-        gmlDecoderv321.setXmlOptions(XmlOptions::new);
-
-        SamplingDecoderv20 samplingDecoderv20 = new SamplingDecoderv20();
-        samplingDecoderv20.setDecoderRepository(decoderRepository);
-        samplingDecoderv20.setXmlOptions(XmlOptions::new);
-
-        decoderRepository.setDecoders(Arrays.asList(sensorMLDecoderV20,
-                sweCommonDecoderV20,
-                gmlDecoderv321,
-                samplingDecoderv20));
-        decoderRepository.init();
-        return decoderRepository;
-    }
+//    private DecoderRepository initDecoderRepository() {
+//        DecoderRepository decoderRepository = new DecoderRepository();
+//
+//        SensorMLDecoderV20 sensorMLDecoderV20 = new SensorMLDecoderV20();
+//        sensorMLDecoderV20.setDecoderRepository(decoderRepository);
+//        sensorMLDecoderV20.setXmlOptions(XmlOptions::new);
+//
+//        SweCommonDecoderV20 sweCommonDecoderV20 = new SweCommonDecoderV20();
+//        sweCommonDecoderV20.setDecoderRepository(decoderRepository);
+//        sweCommonDecoderV20.setXmlOptions(XmlOptions::new);
+//
+//        GmlDecoderv321 gmlDecoderv321 = new GmlDecoderv321();
+//        gmlDecoderv321.setDecoderRepository(decoderRepository);
+//        gmlDecoderv321.setXmlOptions(XmlOptions::new);
+//
+//        SamplingDecoderv20 samplingDecoderv20 = new SamplingDecoderv20();
+//        samplingDecoderv20.setDecoderRepository(decoderRepository);
+//        samplingDecoderv20.setXmlOptions(XmlOptions::new);
+//
+//        decoderRepository.setDecoders(Arrays.asList(sensorMLDecoderV20,
+//                sweCommonDecoderV20,
+//                gmlDecoderv321,
+//                samplingDecoderv20));
+//        decoderRepository.init();
+//        return decoderRepository;
+//    }
 
 }

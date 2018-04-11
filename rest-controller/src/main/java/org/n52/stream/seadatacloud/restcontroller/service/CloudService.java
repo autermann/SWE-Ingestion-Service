@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -100,7 +100,7 @@ public class CloudService {
     }
 
     public Processors getProcessors() {
-        Processors processors = new Processors();
+        Processors processors = null;
         try {
             URL url = new URL(BASE_URL + "/apps?type=processor");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -126,7 +126,7 @@ public class CloudService {
     }
 
     public Sinks getSinks() {
-        Sinks sinks = new Sinks();
+        Sinks sinks = null;
         try {
             URL url = new URL(BASE_URL + "/apps?type=sink");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -338,9 +338,8 @@ public class CloudService {
             String response = res.toString();
             
             stream = objectMapper.readValue(response, Stream.class);
-
+            
         } catch (Exception e) {
-            // TODO: error
             return null;
         }
         return stream;

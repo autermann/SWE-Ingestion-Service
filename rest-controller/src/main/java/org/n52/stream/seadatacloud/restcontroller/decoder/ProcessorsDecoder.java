@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,11 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller.decoder;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -46,7 +41,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Processor;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import static org.n52.stream.seadatacloud.restcontroller.service.CloudService.BASE_URL;
@@ -67,9 +61,13 @@ public class ProcessorsDecoder extends BaseDeserializer<Processors> {
 
         JsonNode node = jp.readValueAsTree();
         JsonNode embedded = node.get("_embedded");
+        List<Processor> processorList = new ArrayList();
+        if (embedded == null) {
+            results.setProcessors(processorList);
+            return results;
+        }
         ArrayNode appRegistrationResourceList = (ArrayNode) embedded.get("appRegistrationResourceList");
 
-        List<Processor> processorList = new ArrayList();
         appRegistrationResourceList.forEach((proc) -> {
             Processor current = new Processor();
             current.setName(proc.get("name").asText());
