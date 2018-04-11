@@ -42,20 +42,24 @@ import org.n52.svalbard.decode.DecoderRepository;
 import org.n52.svalbard.decode.exception.DecodingException;
 import org.n52.svalbard.decode.exception.XmlDecodingException;
 import org.n52.svalbard.util.CodingHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Component;
 
 /**
  * Helper class to decode XML documents, e.g. the process description
- * 
+ *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
  *
  */
-@ImportResource("classpath:svalbard-*.xml")
+@ImportResource("classpath*:/svalbard-*.xml")
 @Component
 public class DecoderHelper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DecoderHelper.class);
 
     @Autowired
     private DecoderRepository decoderRepository;
@@ -70,7 +74,7 @@ public class DecoderHelper {
 
     /**
      * Decodes an XML document to an representation from arctic-sea/shetland
-     * 
+     *
      * @param xml
      *            XML object to decode
      * @return Decoded object
@@ -80,15 +84,19 @@ public class DecoderHelper {
     public Object decode(XmlObject xml)
             throws DecodingException {
         Decoder<Object, Object> decoder = decoderRepository.getDecoder(CodingHelper.getDecoderKey(xml));
-        if (decoder != null) {
-            return decoder.decode(xml);
+        if (decoder == null) {
+            String msg = String.format("No decoder found for XML: Element: '%s' with Namespace '%s'.",
+                    xml.getDomNode().getNodeName(),
+                    xml.getDomNode().getNamespaceURI());
+            LOG.error(msg);
+            throw new IllegalArgumentException();
         }
-        return null;
+        return decoder.decode(xml);
     }
 
     /**
      * Decode a XML input stream
-     * 
+     *
      * @param inputStream
      *            XML input stream
      * @return Decoded object
@@ -109,7 +117,7 @@ public class DecoderHelper {
 
     /**
      * Decode a XML file from {@link Path}
-     * 
+     *
      * @param path
      *            XML file path
      * @return Decoded object
@@ -130,7 +138,7 @@ public class DecoderHelper {
 
     /**
      * Decode a XML string
-     * 
+     *
      * @param xml
      *            XML string to decode
      * @return Decoded object
@@ -147,7 +155,7 @@ public class DecoderHelper {
 
     /**
      * Set {@link DecoderRepository}
-     * 
+     *
      * @param decoderRepository
      */
     public void setDecoderRepository(DecoderRepository decoderRepository) {
