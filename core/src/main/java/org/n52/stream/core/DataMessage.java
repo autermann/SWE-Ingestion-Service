@@ -31,6 +31,7 @@ package org.n52.stream.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -43,14 +44,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Validated
 
-public class DataMessage {
+public class DataMessage implements Cloneable {
 
     @JsonProperty("id")
     private String id = null;
 
     @JsonProperty("timeseries")
     @Valid
-    private List<Timeseries<?>> timeseries = null;
+    private List<Timeseries<?>> timeseries = new ArrayList<>();
 
     public DataMessage id(String id) {
         this.id = id;
@@ -66,14 +67,12 @@ public class DataMessage {
     }
 
     public DataMessage timeseries(List<Timeseries<?>> timeseries) {
-        this.timeseries = timeseries;
+        this.timeseries.clear();
+        this.timeseries.addAll(timeseries);
         return this;
     }
 
     public DataMessage addTimeseriesItem(Timeseries<?> timeseriesItem) {
-        if (timeseries == null) {
-            timeseries = new ArrayList<>();
-        }
         timeseries.add(timeseriesItem);
         return this;
     }
@@ -83,8 +82,12 @@ public class DataMessage {
         return timeseries;
     }
 
+    public Optional<Timeseries<?>> getTimeseriesForPhenomenon(String phenomenon) {
+        return timeseries.stream().filter(p -> p.getPhenomenon().equalsIgnoreCase(phenomenon)).findFirst();
+    }
+
     public void setTimeseries(List<Timeseries<?>> timeseries) {
-        this.timeseries = timeseries;
+        timeseries(timeseries);
     }
 
     @Override
@@ -103,6 +106,16 @@ public class DataMessage {
     @Override
     public int hashCode() {
         return Objects.hash(timeseries);
+    }
+
+    // TODO check if okay
+    @Override
+    public DataMessage clone() {
+        try {
+            return (DataMessage) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
