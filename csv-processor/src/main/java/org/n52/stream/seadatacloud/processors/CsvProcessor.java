@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.marine;
+package org.n52.stream.seadatacloud.processors;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -60,7 +60,7 @@ import org.springframework.cloud.stream.messaging.Processor;
 @SpringBootApplication
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(Configuration.class)
-public class MarineProcessor {
+public class CsvProcessor {
 
     private int msgCount = 0;
 
@@ -71,10 +71,10 @@ public class MarineProcessor {
     @Named("sensorml")
     private AggregateProcess processDescription;
 
-    private static final Logger LOG = LoggerFactory.getLogger(MarineProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CsvProcessor.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(MarineProcessor.class, args);
+        SpringApplication.run(CsvProcessor.class, args);
     }
 
     /**

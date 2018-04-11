@@ -26,39 +26,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.marine;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-
-import org.n52.stream.core.DataMessage;
-import org.n52.stream.core.Feature;
-import org.n52.stream.core.Measurement;
-import org.n52.stream.core.Timeseries;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.n52.stream.seadatacloud.processors;
 
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-public class ProcessorWeather extends ProcessorSkeleton {
+public class CsvProcessorTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessorWeather.class);
-
-    public DataMessage process(OffsetDateTime timestamp, String sensorId, String featureId, List<String> values) {
-        validateInput(timestamp, sensorId, featureId, values);
-
-        DataMessage dataMessage = new DataMessage();
-        LOG.info("Weather data processing: " + timestamp);
-        Timeseries<Object> timeseries = new Timeseries<>().
-                feature(new Feature().id(featureId)).
-                sensor(sensorId);
-        Measurement<Object> measurement = new Measurement<>();
-        measurement.setTimestamp(timestamp);
-        timeseries.addMeasurementsItem(measurement);
-        dataMessage.addTimeseriesItem(timeseries);
-        dataMessage.setId("weather-" + dataMessage.hashCode());
-        return dataMessage;
-    }
 
 }
