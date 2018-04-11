@@ -13,6 +13,7 @@ This project includes:
   52°North Svalbard XmlBeans under The Apache Software License, Version 2.0
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
+  Apache Commons Logging under The Apache Software License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache License, Version 2.0
@@ -24,6 +25,7 @@ This project includes:
   Core Classes under Apache License, Version 2.0
   Core Hibernate O/RM functionality under GNU Lesser General Public License
   dom4j under DOM4J license, http://dom4j.sourceforge.net/dom4j-1.6.1/license.html (BSD style)
+  Failsafe under Apache License, Version 2.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   Geographic Common (GCO) schema (version 2012-07-13) under The Apache Software License, Version 2.0
   Geographic MetaData (GMD) schema (version 2012-07-13) under The Apache Software License, Version 2.0

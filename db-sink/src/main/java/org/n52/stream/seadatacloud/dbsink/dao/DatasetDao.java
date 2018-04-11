@@ -67,7 +67,7 @@ public class DatasetDao extends AbstractDao {
     public DatasetDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
-    
+
     public DatasetEntity getOrInsert(Timeseries<?> timeseries, AbstractProcess process) {
         Criteria criteria = getDefaultAllSeriesCriteria();
         addIdentifierRestrictionsToCritera(criteria, timeseries);
@@ -76,7 +76,7 @@ public class DatasetDao extends AbstractDao {
         if (series == null || series instanceof NotInitializedDataset) {
             series = preCheck(timeseries, process, series);
         }
-        if (series == null || (series.isSetFeature() && !series.getFeature().getIdentifier().equals(timeseries.getFeature().getId()))) {
+        if (series == null || series.isSetFeature() && !series.getFeature().getIdentifier().equals(timeseries.getFeature().getId())) {
             series = get(timeseries);
             addValuesToSeries(series, timeseries, process);
             series.setDeleted(false);
@@ -96,21 +96,23 @@ public class DatasetDao extends AbstractDao {
         getSession().flush();
         return series;
     }
-    
+
     public void updateMetadata(DatasetEntity series, Data<?> first, Data<?> last) {
         boolean minChanged = false;
         boolean maxChanged = false;
-        if (!series.isSetFirstValueAt() || (series.isSetFirstValueAt()
-                && series.getFirstValueAt().after(first.getSamplingTimeStart()))) {
+        if (!series.isSetFirstValueAt() || series.isSetFirstValueAt()
+                && series.getFirstValueAt().after(first.getSamplingTimeStart())) {
             minChanged = true;
             series.setFirstValueAt(first.getSamplingTimeStart());
-            series.setFirstObservation(first);
+            // FIXME remove comment and fix compilation error
+//            series.setFirstObservation(first);
         }
-        if (!series.isSetLastValueAt() || (series.isSetLastValueAt()
-                && series.getLastValueAt().before(last.getSamplingTimeEnd()))) {
+        if (!series.isSetLastValueAt() || series.isSetLastValueAt()
+                && series.getLastValueAt().before(last.getSamplingTimeEnd())) {
             maxChanged = true;
             series.setLastValueAt(last.getSamplingTimeEnd());
-            series.setLastObservation(last);
+         // FIXME remove comment and fix compilation error
+//          series.setLastObservation(last);
         }
         if (first instanceof QuantityDataEntity && minChanged) {
                 series.setFirstQuantityValue(((QuantityDataEntity) first).getValue());
@@ -134,7 +136,7 @@ public class DatasetDao extends AbstractDao {
 //        LOG.info("Not supported value type");
         return new NotInitializedDatasetEntity();
     }
-    
+
     private DatasetEntity preCheck(Timeseries<?> t, AbstractProcess process, DatasetEntity dataset) {
         if (dataset == null) {
             Criteria criteria = getDefaultNotDefinedDatasetCriteria();
@@ -155,7 +157,7 @@ public class DatasetDao extends AbstractDao {
         }
         return dataset;
     }
-    
+
     private String getValueType(Timeseries<?> t, AbstractProcess process) {
         SweAbstractDataComponent component = getComponent(t.getPhenomenon(), process.getOutputs());
         if (component != null) {
@@ -184,7 +186,7 @@ public class DatasetDao extends AbstractDao {
 //        LOG.info("Not supported value type");
         return DatasetEntity.DEFAULT_VALUE_TYPE;
     }
-    
+
     private void addValuesToSeries(DatasetEntity datasetEntity, Timeseries<?> series, AbstractProcess process) {
         if (datasetEntity.getProcedure() == null) {
             datasetEntity.setProcedure(getProcedure(series.getSensor()));
@@ -240,7 +242,7 @@ public class DatasetDao extends AbstractDao {
     private ProcedureEntity getProcedure(String identifier) {
         return getDaoFactory().getProcedureDAO().get(identifier);
     }
-    
+
     private void addIdentifierRestrictionsToCritera(Criteria c, Timeseries<?> t) {
         addIdentifierRestrictionsToCritera(c, t, true);
     }
@@ -261,11 +263,11 @@ public class DatasetDao extends AbstractDao {
         c.createCriteria(DatasetEntity.PROPERTY_CATEGORY)
                 .add(Restrictions.eq(CategoryEntity.PROPERTY_IDENTIFIER, t.getPhenomenon()));
     }
-    
+
     private Criteria getDefaultAllSeriesCriteria() {
         return getSession().createCriteria(DatasetEntity.class).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
     }
-    
+
     private Criteria getDefaultNotDefinedDatasetCriteria() {
         return getSession().createCriteria(NotInitializedDatasetEntity.class).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
     }

@@ -32,22 +32,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.n52.stream</groupId>
     <artifactId>seadatacloud</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    
     <name>SeaDataCloud - SWE Ingestion Service</name>
     <inceptionYear>2018</inceptionYear>
-
+    <packaging>pom</packaging>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.0.0.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
-    
     <modules>
         <module>log-sink</module>
         <module>db-sink</module>
@@ -55,7 +51,6 @@
         <module>rest-controller</module>
         <module>core</module>
     </modules>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -63,7 +58,6 @@
         <spring-cloud.version>Finchley.M8</spring-cloud.version>
         <arctic-sea.version>4.2.0-SNAPSHOT</arctic-sea.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -74,23 +68,47 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>svalbard</artifactId>
-                <version>${arctic-sea.version}</version>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.5</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>svalbard-xmlbeans</artifactId>
-                <version>${arctic-sea.version}</version>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>4.4.9</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>shetland</artifactId>
-                <version>${arctic-sea.version}</version>
+                <groupId>net.jodah</groupId>
+                <artifactId>failsafe</artifactId>
+                <version>1.0.5</version>
             </dependency>
+            <dependency>
+               <groupId>org.n52.arctic-sea</groupId>
+               <artifactId>svalbard</artifactId>
+               <version>${arctic-sea.version}</version>
+           </dependency>
+           <dependency>
+               <groupId>org.n52.arctic-sea</groupId>
+               <artifactId>svalbard-xmlbeans</artifactId>
+               <version>${arctic-sea.version}</version>
+           </dependency>
+           <dependency>
+               <groupId>org.n52.arctic-sea</groupId>
+               <artifactId>shetland</artifactId>
+               <version>${arctic-sea.version}</version>
+           </dependency>
+           <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+		<groupId>javax.inject</groupId>
+		<artifactId>javax.inject</artifactId>
+		<version>1</version>
+	    </dependency>
         </dependencies>
     </dependencyManagement>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -176,7 +194,6 @@
             </plugin>
         </plugins>
     </build>
-
     <repositories>
         <repository>
             <id>spring-milestones</id>
@@ -187,37 +204,10 @@
             </snapshots>
         </repository>
         <repository>
+	    <!-- Required for extend hibernate spatial implementation -->
             <id>n52-releases</id>
             <name>52n Releases</name>
             <url>http://52north.org/maven/repo/releases</url>
         </repository>
     </repositories>
-    <dependencies>
-        <!-- 
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <scope>test</scope>
-            <version>2.44.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.opera</groupId>
-            <artifactId>operadriver</artifactId>
-            <scope>test</scope>
-            <version>1.5</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-remote-driver</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-         -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
