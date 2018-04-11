@@ -28,17 +28,33 @@
  */
 package org.n52.stream.seadatacloud.processors;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
+import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
+import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.v20.AbstractProcessV20;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
+import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
+import org.n52.shetland.ogc.swe.SweConstants.SweDataComponentType;
+import org.n52.shetland.ogc.swe.SweDataRecord;
+import org.n52.shetland.ogc.swe.SweField;
+import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
+import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
+import org.n52.shetland.ogc.swe.simpleType.SweCategory;
+import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
 import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
+import org.n52.stream.core.Feature;
+import org.n52.stream.core.Timeseries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +73,14 @@ import org.springframework.cloud.stream.messaging.Processor;
  * @author Maurin Radtke <m.radtke@52north.org>
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(Configuration.class)
 public class CsvProcessor {
+
+    private static final String DEFINITION_PHENOMENON_TIME = "http://www.opengis.net/def/property/OGC/0/PhenomenonTime";
+
+    private static final String DEFINITION_RESULT_TIME = "http://www.opengis.net/def/property/OGC/0/ResultTime";
 
     private int msgCount = 0;
 
@@ -70,6 +90,12 @@ public class CsvProcessor {
     @Autowired
     @Named("sensorml")
     private AggregateProcess processDescription;
+
+    private SweTextEncoding textEncoding;
+
+    private SweDataRecord tokenAssigments;
+
+    private DataMessage templateDataMessage;
 
     private static final Logger LOG = LoggerFactory.getLogger(CsvProcessor.class);
 
@@ -86,13 +112,113 @@ public class CsvProcessor {
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
         checkSetting("sensorml-url", properties.getSensormlUrl());
+        // validate processDescription
+        if (!processDescription.isSetComponents() || processDescription.getComponents().isEmpty()) {
+            throw logErrorAndCreateException("AggregateProcess does not contain any component!");
+        }
+        SmlComponent smlComponent = processDescription.getComponents().get(0);
+        if (smlComponent.isReferencedExternally()) {
+            throw logErrorAndCreateException("First component is referenced externally but should not!");
+        }
+        if (!(smlComponent.getProcess() instanceof AbstractProcessV20)) {
+            throw logErrorAndCreateException(String.format("First component is not of type '%s' but '%s'!", AbstractProcessV20.class,
+                    smlComponent.getProcess().getClass()));
+        }
+        AbstractProcessV20 process = (AbstractProcessV20) smlComponent.getProcess();
+        if (!process.isSetSmlFeatureOfInterest()) {
+            throw logErrorAndCreateException("Element <featureofinterest> of first component is NOT set!");
+        }
+        Set<String> featuresOfInterest = process.getSmlFeatureOfInterest().getFeaturesOfInterest();
+        if (featuresOfInterest.isEmpty() || featuresOfInterest.size() > 1) {
+            throw logErrorAndCreateException("Only ONE Element <featureofinterest> of first component supported!");
+        }
+        String featureIdentifier = featuresOfInterest.iterator().next();
+        if (!process.isSetOutputs() || process.getOutputs().isEmpty()) {
+            throw logErrorAndCreateException("Element <outputs><OutputList><output> of first component is NOT set!");
+        }
+        List<SmlIo> ioValue = process.getOutputs().stream().
+                filter(p -> p.getIoName().equalsIgnoreCase("fluorometerOutput") &&
+                        p.getIoValue().getClass().getName().equalsIgnoreCase(SmlDataInterface.class.getName())).
+                collect(Collectors.toList());
+        if (ioValue.isEmpty() || ioValue.size() > 1 || !(ioValue.get(0).getIoValue() instanceof SmlDataInterface)) {
+            throw logErrorAndCreateException("Element <outputs><OutputList><output><DataInterface> of first component is not set correct!");
+        }
+        SmlDataInterface ioValue2 = (SmlDataInterface) ioValue.get(0).getIoValue();
+        if (ioValue2.getData().isEmpty()) {
+            throw logErrorAndCreateException("Element <outputs><OutputList><output><DataInterface><Data> of first component is not set correct!");
+        }
+        // store encoding
+        SweAbstractEncoding encoding = ioValue2.getData().getEncoding();
+        if (!(encoding instanceof SweTextEncoding)) {
+            throw logErrorAndCreateException(String.format("Datastream not encoded with text encoding! Found type: '%s'.",
+                    encoding.getClass().getName()));
+        }
+        textEncoding = (SweTextEncoding) encoding;
+        // store elementtype
+        SweAbstractDataComponent elementType = ioValue2.getData().getElementType();
+        if (!(elementType instanceof SweDataRecord)) {
+            throw logErrorAndCreateException(String.format("Datastream not encoded with DataRecord as ElementType! Found type '%s'.",
+                    elementType.getClass().getName()));
+        }
+        tokenAssigments = (SweDataRecord) elementType;
+        // TODO check definitions for not supported ones to fail fast.
+        // create template DataMessageObject
+        templateDataMessage = new DataMessage();
+        //SweAbstractDataComponent tokenSpecification = tokenAssigments.getFields().get(i).getElement();
+        boolean resultTimeSet = false, phenTimeSet = false;
+        for (SweField field : tokenAssigments.getFields()) {
+            SweAbstractDataComponent sweElement = field.getElement();
+            if (!sweElement.isSetDefinition()) {
+                continue;
+            } else if (sweElement.getDefinition().equalsIgnoreCase(DEFINITION_RESULT_TIME)) {
+                resultTimeSet = true;
+            } else if (sweElement.getDefinition().equalsIgnoreCase(DEFINITION_PHENOMENON_TIME)) {
+                phenTimeSet = true;
+            } else {
+                String phenomenon = sweElement.getDefinition();
+                Timeseries<?> ts = null;
+                String unit = null;
+                SweDataComponentType sweType = sweElement.getDataComponentType();
+                switch(sweType) {
+                    case Boolean:
+                        ts = new Timeseries<Boolean>();
+                        break;
+                    case Category:
+                        unit = ((SweCategory) sweElement).getUom();
+                    case Text:
+                        ts = new Timeseries<String>();
+                        break;
+                    case Quantity:
+                        ts = new Timeseries<BigDecimal>();
+                        unit = ((SweQuantity) sweElement).getUom();
+                        break;
+                    case Count:
+                        ts = new Timeseries<Integer>();
+                        break;
+                    default:
+                        throw logErrorAndCreateException(String.format("Not supported swe:field element type found '%s'!",
+                                sweType));
+                }
+                ts.phenomenon(phenomenon).sensor(properties.getSensor()).feature(new Feature().id(featureIdentifier));
+                if (unit != null) {
+                    ts.setUnit(unit);
+                }
+                templateDataMessage.addTimeseriesItem(ts);
+            }
+        }
+        if (!phenTimeSet) {
+            throw logErrorAndCreateException("PhenomenonTime not configured in Datastream definition");
+        }
+    }
+
+    private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
+        LOG.error(msg);
+        return new IllegalArgumentException(msg);
     }
 
     private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
         if (setting == null || setting.isEmpty()) {
-            String msg = String.format("setting '%s' not set correct. Received value: '%s'.", settingName, setting);
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            throw logErrorAndCreateException(String.format("setting '%s' not set correct. Received value: '%s'.", settingName, setting));
         }
         LOG.trace("'{}': '{}'", settingName, setting);
     }
@@ -101,61 +227,63 @@ public class CsvProcessor {
     @SendTo(Processor.OUTPUT)
     public DataMessage process(Message<String> mqttMessage) {
         if (mqttMessage == null) {
-            String msg = "NO MQTT message received! Input is 'null'.";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            throw logErrorAndCreateException("NO MQTT message received! Input is 'null'.");
         }
-        // check property value
-        // download sensorML
-        // parse sensorml
-        // configure csv parser
         String mqttMessagePayload = mqttMessage.getPayload();
-        String mqttTopic = mqttMessage.getHeaders().get("mqtt_receivedTopic", String.class);
         msgCount++;
-        if (mqttTopic == null || mqttTopic.isEmpty()) {
-            String msg = "MQTT topic not specified.";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
         if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
-            String msg = "Empty MQTT payload received.";
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            throw logErrorAndCreateException("Empty MQTT payload received.");
         }
-        DataMessage processedDataset = processMarineMqttPayload(mqttTopic, mqttMessagePayload);
+        DataMessage processedDataset = processMqttPayload(mqttMessagePayload);
         LOG.info("Processed dataset #{}", msgCount);
         LOG.trace("DataMessage: \n{}", processedDataset);
         return processedDataset;
     }
 
-    private DataMessage processMarineMqttPayload(String mqttTopic, String mqttMessagePayload) {
+    // Example payload: 2018-04-04T08:34:14.945Z;WL-ECO-FLNTU-4476;2018-04-04T08:34:14.945Z;695;44;700;56;554
+    private DataMessage processMqttPayload(String mqttMessagePayload) {
         LOG.trace("MQTT-Payload received: {}", mqttMessagePayload);
 
-        String[] payloadChunks = mqttMessagePayload.split("\\|");
-        if (payloadChunks.length != 3) {
-            String msg = String.format(
-                    "Received mqtt payload not in correct format. Expected three '|' separated chunks: '%s'",
-                    mqttMessagePayload);
-            LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+        StringTokenizer blockernizer = new StringTokenizer(mqttMessagePayload, textEncoding.getBlockSeparator());
+        List<String> payloadBlocks = new LinkedList<>();
+        while(blockernizer.hasMoreTokens()) {
+            payloadBlocks.add(blockernizer.nextToken());
+        }
+        if (payloadBlocks.isEmpty()) {
+            return null;
+        }
+        DataMessage dm = templateDataMessage.clone();
+        for (String block : payloadBlocks) {
+            StringTokenizer tokenizer = new StringTokenizer(block, textEncoding.getTokenSeparator());
+            List<String> tokens = new LinkedList<>();
+            while(tokenizer.hasMoreTokens()) {
+                tokens.add(tokenizer.nextToken());
+            }
+            if (tokens.isEmpty()) {
+                return null;
+            }
+            OffsetDateTime resultTime, phenTime;
+            List<Object> values;
+            String unit, phenomenon;
+            for (int i = 0; i < tokens.size(); i++) {
+                String token = tokens.get(i);
+                SweAbstractDataComponent tokenSpecification = tokenAssigments.getFields().get(i).getElement();
+                if (tokenSpecification.isSetDefinition()) {
+                    continue;
+                }
+                String definition = tokenSpecification.getDefinition();
+                if (definition.equals(DEFINITION_RESULT_TIME)) {
+                    resultTime = OffsetDateTime.parse(token);
+                } else if (definition.equals(DEFINITION_PHENOMENON_TIME)) {
+                    phenTime = OffsetDateTime.parse(token);
+                } else {
+                    // interpret the swe element
+
+                }
+            }
         }
 
-        // TIMESTAMP
-        LOG.trace("Receiver Station Timestamp chunk: '{}'", payloadChunks[0]);
-        OffsetDateTime receiverStationTimestamp = OffsetDateTime.parse(payloadChunks[0]);
-
-        // Sensor
-        String sensor = payloadChunks[1];
-        LOG.trace("Sensor chunk   : '{}'", sensor);
-
-        // Process values
-        LOG.trace("Data chunk     : '{}", payloadChunks[2]);
-        List<String> values = Stream.of(payloadChunks[2].split("\\s+"))
-                .filter(value -> (value!=null && !value.isEmpty()))
-                .collect(Collectors.toList());
-        String msg = String.format("Generic Processor not yet implemented.");
-        LOG.error(msg);
-        throw new IllegalArgumentException(msg);
+        throw logErrorAndCreateException(String.format("Generic Processor not yet implemented."));
     }
 
 }
