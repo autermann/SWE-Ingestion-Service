@@ -15,16 +15,10 @@ spring:
 server:
   port: 8083
 
-processor:
-  ctd:
-    topic: spiddal-ctd
-    feature-id: "Galway Bay Cable Observatory"
-  weather:
-    topic: airmar-rinville-1
-    feature-id: "Galway Bay Cable Observatory"
-  fluorometer:
-    topic: spiddal-fluorometer
-    feature-id: "Galway Bay Cable Observatory"
+org.n52.stream:
+  sensorml-url: http://localhost:8080/AggregateProcess.xml
+  offering: example-offering
+  sensor: example-sensor
 
 logging:
   level:
