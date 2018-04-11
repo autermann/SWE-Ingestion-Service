@@ -1,18 +1,30 @@
 /*
- * Copyright 2018-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
  * Software GmbH
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  */
 package org.n52.stream.seadatacloud.marine;
 
@@ -73,29 +85,29 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
                 LocalDateTime.parse(dateTimeString, formatter),
                 ZoneOffset.UTC);
 
-        Measurement<BigDecimal> instrumentTimeDeviationMeasurement = new Measurement<>();
-        BigDecimal instrumentTimeDeviation =
-                BigDecimal.valueOf(ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp));
-        instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
-        instrumentTimeDeviationMeasurement.setTimestamp(instrumentTimestamp);
+//        Measurement<BigDecimal> instrumentTimeDeviationMeasurement = new Measurement<>();
+//        BigDecimal instrumentTimeDeviation =
+//                BigDecimal.valueOf(ChronoUnit.SECONDS.between(instrumentTimestamp, receiverStationTimestamp));
+//        instrumentTimeDeviationMeasurement.setValue(instrumentTimeDeviation);
+//        instrumentTimeDeviationMeasurement.setTimestamp(instrumentTimestamp);
+//
+//        Timeseries<BigDecimal> instrumentTimeDeviationTimeseries = new Timeseries<>();
+//        instrumentTimeDeviationTimeseries.setFeature(feature);
+//        instrumentTimeDeviationTimeseries.setPhenomenon("receiver-latency");
+//        instrumentTimeDeviationTimeseries.setSensor(sensorId);
+//        instrumentTimeDeviationTimeseries.setUnit("s");
+//        instrumentTimeDeviationTimeseries.addMeasurementsItem(instrumentTimeDeviationMeasurement);
 
-        Timeseries<BigDecimal> instrumentTimeDeviationTimeseries = new Timeseries<>();
-        instrumentTimeDeviationTimeseries.setFeature(feature);
-        instrumentTimeDeviationTimeseries.setPhenomenon("receiver-latency");
-        instrumentTimeDeviationTimeseries.setSensor(sensorId);
-        instrumentTimeDeviationTimeseries.setUnit("s");
-        instrumentTimeDeviationTimeseries.addMeasurementsItem(instrumentTimeDeviationMeasurement);
-
-        Measurement<BigDecimal> fluorescenceWavelengthMeasurement = new Measurement<>();
-        fluorescenceWavelengthMeasurement.setValue(new BigDecimal(values.get(2)));
-        fluorescenceWavelengthMeasurement.setTimestamp(instrumentTimestamp);
-
-        Timeseries<BigDecimal> fluorescenceWavelengthTimeseries = new Timeseries<>();
-        fluorescenceWavelengthTimeseries.setFeature(feature);
-        fluorescenceWavelengthTimeseries.setSensor(sensorId);
-        fluorescenceWavelengthTimeseries.setPhenomenon("fluorescence-wavelength");
-        fluorescenceWavelengthTimeseries.setUnit("nm");
-        fluorescenceWavelengthTimeseries.addMeasurementsItem(fluorescenceWavelengthMeasurement);
+//        Measurement<BigDecimal> fluorescenceWavelengthMeasurement = new Measurement<>();
+//        fluorescenceWavelengthMeasurement.setValue(new BigDecimal(values.get(2)));
+//        fluorescenceWavelengthMeasurement.setTimestamp(instrumentTimestamp);
+//
+//        Timeseries<BigDecimal> fluorescenceWavelengthTimeseries = new Timeseries<>();
+//        fluorescenceWavelengthTimeseries.setFeature(feature);
+//        fluorescenceWavelengthTimeseries.setSensor(sensorId);
+//        fluorescenceWavelengthTimeseries.setPhenomenon("fluorescence-wavelength");
+//        fluorescenceWavelengthTimeseries.setUnit("nm");
+//        fluorescenceWavelengthTimeseries.addMeasurementsItem(fluorescenceWavelengthMeasurement);
 
         Measurement<Integer> chlMeasurement = new Measurement<>();
         chlMeasurement.setValue(Integer.parseInt(values.get(3)));
@@ -104,19 +116,19 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
         Timeseries<Integer> chlTimeseries = new Timeseries<>();
         chlTimeseries.setFeature(feature);
         chlTimeseries.setSensor(sensorId);
-        chlTimeseries.setPhenomenon("CHL");
+        chlTimeseries.setPhenomenon("http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/");
         chlTimeseries.addMeasurementsItem(chlMeasurement);
 
-        Measurement<BigDecimal> turbidityWavelengthMeasurement = new Measurement<>();
-        turbidityWavelengthMeasurement.setValue(new BigDecimal(values.get(4)));
-        turbidityWavelengthMeasurement.setTimestamp(instrumentTimestamp);
-
-        Timeseries<BigDecimal> turbidityWavelengthTimeseries = new Timeseries<>();
-        turbidityWavelengthTimeseries.setFeature(feature);
-        turbidityWavelengthTimeseries.setSensor(sensorId);
-        turbidityWavelengthTimeseries.setPhenomenon("turbidity-wavelength");
-        turbidityWavelengthTimeseries.setUnit("nm");
-        turbidityWavelengthTimeseries.addMeasurementsItem(turbidityWavelengthMeasurement);
+//        Measurement<BigDecimal> turbidityWavelengthMeasurement = new Measurement<>();
+//        turbidityWavelengthMeasurement.setValue(new BigDecimal(values.get(4)));
+//        turbidityWavelengthMeasurement.setTimestamp(instrumentTimestamp);
+//
+//        Timeseries<BigDecimal> turbidityWavelengthTimeseries = new Timeseries<>();
+//        turbidityWavelengthTimeseries.setFeature(feature);
+//        turbidityWavelengthTimeseries.setSensor(sensorId);
+//        turbidityWavelengthTimeseries.setPhenomenon("turbidity-wavelength");
+//        turbidityWavelengthTimeseries.setUnit("nm");
+//        turbidityWavelengthTimeseries.addMeasurementsItem(turbidityWavelengthMeasurement);
 
         Measurement<Integer> ntuMeasurement = new Measurement<>();
         ntuMeasurement.setValue(Integer.parseInt(values.get(5)));
@@ -125,26 +137,26 @@ public class ProcessorFluorometer extends ProcessorSkeleton {
         Timeseries<Integer> ntuTimeseries = new Timeseries<>();
         ntuTimeseries.setFeature(feature);
         ntuTimeseries.setSensor(sensorId);
-        ntuTimeseries.setPhenomenon("NTU");
+        ntuTimeseries.setPhenomenon("http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/");
         ntuTimeseries.addMeasurementsItem(ntuMeasurement);
 
-        Measurement<Integer> thermistorMeasurement = new Measurement<>();
-        thermistorMeasurement.setValue(Integer.parseInt(values.get(6)));
-        thermistorMeasurement.setTimestamp(instrumentTimestamp);
-
-        Timeseries<Integer> thermistorTimeseries = new Timeseries<>();
-        thermistorTimeseries.setFeature(feature);
-        thermistorTimeseries.setPhenomenon("thermistor");
-        thermistorTimeseries.setSensor(sensorId);
-        thermistorTimeseries.addMeasurementsItem(thermistorMeasurement);
+//        Measurement<Integer> thermistorMeasurement = new Measurement<>();
+//        thermistorMeasurement.setValue(Integer.parseInt(values.get(6)));
+//        thermistorMeasurement.setTimestamp(instrumentTimestamp);
+//
+//        Timeseries<Integer> thermistorTimeseries = new Timeseries<>();
+//        thermistorTimeseries.setFeature(feature);
+//        thermistorTimeseries.setPhenomenon("thermistor");
+//        thermistorTimeseries.setSensor(sensorId);
+//        thermistorTimeseries.addMeasurementsItem(thermistorMeasurement);
 
         DataMessage result = new DataMessage();
-        result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
+//        result.addTimeseriesItem(fluorescenceWavelengthTimeseries);
         result.addTimeseriesItem(chlTimeseries);
-        result.addTimeseriesItem(turbidityWavelengthTimeseries);
+//        result.addTimeseriesItem(turbidityWavelengthTimeseries);
         result.addTimeseriesItem(ntuTimeseries);
-        result.addTimeseriesItem(thermistorTimeseries);
-        result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
+//        result.addTimeseriesItem(thermistorTimeseries);
+//        result.addTimeseriesItem(instrumentTimeDeviationTimeseries);
         result.setId("fluorometer-" + result.hashCode());
 
         return result;
