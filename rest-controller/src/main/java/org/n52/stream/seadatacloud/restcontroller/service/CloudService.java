@@ -33,6 +33,8 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.service;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,8 +42,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.n52.stream.seadatacloud.restcontroller.decoder.ProcessorsDecoder;
+import org.n52.stream.seadatacloud.restcontroller.decoder.SWEModule;
 import org.n52.stream.seadatacloud.restcontroller.model.Processor;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import org.n52.stream.seadatacloud.restcontroller.model.Sink;
@@ -52,6 +54,9 @@ import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
+import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -62,42 +67,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CloudService {
+    
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public static final String BASE_URL = "http://localhost:9393";
-
-    private List<AppOption> getAppOptions(String appType, String appName) {
-        List<AppOption> options = new ArrayList();
-        try {
-            URL url = new URL(BASE_URL + "/apps/" + appType + "/" + appName);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-            JSONObject json = new JSONObject(response);
-            JSONArray jsoptions = json.getJSONArray("options");
-            for (int i = 0; i < jsoptions.length(); i++) {
-                JSONObject jscurrent = jsoptions.getJSONObject(i);
-                AppOption current = new AppOption();
-                current.setName(jscurrent.getString("name"));
-                current.setDescription(jscurrent.getString("description"));
-                current.setType(jscurrent.getString("type"));
-                current.setDefaultValue(jscurrent.get("defaultValue").toString());
-                options.add(current);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return options;
-    }
 
     public Sources getSources() {
         Sources sources = new Sources();
@@ -117,17 +91,7 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            JSONArray jssources = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Source> sourcesList = new ArrayList();
-            for (int i = 0; i < jssources.length(); i++) {
-                JSONObject jscurrent = jssources.getJSONObject(i);
-                Source current = new Source();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("source", current.getName()));
-                sourcesList.add(current);
-            }
-            sources.setSources(sourcesList);
+            sources = objectMapper.readValue(response, Sources.class);
 
         } catch (Exception e) {
             System.out.println(e);
@@ -152,18 +116,8 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
-
-            JSONObject json = new JSONObject(response);
-            JSONArray jsprocessors = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Processor> processorList = new ArrayList();
-            for (int i = 0; i < jsprocessors.length(); i++) {
-                JSONObject jscurrent = jsprocessors.getJSONObject(i);
-                Processor current = new Processor();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("processor", current.getName()));
-                processorList.add(current);
-            }
-            processors.setProcessors(processorList);
+            
+            processors = objectMapper.readValue(response, Processors.class);
 
         } catch (Exception e) {
             System.out.println(e);
@@ -189,17 +143,7 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            JSONArray jssinks = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Sink> sinkList = new ArrayList();
-            for (int i = 0; i < jssinks.length(); i++) {
-                JSONObject jscurrent = jssinks.getJSONObject(i);
-                Sink current = new Sink();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("sink", current.getName()));
-                sinkList.add(current);
-            }
-            sinks.setSinks(sinkList);
+            sinks = objectMapper.readValue(response, Sinks.class);
 
         } catch (Exception e) {
             System.out.println(e);
@@ -238,8 +182,8 @@ public class CloudService {
         return response;
     }
 
-    public String createStream(String streamName, String streamDefinition, boolean deploy) {
-        String response = "";
+    public Stream createStream(String streamName, String streamDefinition, boolean deploy) {
+        Stream stream = null;
         try {
             URL url = new URL(BASE_URL + "/streams/definitions?deploy=" + deploy);
 
@@ -258,11 +202,12 @@ public class CloudService {
             }
             in.close();
             conn.disconnect();
-            response = res.toString() + "success.";
+            String response = res.toString();
+            stream = objectMapper.readValue(response, Stream.class);
+
         } catch (Exception e) {
-            response = e.getMessage() + "failed.";
         }
-        return response;
+        return stream;
     }
 
     public String undeployStream(String streamName) {
@@ -350,7 +295,7 @@ public class CloudService {
     public Streams getStreams() {
         Streams streams = new Streams();
         try {
-            URL url = new URL(BASE_URL + "/streams/definitions");
+            URL url = new URL(BASE_URL + "/streams/definitions?size=100");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -364,24 +309,9 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
+            
+            streams = objectMapper.readValue(response, Streams.class);
 
-            JSONObject json = new JSONObject(response);
-            if (!json.has("_embedded")) {
-                streams.setStreams(new ArrayList());
-            } else {
-                JSONArray jsstreams = json.getJSONObject("_embedded").getJSONArray("streamDefinitionResourceList");
-
-                List<Stream> streamsList = new ArrayList();
-                for (int i = 0; i < jsstreams.length(); i++) {
-                    JSONObject jscurrent = jsstreams.getJSONObject(i);
-                    Stream current = new Stream();
-                    current.setName(jscurrent.getString("name"));
-                    current.setStatus(jscurrent.getString("status"));
-                    current.setDefinition(jscurrent.getString("dslText"));
-                    streamsList.add(current);
-                }
-                streams.setStreams(streamsList);
-            }
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -389,7 +319,7 @@ public class CloudService {
     }
 
     public Stream getStream(String streamId) {
-        Stream stream = new Stream();
+        Stream stream = null;
         try {
             URL url = new URL(BASE_URL + "/streams/definitions/" + streamId);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -406,11 +336,8 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
-
-            JSONObject json = new JSONObject(response);
-            stream.setName(json.getString("name"));
-            stream.setStatus(json.getString("status"));
-            stream.setDefinition(json.getString("dslText"));
+            
+            stream = objectMapper.readValue(response, Stream.class);
 
         } catch (Exception e) {
             // TODO: error

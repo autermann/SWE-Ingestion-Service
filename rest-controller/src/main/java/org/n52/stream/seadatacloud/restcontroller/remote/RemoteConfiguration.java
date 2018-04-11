@@ -26,27 +26,30 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.restcontroller.model;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.n52.stream.seadatacloud.restcontroller.remote;
 
-import java.util.List;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.n52.stream.seadatacloud.restcontroller.decoder.SWEModule;
 
 /**
- *
+ * 
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Streams {
+@Configuration
+public class RemoteConfiguration {
     
-    public List<Stream> streams;
-
-    public Streams() {
-    }
-
-    public List<Stream> getStreams() {
-        return streams;
-    }
-
-    public void setStreams(List<Stream> streams) {
-        this.streams = streams;
+    @Bean
+    public ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new SWEModule());
+        return mapper;
     }
 
 }

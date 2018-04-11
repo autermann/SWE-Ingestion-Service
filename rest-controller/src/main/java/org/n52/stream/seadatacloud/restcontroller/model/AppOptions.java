@@ -26,27 +26,36 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.n52.stream.seadatacloud.restcontroller.model;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import org.n52.stream.seadatacloud.restcontroller.decoder.AppOptionsDecoder;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Streams {
+@JsonDeserialize(using = AppOptionsDecoder.class)
+public class AppOptions implements BaseEntity {
+
+    ArrayList<AppOption> appOptions;
+
+    public AppOptions() {
+    }
+
+    public ArrayList<AppOption> getAppOptions() {
+        return appOptions;
+    }
+
+    public void setAppOptions(ArrayList<AppOption> appOptions) {
+        this.appOptions = appOptions;
+    }
     
-    public List<Stream> streams;
-
-    public Streams() {
-    }
-
-    public List<Stream> getStreams() {
-        return streams;
-    }
-
-    public void setStreams(List<Stream> streams) {
-        this.streams = streams;
-    }
-
+    
 }

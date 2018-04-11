@@ -31,30 +31,45 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.n52.stream.seadatacloud.restcontroller;
+package org.n52.stream.seadatacloud.restcontroller.decoder;
 
-import org.n52.stream.seadatacloud.restcontroller.controller.AppController;
-import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOptions;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-@SpringBootApplication
-@ComponentScan("org.n52.stream.seadatacloud.restcontroller")
-@Import(RemoteConfiguration.class)
-public class RestApplication {
-    
-    @Autowired
-    AppController appController;
+public class AppOptionsDecoder extends BaseDeserializer<AppOptions> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(RestApplication.class, args);
+    @Override
+    public AppOptions deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+        AppOptions results = new AppOptions();
+
+        JsonNode node = jp.readValueAsTree();
+
+        ArrayNode options = (ArrayNode) node.get("options");
+        
+        ArrayList<AppOption> resultOptions = new ArrayList();
+        options.forEach((op) -> {
+            AppOption ao = new AppOption();
+            ao.setName(op.get("name").asText());
+            ao.setDescription(op.get("description").asText());
+            ao.setDefaultValue(op.get("defaultValue").asText());
+            ao.setType(op.get("type").asText());
+            resultOptions.add(ao);
+        });
+        results.setAppOptions(resultOptions);
+
+        return results;
     }
 
 }

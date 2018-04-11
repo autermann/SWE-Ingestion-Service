@@ -26,27 +26,34 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.restcontroller.model;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.n52.stream.seadatacloud.restcontroller.decoder;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOptions;
+import org.n52.stream.seadatacloud.restcontroller.model.Processors;
+import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
+import org.n52.stream.seadatacloud.restcontroller.model.Sources;
+import org.n52.stream.seadatacloud.restcontroller.model.Streams;
+import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Streams {
-    
-    public List<Stream> streams;
+public class SWEModule extends SimpleModule {
 
-    public Streams() {
-    }
-
-    public List<Stream> getStreams() {
-        return streams;
-    }
-
-    public void setStreams(List<Stream> streams) {
-        this.streams = streams;
+    public SWEModule() {
+        this.addDeserializer(Streams.class, new StreamsDecoder());
+        this.addDeserializer(Stream.class, new StreamDecoder());
+        this.addDeserializer(Processors.class, new ProcessorsDecoder());
+        this.addDeserializer(Sinks.class, new SinksDecoder());
+        this.addDeserializer(Sources.class, new SourcesDecoder());
+        this.addDeserializer(AppOptions.class, new AppOptionsDecoder());
     }
 
 }

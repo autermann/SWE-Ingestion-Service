@@ -33,11 +33,13 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class AppOption {
+public class AppOption implements BaseEntity {
 
     String name;
     String type;

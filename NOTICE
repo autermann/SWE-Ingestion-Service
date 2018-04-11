@@ -64,7 +64,6 @@ This project includes:
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
-  JSON in Java under The JSON License
   JTS Topology Suite under Lesser General Public License (LGPL)
   JUL to SLF4J bridge under MIT License
   Kryo Shaded under New BSD License

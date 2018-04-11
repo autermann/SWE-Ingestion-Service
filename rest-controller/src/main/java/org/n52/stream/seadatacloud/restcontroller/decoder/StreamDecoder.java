@@ -26,27 +26,33 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.restcontroller.model;
+package org.n52.stream.seadatacloud.restcontroller.decoder;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Streams {
-    
-    public List<Stream> streams;
+public class StreamDecoder extends BaseDeserializer<Stream> {
 
-    public Streams() {
-    }
+    @Override
+    public Stream deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+        Stream result = new Stream();
 
-    public List<Stream> getStreams() {
-        return streams;
-    }
+        JsonNode node = jp.readValueAsTree();
 
-    public void setStreams(List<Stream> streams) {
-        this.streams = streams;
+        result.setName(node.get("name").asText());
+        result.setDefinition(node.get("dslText").asText());
+        result.setStatus(node.get("status").asText());
+        
+        return result;
     }
 
 }
