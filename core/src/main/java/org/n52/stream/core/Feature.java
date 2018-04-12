@@ -55,7 +55,7 @@ public class Feature implements Cloneable {
     @JsonProperty("geometry")
     private Object geometry = null;
 
-    public Feature id(String id) {
+    public Feature withId(String id) {
         this.id = id;
         return this;
     }
@@ -68,7 +68,7 @@ public class Feature implements Cloneable {
         this.id = id;
     }
 
-    public Feature properties(List<SimpleEntry<String, String>> properties) {
+    public Feature withProperties(List<SimpleEntry<String, String>> properties) {
         this.properties = properties;
         return this;
     }
@@ -90,7 +90,7 @@ public class Feature implements Cloneable {
         this.properties = properties;
     }
 
-    public Feature geometry(Object geometry) {
+    public Feature withGeometry(Object geometry) {
         this.geometry = geometry;
         return this;
     }

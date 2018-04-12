@@ -54,7 +54,7 @@ public class DataMessage implements Cloneable {
     @Valid
     private List<Timeseries<?>> timeseries = new ArrayList<>();
 
-    public DataMessage id(String id) {
+    public DataMessage withId(String id) {
         this.id = id;
         return this;
     }
@@ -67,7 +67,7 @@ public class DataMessage implements Cloneable {
         this.id = id;
     }
 
-    public DataMessage timeseries(List<Timeseries<?>> timeseries) {
+    public DataMessage withTimeseries(List<Timeseries<?>> timeseries) {
         this.timeseries.clear();
         this.timeseries.addAll(timeseries);
         return this;
@@ -88,7 +88,7 @@ public class DataMessage implements Cloneable {
     }
 
     public void setTimeseries(List<Timeseries<?>> timeseries) {
-        timeseries(timeseries);
+        withTimeseries(timeseries);
     }
 
     @Override

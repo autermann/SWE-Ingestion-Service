@@ -71,7 +71,7 @@ public class Timeseries<T> implements Cloneable {
     @Valid
     private List<Measurement<T>> measurements = null;
 
-    public Timeseries<T> id(String id) {
+    public Timeseries<T> withId(String id) {
         this.id = id;
         return this;
     }
@@ -84,7 +84,7 @@ public class Timeseries<T> implements Cloneable {
         this.id = id;
     }
 
-    public Timeseries<T> unit(String unit) {
+    public Timeseries<T> withUnit(String unit) {
         this.unit = unit;
         return this;
     }
@@ -97,7 +97,7 @@ public class Timeseries<T> implements Cloneable {
         this.unit = unit;
     }
 
-    public Timeseries<T> phenomenon(String phenomenon) {
+    public Timeseries<T> withPhenomenon(String phenomenon) {
         this.phenomenon = phenomenon;
         return this;
     }
@@ -110,7 +110,7 @@ public class Timeseries<T> implements Cloneable {
         this.phenomenon = phenomenon;
     }
 
-    public Timeseries<T> sensor(String sensor) {
+    public Timeseries<T> withSensor(String sensor) {
         this.sensor = sensor;
         return this;
     }
@@ -123,7 +123,7 @@ public class Timeseries<T> implements Cloneable {
         this.sensor = sensor;
     }
 
-    public Timeseries<T> feature(Feature feature) {
+    public Timeseries<T> withFeature(Feature feature) {
         this.feature = feature;
         return this;
     }
@@ -137,7 +137,7 @@ public class Timeseries<T> implements Cloneable {
         this.feature = feature;
     }
 
-    public Timeseries<T> measurements(List<Measurement<T>> measurements) {
+    public Timeseries<T> withMeasurements(List<Measurement<T>> measurements) {
         this.measurements = measurements;
         return this;
     }
