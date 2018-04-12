@@ -37,8 +37,8 @@ import org.springframework.validation.annotation.Validated;
  * Measurement
  */
 @Validated
+public class Measurement<T> implements Cloneable {
 
-public class Measurement<T> {
 
     @JsonProperty("timestamp")
     private OffsetDateTime timestamp = null;
@@ -88,6 +88,16 @@ public class Measurement<T> {
     @Override
     public int hashCode() {
         return Objects.hash(timestamp, value);
+
+    @Override
+    public Measurement<T> clone() {
+        try {
+            @SuppressWarnings("unchecked")
+            Measurement<T> m = (Measurement<T>) super.clone();
+            return m;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

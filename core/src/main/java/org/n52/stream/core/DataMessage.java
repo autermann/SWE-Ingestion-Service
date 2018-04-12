@@ -29,6 +29,7 @@
 package org.n52.stream.core;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -112,7 +113,12 @@ public class DataMessage implements Cloneable {
     @Override
     public DataMessage clone() {
         try {
-            return (DataMessage) super.clone();
+            DataMessage dm = (DataMessage) super.clone();
+            dm.timeseries = new LinkedList<>();
+            if (timeseries != null && !timeseries.isEmpty()) {
+                timeseries.forEach(t -> dm.timeseries.add(t.clone()));
+            }
+            return dm;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }

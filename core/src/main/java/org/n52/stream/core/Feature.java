@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -42,7 +43,7 @@ import javax.validation.Valid;
  */
 @Validated
 
-public class Feature {
+public class Feature implements Cloneable {
 
     @JsonProperty("id")
     private String id = null;
@@ -131,6 +132,20 @@ public class Feature {
         sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    @Override
+    public Feature clone() {
+        try {
+            Feature f = (Feature) super.clone();
+            f.properties = new LinkedList<>();
+            if (properties != null && !properties.isEmpty()) {
+                properties.forEach(p -> f.properties.add(new SimpleEntry<>(p.getKey(), p.getValue())));
+            }
+            return f;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
