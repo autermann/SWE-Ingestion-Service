@@ -40,13 +40,11 @@ import org.n52.shetland.ogc.gml.AbstractFeature;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.ogc.om.features.samplingFeatures.AbstractSamplingFeature;
-import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.AbstractSensorML;
 import org.n52.shetland.ogc.sensorML.SensorML20Constants;
 import org.n52.shetland.ogc.sensorML.v20.AbstractProcessV20;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
-import org.n52.shetland.ogc.sensorML.v20.SmlFeatureOfInterest;
 import org.n52.shetland.ogc.sos.SosInsertionMetadata;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.stream.AbstractCodingTest;
@@ -61,21 +59,21 @@ import org.springframework.util.ResourceUtils;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {InsertSensorGeneratorTest.class})
 public class InsertSensorGeneratorTest extends AbstractCodingTest {
-    
+
     private Object decode;
     private InsertSensorGenerator generator;
 
     @Before
     public void setUp() throws DecodingException, IOException, XmlException {
         DecoderRepository decoderRepository = initDecoderRepository();
-        
+
         DecoderHelper helper = new DecoderHelper();
         helper.setDecoderRepository(decoderRepository);
         Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess.xml");
         decode = helper.decode(path);
         generator = new InsertSensorGenerator();
     }
-    
+
     @Test
     public void generate()
             throws DecodingException,
@@ -96,7 +94,7 @@ public class InsertSensorGeneratorTest extends AbstractCodingTest {
         checkObservedProperties(request);
         checkMetadata(request);
     }
-    
+
     @Test
     public void generateHrefFeature()
             throws DecodingException,

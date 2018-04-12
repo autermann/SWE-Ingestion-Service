@@ -80,8 +80,6 @@
         <dependency>
             <groupId>org.n52.stream.seadatacloud</groupId>
             <artifactId>core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
         </dependency>
         
         <dependency>
@@ -118,7 +116,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>net.postgis</groupId>
@@ -134,7 +131,6 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
-            <version>${hibernate.spatial.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.postgis</groupId>

@@ -94,7 +94,7 @@ public class EncoderHelper {
             throws EncodingException {
         XmlObject xml = encode(request);
         if (xml != null) {
-            return xml.xmlText(((AbstractXmlEncoder) getEncoder(request)).getXmlOptions());
+            return xml.xmlText(((AbstractXmlEncoder<?, ?>) getEncoder(request)).getXmlOptions());
         }
         return null;
     }

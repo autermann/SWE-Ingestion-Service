@@ -33,14 +33,12 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.model;
 
-import java.util.List;
-
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 public class Stream {
-    
+
     public String name;
     public String status;
     public String definition;
@@ -71,6 +69,6 @@ public class Stream {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
-    
-    
+
+
 }

@@ -33,8 +33,6 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.controller;
 
-import java.util.Optional;
-import okhttp3.Call;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
@@ -56,7 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Component
 @RequestMapping("/api")
 public class AppController {
-    
+
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
 
@@ -68,13 +66,13 @@ public class AppController {
         Sources result = service.getSources();
         return result;
     }
-    
+
     @RequestMapping(value = "/processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Processors getProcessors() {
         Processors result = service.getProcessors();
         return result;
     }
-    
+
     @RequestMapping(value = "/sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sinks getSinks() {
         Sinks result = service.getSinks();
@@ -88,7 +86,7 @@ public class AppController {
             @RequestParam("uri") String appUri
     ) {
         String result = service.registerApp(appName, appType, appUri);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
 }

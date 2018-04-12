@@ -65,6 +65,7 @@ public class StreamController {
     @Autowired
     CloudService service;
 
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_JSON)
     public ResponseEntity<String> createJsonStream(
             @RequestBody Map<String, Object> payload) {
@@ -74,7 +75,7 @@ public class StreamController {
             String streamName = (String) payload.get("name");
             Stream stream = service.getStream(streamName);
             if (stream != null) {
-                return new ResponseEntity("{Error: Stream " + streamName + " already exists.}", HttpStatus.CONFLICT);
+                return new ResponseEntity<>("{Error: Stream " + streamName + " already exists.}", HttpStatus.CONFLICT);
             }
             Map<String, Object> source = (Map<String, Object>) payload.get("source");
             String sourceName = (String) source.get("name");
@@ -110,17 +111,16 @@ public class StreamController {
 
             }
 
-            String sinkLabel = (String) sink.get("label");
             streamDefinition += " | " + processorName + " | " + sinkName;
 
-            String attempt = this.createStream(streamName, streamDefinition, false);
+            String attempt = createStream(streamName, streamDefinition, false);
             if (attempt.endsWith("success.")) {
-                return new ResponseEntity(attempt, HttpStatus.CREATED);
+                return new ResponseEntity<>(attempt, HttpStatus.CREATED);
             } else {
-                return new ResponseEntity(attempt, HttpStatus.EXPECTATION_FAILED);
+                return new ResponseEntity<>(attempt, HttpStatus.EXPECTATION_FAILED);
             }
         } catch (Exception e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -128,20 +128,20 @@ public class StreamController {
     public ResponseEntity<String> createJXmlStream(
             @RequestBody String xml) {
         String result = xml;
-        return new ResponseEntity(result, HttpStatus.CREATED);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
@@ -150,25 +150,25 @@ public class StreamController {
             @RequestBody Map<String, Object> payload) {
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity(null, HttpStatus.EXPECTATION_FAILED);
+            return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
         } else {
             String status = stream.getStatus();
             if (status.equals("deploying")) {
                 // what to do when it's currently deploying?
-                return new ResponseEntity(status, HttpStatus.CONFLICT);
+                return new ResponseEntity<>(stream, HttpStatus.CONFLICT);
             } else if (status.equals("undeployed")) {
                 // deploy Stream
                 service.deployStream(streamId);
                 stream.setStatus("deploying");
-                return new ResponseEntity(stream, HttpStatus.OK);
+                return new ResponseEntity<>(stream, HttpStatus.OK);
             } else if (status.equals("deployed")) {
                 // undeploy Stream
                 service.undeployStream(streamId);
                 stream.setStatus("undeployed");
-                return new ResponseEntity(stream, HttpStatus.OK);
+                return new ResponseEntity<>(stream, HttpStatus.OK);
             } else {
                 // NoSuchStreamDefinitionException ==> Error
-                return new ResponseEntity(stream, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(stream, HttpStatus.NOT_FOUND);
             }
         }
     }
@@ -183,7 +183,7 @@ public class StreamController {
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/createStream", method = RequestMethod.GET)

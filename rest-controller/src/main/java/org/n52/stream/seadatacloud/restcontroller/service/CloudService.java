@@ -40,20 +40,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Processor;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import org.n52.stream.seadatacloud.restcontroller.model.Sink;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
 import org.n52.stream.seadatacloud.restcontroller.model.Source;
-import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
-import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 /**
@@ -66,7 +64,7 @@ public class CloudService {
     public static final String BASE_URL = "http://localhost:9393";
 
     private List<AppOption> getAppOptions(String appType, String appName) {
-        List<AppOption> options = new ArrayList();
+        List<AppOption> options = new ArrayList<>();
         try {
             URL url = new URL(BASE_URL + "/apps/" + appType + "/" + appName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -119,7 +117,7 @@ public class CloudService {
 
             JSONObject json = new JSONObject(response);
             JSONArray jssources = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Source> sourcesList = new ArrayList();
+            List<Source> sourcesList = new ArrayList<>();
             for (int i = 0; i < jssources.length(); i++) {
                 JSONObject jscurrent = jssources.getJSONObject(i);
                 Source current = new Source();
@@ -155,7 +153,7 @@ public class CloudService {
 
             JSONObject json = new JSONObject(response);
             JSONArray jsprocessors = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Processor> processorList = new ArrayList();
+            List<Processor> processorList = new ArrayList<>();
             for (int i = 0; i < jsprocessors.length(); i++) {
                 JSONObject jscurrent = jsprocessors.getJSONObject(i);
                 Processor current = new Processor();
@@ -191,7 +189,7 @@ public class CloudService {
 
             JSONObject json = new JSONObject(response);
             JSONArray jssinks = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Sink> sinkList = new ArrayList();
+            List<Sink> sinkList = new ArrayList<>();
             for (int i = 0; i < jssinks.length(); i++) {
                 JSONObject jscurrent = jssinks.getJSONObject(i);
                 Sink current = new Sink();
@@ -302,7 +300,7 @@ public class CloudService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
-            conn.getOutputStream().write(("").getBytes());
+            conn.getOutputStream().write("".getBytes());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
@@ -367,11 +365,11 @@ public class CloudService {
 
             JSONObject json = new JSONObject(response);
             if (!json.has("_embedded")) {
-                streams.setStreams(new ArrayList());
+                streams.setStreams(new ArrayList<>());
             } else {
                 JSONArray jsstreams = json.getJSONObject("_embedded").getJSONArray("streamDefinitionResourceList");
 
-                List<Stream> streamsList = new ArrayList();
+                List<Stream> streamsList = new ArrayList<>();
                 for (int i = 0; i < jsstreams.length(); i++) {
                     JSONObject jscurrent = jsstreams.getJSONObject(i);
                     Stream current = new Stream();

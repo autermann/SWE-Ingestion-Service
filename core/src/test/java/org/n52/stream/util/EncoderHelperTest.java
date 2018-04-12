@@ -36,7 +36,6 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
@@ -51,7 +50,7 @@ public class EncoderHelperTest extends AbstractCodingTest {
 
     private EncoderHelper helper;
     private InsertSensorRequest request;
-    
+
     @Before
     public void setUp() throws DecodingException, IOException, XmlException {
         DecoderHelper decoderHelper = new DecoderHelper();
@@ -61,14 +60,14 @@ public class EncoderHelperTest extends AbstractCodingTest {
         helper = new EncoderHelper();
         helper.setEncoderRepository(initEncoderRepository());
     }
-    
+
     @Test
     public void encode() throws EncodingException, IOException, XmlException {
         Assert.isTrue(request != null, "Request should not null");
         XmlObject encode = helper.encode(request);
         Assert.isTrue(encode != null, "Should not null");
     }
-    
+
     @Test
     public void encodeToString() throws EncodingException, IOException, XmlException {
         Assert.isTrue(request != null, "Request should not null");
