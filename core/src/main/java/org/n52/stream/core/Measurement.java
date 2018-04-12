@@ -37,29 +37,44 @@ import org.springframework.validation.annotation.Validated;
  * Measurement
  */
 @Validated
+public class Measurement<T> implements Cloneable {
 
-public class Measurement<T> {
+    @JsonProperty("resultTime")
+    private OffsetDateTime resultTime = null;
 
-    @JsonProperty("timestamp")
-    private OffsetDateTime timestamp = null;
+    @JsonProperty("phenomenonTime")
+    private OffsetDateTime phenomenonTime = null;
 
     @JsonProperty("value")
     private T value = null;
 
-    public Measurement<T> timestamp(OffsetDateTime timestamp) {
-        this.timestamp = timestamp;
+    public Measurement<T> withPhenomenonTime(OffsetDateTime phenomenonTime) {
+        this.phenomenonTime = phenomenonTime;
         return this;
     }
 
-    public OffsetDateTime getTimestamp() {
-        return timestamp;
+    public OffsetDateTime getPhenomenonTime() {
+        return phenomenonTime;
     }
 
-    public void setTimestamp(OffsetDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setPhenomenonTime(OffsetDateTime phenomenonTime) {
+        this.phenomenonTime = phenomenonTime;
     }
 
-    public Measurement<T> value(T value) {
+    public Measurement<T> withResultTime(OffsetDateTime resultTime) {
+        this.resultTime = resultTime;
+        return this;
+    }
+
+    public OffsetDateTime getResultTime() {
+        return resultTime;
+    }
+
+    public void setResultTime(OffsetDateTime resultTime) {
+        this.resultTime = resultTime;
+    }
+
+    public Measurement<T> withValue(T value) {
         this.value = value;
         return this;
     }
@@ -81,22 +96,34 @@ public class Measurement<T> {
             return false;
         }
         Measurement<?> measurement = (Measurement<?>) o;
-        return Objects.equals(timestamp, measurement.timestamp) &&
+        return Objects.equals(resultTime, measurement.resultTime) &&
                 Objects.equals(value, measurement.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, value);
+        return Objects.hash(resultTime, phenomenonTime, value);
+    }
+
+
+    @Override
+    public Measurement<T> clone() {
+        try {
+            @SuppressWarnings("unchecked")
+            Measurement<T> m = (Measurement<T>) super.clone();
+            return m;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Measurement {\n");
-
-        sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
-        sb.append("    value: ").append(toIndentedString(value)).append("\n");
+        sb.append("    resultTime    : ").append(toIndentedString(resultTime)).append("\n");
+        sb.append("    phenomenonTime: ").append(toIndentedString(phenomenonTime)).append("\n");
+        sb.append("    value         : ").append(toIndentedString(value)).append("\n");
         sb.append("}");
         return sb.toString();
     }

@@ -123,7 +123,7 @@ public class ObservationDao extends AbstractDao {
 
     private Data<?> persist(Data<?> data, Measurement<?> m, DatasetEntity dataset) {
         data.setDataset(dataset);
-        java.util.Date date = Date.from(m.getTimestamp().toInstant());
+        java.util.Date date = Date.from(m.getResultTime().toInstant());
         data.setSamplingTimeStart(date);
         data.setSamplingTimeEnd(date);
         data.setResultTime(date);

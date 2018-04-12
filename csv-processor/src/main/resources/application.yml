@@ -22,4 +22,4 @@ org.n52.stream:
 
 logging:
   level:
-    org.n52.stream.seadatacloud.marine: TRACE
+    org.n52.stream.seadatacloud.processors: TRACE

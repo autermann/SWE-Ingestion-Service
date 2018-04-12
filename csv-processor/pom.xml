@@ -38,8 +38,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <groupId>org.n52.stream.seadatacloud</groupId>
-    <artifactId>marine-processor</artifactId>
-    <name>MarineProcessor with topic specific processors</name>
+    <artifactId>csv-processor</artifactId>
+    <name>Generic CSV processor</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>

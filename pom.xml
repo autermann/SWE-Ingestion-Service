@@ -47,7 +47,7 @@
     <modules>
         <module>log-sink</module>
         <module>db-sink</module>
-        <module>marine-processor</module>
+        <module>csv-processor</module>
         <module>rest-controller</module>
         <module>core</module>
     </modules>
