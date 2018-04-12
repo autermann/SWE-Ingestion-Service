@@ -21,6 +21,7 @@ This project includes:
   AspectJ weaver under Eclipse Public License - v 1.0
   Bean Validation API under Apache License 2.0
   ClassMate under The Apache Software License, Version 2.0
+  com.vividsolutions:jts-core under GNU Lesser General Public License, Version 2.1
   Commons Lang under The Apache Software License, Version 2.0
   Core Classes under Apache License, Version 2.0
   Core Hibernate O/RM functionality under GNU Lesser General Public License
