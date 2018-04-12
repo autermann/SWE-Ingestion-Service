@@ -185,7 +185,6 @@ public class Timeseries<T> implements Cloneable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Timeseries {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    unit: ").append(toIndentedString(unit)).append("\n");
         sb.append("    phenomenon: ").append(toIndentedString(phenomenon)).append("\n");

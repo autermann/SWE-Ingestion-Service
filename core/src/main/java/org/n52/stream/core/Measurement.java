@@ -105,7 +105,6 @@ public class Measurement<T> implements Cloneable {
         return Objects.hash(resultTime, phenomenonTime, value);
     }
 
-
     @Override
     public Measurement<T> clone() {
         try {

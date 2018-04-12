@@ -109,7 +109,6 @@ public class DataMessage implements Cloneable {
         return Objects.hash(timeseries);
     }
 
-    // TODO check if okay
     @Override
     public DataMessage clone() {
         try {
@@ -128,7 +127,6 @@ public class DataMessage implements Cloneable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class DataMessage {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    timeseries: ").append(toIndentedString(timeseries)).append("\n");
         sb.append("}");

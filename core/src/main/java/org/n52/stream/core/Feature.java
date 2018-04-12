@@ -42,7 +42,6 @@ import javax.validation.Valid;
  * Feature
  */
 @Validated
-
 public class Feature implements Cloneable {
 
     @JsonProperty("id")
@@ -126,7 +125,6 @@ public class Feature implements Cloneable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Feature {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
         sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
