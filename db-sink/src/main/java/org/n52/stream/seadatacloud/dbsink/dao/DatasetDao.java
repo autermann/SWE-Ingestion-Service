@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2018 52Â°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -104,15 +104,13 @@ public class DatasetDao extends AbstractDao {
                 && series.getFirstValueAt().after(first.getSamplingTimeStart())) {
             minChanged = true;
             series.setFirstValueAt(first.getSamplingTimeStart());
-            // FIXME remove comment and fix compilation error
-//            series.setFirstObservation(first);
+            series.setFirstObservation(first);
         }
         if (!series.isSetLastValueAt() || series.isSetLastValueAt()
                 && series.getLastValueAt().before(last.getSamplingTimeEnd())) {
             maxChanged = true;
             series.setLastValueAt(last.getSamplingTimeEnd());
-         // FIXME remove comment and fix compilation error
-//          series.setLastObservation(last);
+            series.setLastObservation(last);
         }
         if (first instanceof QuantityDataEntity && minChanged) {
                 series.setFirstQuantityValue(((QuantityDataEntity) first).getValue());
