@@ -53,20 +53,23 @@ public class Configuration {
         return offering;
     }
 
-    public void setSensormlUrl(String sensormlUrl) {
-        this.sensormlUrl = sensormlUrl;
-    }
-
-    public void setOffering(String offering) {
-        this.offering = offering;
-    }
-
-    public void setSensor(String sensor) {
-        this.sensor = sensor;
-    }
-
     public String getSensor() {
         return sensor;
+    }
+
+    public Configuration setSensormlUrl(String sensormlUrl) {
+        this.sensormlUrl = sensormlUrl;
+        return this;
+    }
+
+    public Configuration setOffering(String offering) {
+        this.offering = offering;
+        return this;
+    }
+
+    public Configuration setSensor(String sensor) {
+        this.sensor = sensor;
+        return this;
     }
 
 }
