@@ -27,15 +27,11 @@
  * Public License for more details.
  */
 package org.n52.stream.seadatacloud.dbsink;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.Session;
@@ -44,6 +40,9 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.data.Data;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
+import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -51,23 +50,23 @@ import org.n52.stream.seadatacloud.dbsink.dao.DaoFactory;
 import org.n52.stream.seadatacloud.dbsink.dao.DatasetDao;
 import org.n52.stream.seadatacloud.dbsink.dao.ObservationDao;
 import org.n52.stream.seadatacloud.dbsink.dao.OfferingDao;
-import org.n52.stream.util.DecoderHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ResourceUtils;
 
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
+@EnableConfigurationProperties(Configuration.class)
 public class DatabaseSinkApplication {
     
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSinkApplication.class);
@@ -76,10 +75,27 @@ public class DatabaseSinkApplication {
     private EntityManagerFactory entityManagerFactory;
     
     @Autowired
-    private DecoderHelper decoderHelper;
+    private Configuration properties;
+
+    @Autowired
+    @Named("sensorml")
+    private AggregateProcess processDescription;
     
-    private Map<String, AbstractProcess> descriptions = new LinkedHashMap<>();
-    
+    public static void main(String[] args) {
+        SpringApplication.run(DatabaseSinkApplication.class, args);
+    }
+
+    /**
+     * Init the processor by checking the properties and finalize the custom configuration
+     */
+    @PostConstruct
+    public void init() {
+        LOG.info("init(); processor called");
+        checkSetting("offering", properties.getOffering());
+        checkSetting("sensor", properties.getSensor());
+        checkSetting("sensorml-url", properties.getSensormlUrl());
+    }
+
     @Transactional(rollbackFor=Exception.class)
     @StreamListener(Sink.INPUT)
     public synchronized void input(DataMessage message) {
@@ -93,8 +109,8 @@ public class DatabaseSinkApplication {
             for (Timeseries<?> series : message.getTimeseries()) {
                 if (series.getMeasurements() != null && !series.getMeasurements().isEmpty()) {
                     ProcedureEntity procedure = daoFactory.getProcedureDAO().get(series.getSensor());
-                    if (procedure != null && descriptions.containsKey(series.getSensor())) {
-                        DatasetEntity datasetEntity = datasetDao.getOrInsert(series, descriptions.get(series.getSensor()));
+                    if (procedure != null && properties.getSensor().equals(series.getSensor())) {
+                        DatasetEntity datasetEntity = datasetDao.getOrInsert(series, getOutputs(), properties.getOffering());
                         if (datasetEntity != null) {
                             ObservationDao observationDao = daoFactory.getObservationDao();
                             Data<?> first = null;
@@ -102,7 +118,7 @@ public class DatabaseSinkApplication {
                             for (Measurement<?> m : series.getMeasurements()) {
                                 Data<?> data = observationDao.persist(m, datasetEntity,
                                         observationDao.getComponent(datasetEntity.getPhenomenon().getIdentifier(),
-                                                descriptions.get(series.getSensor()).getOutputs()));
+                                                getOutputs()));
                                 first = updateFirst(first, data);
                                 last = updateLast(last, data);
                             }
@@ -133,31 +149,33 @@ public class DatabaseSinkApplication {
     private Data<?> updateLast(Data<?> last, Data<?> data) {
         return last == null ||last.getSamplingTimeEnd().before(data.getSamplingTimeEnd()) ? data : last;
     }
-    
-    @PostConstruct
-    private void loadDescriptions() {
-        try {
-            Path p = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensor");
-            Set<Path> collect =
-                    Files.find(p, 1, (path, basicFileAttributes) -> path.getFileName().toString().endsWith(".xml"))
-                            .collect(Collectors.toSet());
-            for (Path path : collect) {
-                try {
-                    Object decode = decoderHelper.decode(path);
-                    if (decode instanceof AbstractProcess) {
-                        descriptions.put(((AbstractProcess) decode).getIdentifier(), (AbstractProcess) decode);
-                    }
-                } catch (Exception e) {
-                    LOG.error("Error while parsing sensor description!", e);
-                }
+
+    private List<SmlIo> getOutputs() {
+        if (processDescription != null) {
+            if (processDescription.isSetOutputs()) {
+                return processDescription.getOutputs();
+            } else  if (processDescription.isSetComponents() 
+                    && processDescription.getComponents().get(processDescription.getComponents().size()-1).isSetProcess()
+                    && processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess() instanceof AbstractProcess
+                    && ((AbstractProcess) processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess()).isSetOutputs()) {
+                    return ((AbstractProcess) processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess()).getOutputs();
             }
-        } catch (Exception e) {
-            LOG.error("Error while loading sensor descriptionfrom file!", e);
         }
+        return Collections.emptyList();
+    }
+    
+    private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
+        LOG.error(msg);
+        return new IllegalArgumentException(msg);
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(DatabaseSinkApplication.class, args);
+    private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
+        if (setting == null || setting.isEmpty()) {
+            throw logErrorAndCreateException(String.format("setting '%s' not set correct. Received value: '%s'.",
+                    settingName,
+                    setting));
+        }
+        LOG.trace("'{}': '{}'", settingName, setting);
     }
-    
+
 }

@@ -48,10 +48,6 @@ public class ProcedureDao extends AbstractDao {
         cq.select(root).where(builder.equal(root.get(ProcedureEntity.IDENTIFIER), identifier));
         Query<ProcedureEntity> q = getSession().createQuery(cq);
         return q.uniqueResult();
-//        Criteria criteria =
-//                session.createCriteria(ProcedureEntity.class).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-//                        .add(Restrictions.eq(ProcedureEntity.IDENTIFIER, identifier));
-//        return (ProcedureEntity) criteria.uniqueResult();
     }
 
 }

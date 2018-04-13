@@ -63,7 +63,10 @@ public abstract class AbstractDao {
         return null;
     }
     
-    public String getOfferingIdentifier(String sensorId) {
+    public String getOfferingIdentifier(String sensorId, String offering) {
+        if (offering != null && !offering.isEmpty()) {
+            return offering;
+        }
         return sensorId  + "/observations";
     }
 }
