@@ -29,14 +29,12 @@
 package org.n52.stream.util;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
 
 import javax.inject.Named;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.xmlbeans.XmlException;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.svalbard.decode.exception.DecodingException;
@@ -46,6 +44,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
@@ -62,40 +67,42 @@ public class SensorMLRetriever {
     @Named("sensorml")
     public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensorml-url}") String url)
             throws DecodingException, XmlException, IOException {
-        URL sensormlUrl = null;
+        URI sensormlUrl = null;
         try {
-            sensormlUrl = new URL(url);
-        } catch (MalformedURLException e) {
+            sensormlUrl = new URI(url);
+        } catch (URISyntaxException e) {
             String msg = String.format("Setting 'sensorml-url' malformed: %s (set loglevel to 'TRACE' for stacktrace)",
                     e.getMessage());
             LOG.error(msg);
             LOG.trace("Exception thrown: ", e);
         }
-        HttpResponse getResponse = null;
+        ResponseEntity<String> responseDocument = null;
         try {
-            getResponse = new SimpleHttpClient().executeGet(sensormlUrl.toString());
-        } catch (IOException e) {
+            RestTemplate restClient = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            responseDocument = restClient.exchange(sensormlUrl, HttpMethod.GET, entity, String.class);
+        } catch (RestClientException e) {
             logAndThrowException(sensormlUrl, e);
         }
-        if (getResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            logAndThrowException(sensormlUrl, new RuntimeException("HttpResponseCode != " + HttpStatus.SC_OK));
+        if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+            logAndThrowException(sensormlUrl, new RuntimeException("HttpResponseCode != 2xx."));
         }
-        try (InputStream content = getResponse.getEntity().getContent()) {
-            Object decodedGetResponse = decoderHelper.decode(content);
-            if (decodedGetResponse instanceof AggregateProcess) {
-                return (AggregateProcess) decodedGetResponse;
-            } else {
-                String msg = String.format(
-                        "XML document received from '%s' isn't sml2.0:AggregateProcess! Received: %s",
-                        sensormlUrl,
-                        decodedGetResponse.getClass());
-                LOG.error(msg);
-                throw new IllegalArgumentException(msg);
-            }
+        Object decodedGetResponse = decoderHelper.decode(responseDocument.getBody());
+        if (decodedGetResponse instanceof AggregateProcess) {
+            return (AggregateProcess) decodedGetResponse;
+        } else {
+            String msg = String.format(
+                    "XML document received from '%s' isn't sml2.0:AggregateProcess! Received: %s",
+                    sensormlUrl,
+                    decodedGetResponse.getClass());
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 
-    private void logAndThrowException(URL sensormlUrl, Exception e) throws RuntimeException {
+    private void logAndThrowException(URI sensormlUrl, Exception e) throws RuntimeException {
         String msg = String.format("Error while retrieving file from sensorml-url ('%s') :"
                 + " %s (set loglevel to 'TRACE' for stacktrace)",
                 sensormlUrl.toString(),
