@@ -36,6 +36,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.messaging.Message;
 
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
@@ -48,8 +49,8 @@ public class LogSinkApplication {
     private static final Logger LOG = LoggerFactory.getLogger(LogSinkApplication.class);
 
     @StreamListener(Sink.INPUT)
-    public void input(DataMessage dataMessage){
-        LOG.info("Received processor output:\n{}", dataMessage);
+    public void input(Message<DataMessage> dataMessage){
+        LOG.info("Received processor output:\n{}", dataMessage.getPayload());
     }
 
     public static void main(String[] args){
