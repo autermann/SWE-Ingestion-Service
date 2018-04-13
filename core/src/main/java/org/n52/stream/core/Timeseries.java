@@ -30,6 +30,7 @@ package org.n52.stream.core;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -50,7 +51,9 @@ import javax.validation.Valid;
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @Validated
-public class Timeseries<T> implements Cloneable {
+public class Timeseries<T> implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;

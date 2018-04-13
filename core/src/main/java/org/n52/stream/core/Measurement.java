@@ -28,16 +28,23 @@
  */
 package org.n52.stream.core;
 
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import org.springframework.validation.annotation.Validated;
 
 /**
  * Measurement
  */
 @Validated
-public class Measurement<T> implements Cloneable {
+public class Measurement<T> implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("resultTime")
     private OffsetDateTime resultTime = null;
