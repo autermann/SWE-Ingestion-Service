@@ -53,6 +53,7 @@ public class Measurement<T> implements Cloneable, Serializable {
     private OffsetDateTime phenomenonTime = null;
 
     @JsonProperty("value")
+    @JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="type", defaultImpl = Object.class)
     private T value = null;
 
     public Measurement<T> withPhenomenonTime(OffsetDateTime phenomenonTime) {
