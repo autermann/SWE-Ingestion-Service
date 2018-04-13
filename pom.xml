@@ -83,30 +83,35 @@
                 <version>1.0.5</version>
             </dependency>
             <dependency>
-               <groupId>org.n52.arctic-sea</groupId>
-               <artifactId>svalbard</artifactId>
-               <version>${arctic-sea.version}</version>
-           </dependency>
-           <dependency>
-               <groupId>org.n52.arctic-sea</groupId>
-               <artifactId>svalbard-xmlbeans</artifactId>
-               <version>${arctic-sea.version}</version>
-           </dependency>
-           <dependency>
-               <groupId>org.n52.arctic-sea</groupId>
-               <artifactId>shetland</artifactId>
-               <version>${arctic-sea.version}</version>
-           </dependency>
-           <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard-xmlbeans</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>shetland</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-		<groupId>javax.inject</groupId>
-		<artifactId>javax.inject</artifactId>
-		<version>1</version>
-	    </dependency>
+		        <groupId>javax.inject</groupId>
+		        <artifactId>javax.inject</artifactId>
+		        <version>1</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>com.fasterxml.jackson.core</groupId>
+	            <artifactId>jackson-annotations</artifactId>
+	            <version>2.9.5</version>
+	        </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

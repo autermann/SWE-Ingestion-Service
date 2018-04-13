@@ -28,6 +28,7 @@
  */
 package org.n52.stream.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,8 +45,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * DataMessage
  */
 @Validated
+public class DataMessage implements Cloneable, Serializable {
 
-public class DataMessage implements Cloneable {
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;
@@ -109,7 +111,6 @@ public class DataMessage implements Cloneable {
         return Objects.hash(timeseries);
     }
 
-    // TODO check if okay
     @Override
     public DataMessage clone() {
         try {
@@ -128,7 +129,6 @@ public class DataMessage implements Cloneable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class DataMessage {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    timeseries: ").append(toIndentedString(timeseries)).append("\n");
         sb.append("}");

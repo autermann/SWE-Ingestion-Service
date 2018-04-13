@@ -95,6 +95,10 @@
             <groupId>org.n52.arctic-sea</groupId>
             <artifactId>svalbard-xmlbeans</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
     </dependencies>
     
     <build>

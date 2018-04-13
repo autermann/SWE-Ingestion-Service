@@ -30,8 +30,8 @@ package org.n52.stream.core;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.AbstractMap.SimpleEntry;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,8 +42,9 @@ import javax.validation.Valid;
  * Feature
  */
 @Validated
+public class Feature implements Cloneable, Serializable {
 
-public class Feature implements Cloneable {
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;
@@ -126,7 +127,6 @@ public class Feature implements Cloneable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Feature {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
         sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
