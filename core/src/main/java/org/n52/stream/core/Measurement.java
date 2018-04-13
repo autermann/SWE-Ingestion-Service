@@ -104,6 +104,7 @@ public class Measurement<T> implements Cloneable, Serializable {
         }
         Measurement<?> measurement = (Measurement<?>) o;
         return Objects.equals(resultTime, measurement.resultTime) &&
+                Objects.equals(phenomenonTime, measurement.phenomenonTime) &&
                 Objects.equals(value, measurement.value);
     }
 
