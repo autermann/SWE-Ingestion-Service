@@ -49,17 +49,17 @@ import org.springframework.context.annotation.Import;
 @ComponentScan("org.n52.stream.seadatacloud.core")
 @Import(RemoteConfiguration.class)
 public class RestApplication {
-    
+
     @Value("${resources.path}")
     private String path;
     @Value("${server.url}")
     public String BASE_URL;
     @Value("${server.port}")
     public String BASE_URL_PORT;
-    
+
     @Autowired
     public DataRecordDefinitions dataRecordDefinitions;
-    
+
     @Autowired
     public StreamNameURLs streamNameURLs;
 
@@ -75,23 +75,24 @@ public class RestApplication {
     @PostConstruct
     private void init() {
         this.dataRecordDefinitions = new DataRecordDefinitions();
-        
+
         // register applications:
         if (path.contains("//")) { // windows-solution
-            
+
             // -- sources --
-            appController.registerApp("mqtt-source-rabbit", "source", path+"/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
+            appController.registerApp("mqtt-source-rabbit", "source", path + "/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
 
             // -- processors --
-            appController.registerApp("marine-processor", "processor", path+"/marine-processor/target/marine-processor-0.0.1-SNAPSHOT-metadata.jar");
-            
+            appController.registerApp("csv-processor", "processor", path + "/csv-processor/target/csv-processor-0.0.1-SNAPSHOT-metadata.jar");
+
             // -- sinks --
             appController.registerApp("log-sink", "sink", path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar");
-        
+            appController.registerApp("db-sink", "sink", path + "/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar");
+
         } else {
             // TODO: non Windows pathing ..
         }
-        
+
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 

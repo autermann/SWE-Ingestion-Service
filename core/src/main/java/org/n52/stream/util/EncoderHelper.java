@@ -46,12 +46,12 @@ import org.springframework.stereotype.Component;
 /**
  * Helper class to encode internal representations to XML documents, e.g. the
  * InsertSensor request
- * 
+ *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
  *
  */
-@ImportResource("classpath:svalbard-*.xml")
+@ImportResource("classpath*:svalbard-*.xml")
 @Component
 public class EncoderHelper {
 
@@ -65,7 +65,7 @@ public class EncoderHelper {
 
     /**
      * Encode {@link InsertSensorRequest} to {@link XmlObject}
-     * 
+     *
      * @param request
      *            The {@link InsertSensorRequest} to encode
      * @return the encoded {@link XmlObject}
@@ -83,7 +83,7 @@ public class EncoderHelper {
 
     /**
      * Encode {@link InsertSensorRequest} to XML string
-     * 
+     *
      * @param request
      *            The {@link InsertSensorRequest} to encode
      * @return the encoded XML string
@@ -94,7 +94,7 @@ public class EncoderHelper {
             throws EncodingException {
         XmlObject xml = encode(request);
         if (xml != null) {
-            return xml.xmlText(((AbstractXmlEncoder) getEncoder(request)).getXmlOptions());
+            return xml.xmlText(((AbstractXmlEncoder<?, ?>) getEncoder(request)).getXmlOptions());
         }
         return null;
     }

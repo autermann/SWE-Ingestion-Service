@@ -224,39 +224,7 @@ public class CloudService {
         });
 
         return completableFuture;
-    }
-
-    ;
-
-//    public Stream createStream(String streamName, String streamDefinition, boolean deploy) {
-//        Stream stream = null;
-//        try {
-//            URL url = new URL(BASE_URL + "/streams/definitions?deploy=" + deploy);
-//
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//            conn.setRequestMethod("POST");
-//            conn.setDoOutput(true);
-//            conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition).getBytes());
-//
-//            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//            String line;
-//            StringBuffer res = new StringBuffer();
-//            while ((line = in.readLine()) != null) {
-//                res.append(line);
-//                res.append("\n");
-//            }
-//            in.close();
-//            conn.disconnect();
-//            String response = res.toString();
-//            stream = objectMapper.readValue(response, Stream.class);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            LOG.error(e.getMessage());
-//        }
-//        return stream;
-//    }
+    };
 
     public String undeployStream(String streamName) {
         String response = "";
@@ -295,7 +263,7 @@ public class CloudService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
-            conn.getOutputStream().write(("").getBytes());
+            conn.getOutputStream().write("".getBytes());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;

@@ -28,48 +28,49 @@
  */
 package org.n52.stream.core;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
-/**
- * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
- *
- */
-@Validated
-@ConfigurationProperties("org.n52.stream")
-public class Configuration {
+import java.io.StringWriter;
+import java.io.Writer;
+import java.math.BigDecimal;
 
-    private String sensormlUrl = "";
+import org.junit.Before;
+import org.junit.Test;
 
-    private String offering = "";
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
-    private String sensor = "";
+public class MeasurementTest {
 
-    public String getSensormlUrl() {
-        return sensormlUrl;
+    protected ObjectMapper mapper;
+
+    @Before
+    public void setUp() {
+        mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public String getOffering() {
-        return offering;
+    protected String write(Object object) throws Exception {
+        Writer writer = new StringWriter();
+        mapper.writeValue(writer, object);
+        return writer.toString();
     }
 
-    public String getSensor() {
-        return sensor;
+    protected <T> T read(String source, Class<T> targetType) throws Exception {
+        return mapper.readValue(source, targetType);
     }
 
-    public Configuration setSensormlUrl(String sensormlUrl) {
-        this.sensormlUrl = sensormlUrl;
-        return this;
-    }
+    @Test
+    public void shouldKeepMeasurementType() throws Exception {
+        Measurement<BigDecimal> m = new Measurement<>();
+        m.setValue(new BigDecimal(2));
 
-    public Configuration setOffering(String offering) {
-        this.offering = offering;
-        return this;
-    }
-
-    public Configuration setSensor(String sensor) {
-        this.sensor = sensor;
-        return this;
+        String json = write(m);
+        Measurement<?> m2 = read(json, Measurement.class);
+        assertThat(m2.getValue(), instanceOf(BigDecimal.class));
+        assertThat(m.equals(m2), is(true));
     }
 
 }

@@ -29,6 +29,7 @@
 package org.n52.stream.seadatacloud.dbsink.dao;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
@@ -50,7 +51,7 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.data.Data;
 import org.n52.series.db.beans.dataset.NotInitializedDataset;
 import org.n52.shetland.ogc.UoM;
-import org.n52.shetland.ogc.sensorML.AbstractProcess;
+import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
 import org.n52.shetland.ogc.swe.simpleType.SweAbstractUomType;
 import org.n52.shetland.ogc.swe.simpleType.SweBoolean;
@@ -68,21 +69,21 @@ public class DatasetDao extends AbstractDao {
         super(daoFactory);
     }
 
-    public DatasetEntity getOrInsert(Timeseries<?> timeseries, AbstractProcess process) {
+    public DatasetEntity getOrInsert(Timeseries<?> timeseries, List<SmlIo> outputs, String offering) {
         Criteria criteria = getDefaultAllSeriesCriteria();
-        addIdentifierRestrictionsToCritera(criteria, timeseries);
+        addIdentifierRestrictionsToCritera(criteria, timeseries, offering);
         criteria.setMaxResults(1);
         DatasetEntity series = (DatasetEntity) criteria.uniqueResult();
         if (series == null || series instanceof NotInitializedDataset) {
-            series = preCheck(timeseries, process, series);
+            series = preCheck(timeseries, outputs, series, offering);
         }
         if (series == null || series.isSetFeature() && !series.getFeature().getIdentifier().equals(timeseries.getFeature().getId())) {
             series = get(timeseries);
-            addValuesToSeries(series, timeseries, process);
+            addValuesToSeries(series, timeseries, outputs, offering);
             series.setDeleted(false);
             series.setPublished(true);
         } else if (!series.isSetFeature()) {
-            addValuesToSeries(series, timeseries, process);
+            addValuesToSeries(series, timeseries, outputs, offering);
             series.setDeleted(false);
             series.setPublished(true);
         } else if (!series.isPublished()) {
@@ -104,15 +105,13 @@ public class DatasetDao extends AbstractDao {
                 && series.getFirstValueAt().after(first.getSamplingTimeStart())) {
             minChanged = true;
             series.setFirstValueAt(first.getSamplingTimeStart());
-            // FIXME remove comment and fix compilation error
-//            series.setFirstObservation(first);
+            series.setFirstObservation(first);
         }
         if (!series.isSetLastValueAt() || series.isSetLastValueAt()
                 && series.getLastValueAt().before(last.getSamplingTimeEnd())) {
             maxChanged = true;
             series.setLastValueAt(last.getSamplingTimeEnd());
-         // FIXME remove comment and fix compilation error
-//          series.setLastObservation(last);
+            series.setLastObservation(last);
         }
         if (first instanceof QuantityDataEntity && minChanged) {
                 series.setFirstQuantityValue(((QuantityDataEntity) first).getValue());
@@ -133,14 +132,13 @@ public class DatasetDao extends AbstractDao {
         } else if (m.getValue() instanceof Integer) {
             return new CountDatasetEntity();
         }
-//        LOG.info("Not supported value type");
         return new NotInitializedDatasetEntity();
     }
 
-    private DatasetEntity preCheck(Timeseries<?> t, AbstractProcess process, DatasetEntity dataset) {
+    private DatasetEntity preCheck(Timeseries<?> t, List<SmlIo> outputs, DatasetEntity dataset, String offering) {
         if (dataset == null) {
             Criteria criteria = getDefaultNotDefinedDatasetCriteria();
-            addIdentifierRestrictionsToCritera(criteria, t, false);
+            addIdentifierRestrictionsToCritera(criteria, t, offering, false);
             dataset = (DatasetEntity) criteria.uniqueResult();
         }
         if (dataset != null) {
@@ -150,7 +148,7 @@ public class DatasetDao extends AbstractDao {
                 .append(" set valueType = :valueType")
                 .append(" where id = :id");
             getSession().createQuery(builder.toString())
-                .setParameter( "valueType", getValueType(t, process))
+                .setParameter( "valueType", getValueType(t, outputs))
                 .setParameter( "id", dataset.getId())
                 .executeUpdate();
             getSession().flush();
@@ -158,8 +156,8 @@ public class DatasetDao extends AbstractDao {
         return dataset;
     }
 
-    private String getValueType(Timeseries<?> t, AbstractProcess process) {
-        SweAbstractDataComponent component = getComponent(t.getPhenomenon(), process.getOutputs());
+    private String getValueType(Timeseries<?> t, List<SmlIo> outputs) {
+        SweAbstractDataComponent component = getComponent(t.getPhenomenon(), outputs);
         if (component != null) {
             if (component instanceof SweQuantity) {
                 return QuantityDatasetEntity.DATASET_TYPE;
@@ -170,8 +168,7 @@ public class DatasetDao extends AbstractDao {
             } else if (component instanceof SweBoolean) {
                 return BooleanDatasetEntity.DATASET_TYPE;
             } else if (component instanceof SweCount) {
-                return "count";
-//                return CountDatasetEntity.DATASET_TYPE;
+                return CountDatasetEntity.DATASET_TYPE;
             }
         }
         Measurement<?> m = t.getMeasurements().iterator().next();
@@ -180,20 +177,17 @@ public class DatasetDao extends AbstractDao {
         } else if (m.getValue() instanceof String) {
             return TextDatasetEntity.DATASET_TYPE;
         } else if (m.getValue() instanceof Integer) {
-            return "count";
-//            return CountDatasetEntity.DATASET_TYPE;
+            return CountDatasetEntity.DATASET_TYPE;
         }
-//        LOG.info("Not supported value type");
         return DatasetEntity.DEFAULT_VALUE_TYPE;
     }
 
-    private void addValuesToSeries(DatasetEntity datasetEntity, Timeseries<?> series, AbstractProcess process) {
+    private void addValuesToSeries(DatasetEntity datasetEntity, Timeseries<?> series, List<SmlIo> outputs, String offering) {
         if (datasetEntity.getProcedure() == null) {
             datasetEntity.setProcedure(getProcedure(series.getSensor()));
         }
         if (datasetEntity.getOffering() == null) {
-            // TODO should be defined by config parameter!!!
-            datasetEntity.setOffering(getOffering(getOfferingIdentifier(series.getSensor())));
+            datasetEntity.setOffering(getOffering(getOfferingIdentifier(series.getSensor(), offering)));
         }
         if (datasetEntity.getPhenomenon() == null) {
             datasetEntity.setPhenomenon(getPhenomenon(series.getPhenomenon()));
@@ -207,9 +201,9 @@ public class DatasetDao extends AbstractDao {
         if (series.getUnit() != null && !series.getUnit().isEmpty() && datasetEntity.getUnit() == null) {
             datasetEntity.setUnit(getOrInsertUnit(series.getUnit()));
         } else {
-            SweAbstractDataComponent component = getComponent(series.getPhenomenon(), process.getOutputs());
-            if (component != null && component instanceof SweAbstractUomType && ((SweAbstractUomType)component).isSetUom()) {
-                datasetEntity.setUnit(getOrInsertUnit(((SweAbstractUomType)component).getUomObject()));
+            SweAbstractDataComponent component = getComponent(series.getPhenomenon(), outputs);
+            if (component != null && component instanceof SweAbstractUomType && ((SweAbstractUomType<?>)component).isSetUom()) {
+                datasetEntity.setUnit(getOrInsertUnit(((SweAbstractUomType<?>)component).getUomObject()));
             }
         }
     }
@@ -223,7 +217,7 @@ public class DatasetDao extends AbstractDao {
     }
 
 
-    private AbstractFeatureEntity getOrInsertFeature(Feature feature) {
+    private AbstractFeatureEntity<?> getOrInsertFeature(Feature feature) {
         return getDaoFactory().getFeatureDao().getOrInsert(feature);
     }
 
@@ -243,11 +237,11 @@ public class DatasetDao extends AbstractDao {
         return getDaoFactory().getProcedureDAO().get(identifier);
     }
 
-    private void addIdentifierRestrictionsToCritera(Criteria c, Timeseries<?> t) {
-        addIdentifierRestrictionsToCritera(c, t, true);
+    private void addIdentifierRestrictionsToCritera(Criteria c, Timeseries<?> t, String offering) {
+        addIdentifierRestrictionsToCritera(c, t, offering, true);
     }
 
-    private void addIdentifierRestrictionsToCritera(Criteria c, Timeseries<?> t, boolean includeFeature) {
+    private void addIdentifierRestrictionsToCritera(Criteria c, Timeseries<?> t, String offering, boolean includeFeature) {
         if (includeFeature) {
             c.createCriteria(DatasetEntity.PROPERTY_FEATURE)
                     .add(Restrictions.eq(FeatureEntity.PROPERTY_IDENTIFIER, t.getFeature().getId()));
@@ -259,7 +253,7 @@ public class DatasetDao extends AbstractDao {
         c.createCriteria(DatasetEntity.PROPERTY_PROCEDURE)
                 .add(Restrictions.eq(ProcedureEntity.PROPERTY_IDENTIFIER, t.getSensor()));
         c.createCriteria(DatasetEntity.PROPERTY_OFFERING)
-                .add(Restrictions.eq(OfferingEntity.PROPERTY_IDENTIFIER, getOfferingIdentifier(t.getSensor())));
+                .add(Restrictions.eq(OfferingEntity.PROPERTY_IDENTIFIER, getOfferingIdentifier(t.getSensor(), offering)));
         c.createCriteria(DatasetEntity.PROPERTY_CATEGORY)
                 .add(Restrictions.eq(CategoryEntity.PROPERTY_IDENTIFIER, t.getPhenomenon()));
     }
@@ -271,4 +265,7 @@ public class DatasetDao extends AbstractDao {
     private Criteria getDefaultNotDefinedDatasetCriteria() {
         return getSession().createCriteria(NotInitializedDatasetEntity.class).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
     }
+    
+    
+    
 }

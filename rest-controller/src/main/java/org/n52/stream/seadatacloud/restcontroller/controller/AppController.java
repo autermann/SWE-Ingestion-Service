@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Component
 @RequestMapping("/api/")
 public class AppController {
-    
+
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
 
@@ -106,5 +106,4 @@ public class AppController {
         }
         return null;
     }
-    
 }

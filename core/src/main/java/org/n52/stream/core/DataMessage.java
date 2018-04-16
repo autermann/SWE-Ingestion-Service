@@ -28,9 +28,12 @@
  */
 package org.n52.stream.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -42,17 +45,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * DataMessage
  */
 @Validated
+public class DataMessage implements Cloneable, Serializable {
 
-public class DataMessage {
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;
 
     @JsonProperty("timeseries")
     @Valid
-    private List<Timeseries<?>> timeseries = null;
+    private List<Timeseries<?>> timeseries = new ArrayList<>();
 
-    public DataMessage id(String id) {
+    public DataMessage withId(String id) {
         this.id = id;
         return this;
     }
@@ -65,15 +69,13 @@ public class DataMessage {
         this.id = id;
     }
 
-    public DataMessage timeseries(List<Timeseries<?>> timeseries) {
-        this.timeseries = timeseries;
+    public DataMessage withTimeseries(List<Timeseries<?>> timeseries) {
+        this.timeseries.clear();
+        this.timeseries.addAll(timeseries);
         return this;
     }
 
     public DataMessage addTimeseriesItem(Timeseries<?> timeseriesItem) {
-        if (timeseries == null) {
-            timeseries = new ArrayList<>();
-        }
         timeseries.add(timeseriesItem);
         return this;
     }
@@ -83,8 +85,12 @@ public class DataMessage {
         return timeseries;
     }
 
+    public Optional<Timeseries<?>> getTimeseriesForPhenomenon(String phenomenon) {
+        return timeseries.stream().filter(p -> p.getPhenomenon().equalsIgnoreCase(phenomenon)).findFirst();
+    }
+
     public void setTimeseries(List<Timeseries<?>> timeseries) {
-        this.timeseries = timeseries;
+        withTimeseries(timeseries);
     }
 
     @Override
@@ -106,10 +112,23 @@ public class DataMessage {
     }
 
     @Override
+    public DataMessage clone() {
+        try {
+            DataMessage dm = (DataMessage) super.clone();
+            dm.timeseries = new LinkedList<>();
+            if (timeseries != null && !timeseries.isEmpty()) {
+                timeseries.forEach(t -> dm.timeseries.add(t.clone()));
+            }
+            return dm;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class DataMessage {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    timeseries: ").append(toIndentedString(timeseries)).append("\n");
         sb.append("}");

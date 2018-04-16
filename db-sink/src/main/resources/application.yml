@@ -27,5 +27,11 @@ spring:
        temp:
          use_jdbc_metadata_defaults: false
 
+org.n52.stream:
+  sensorml-url: http://localhost:9080/AggregateProcess.xml
+  offering: WL-ECO-FLNTU-4476/observations
+  sensor: WL-ECO-FLNTU-4476
+
+
 server:
   port: 8082

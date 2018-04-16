@@ -30,7 +30,8 @@ package org.n52.stream.core;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -50,7 +51,9 @@ import javax.validation.Valid;
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @Validated
-public class Timeseries<T> {
+public class Timeseries<T> implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;
@@ -71,7 +74,7 @@ public class Timeseries<T> {
     @Valid
     private List<Measurement<T>> measurements = null;
 
-    public Timeseries<T> id(String id) {
+    public Timeseries<T> withId(String id) {
         this.id = id;
         return this;
     }
@@ -84,7 +87,7 @@ public class Timeseries<T> {
         this.id = id;
     }
 
-    public Timeseries<T> unit(String unit) {
+    public Timeseries<T> withUnit(String unit) {
         this.unit = unit;
         return this;
     }
@@ -97,7 +100,7 @@ public class Timeseries<T> {
         this.unit = unit;
     }
 
-    public Timeseries<T> phenomenon(String phenomenon) {
+    public Timeseries<T> withPhenomenon(String phenomenon) {
         this.phenomenon = phenomenon;
         return this;
     }
@@ -110,7 +113,7 @@ public class Timeseries<T> {
         this.phenomenon = phenomenon;
     }
 
-    public Timeseries<T> sensor(String sensor) {
+    public Timeseries<T> withSensor(String sensor) {
         this.sensor = sensor;
         return this;
     }
@@ -123,7 +126,7 @@ public class Timeseries<T> {
         this.sensor = sensor;
     }
 
-    public Timeseries<T> feature(Feature feature) {
+    public Timeseries<T> withFeature(Feature feature) {
         this.feature = feature;
         return this;
     }
@@ -137,14 +140,14 @@ public class Timeseries<T> {
         this.feature = feature;
     }
 
-    public Timeseries<T> measurements(List<Measurement<T>> measurements) {
+    public Timeseries<T> withMeasurements(List<Measurement<T>> measurements) {
         this.measurements = measurements;
         return this;
     }
 
     public Timeseries<T> addMeasurementsItem(Measurement<T> measurementsItem) {
         if (measurements == null) {
-            measurements = new ArrayList<>();
+            measurements = new LinkedList<>();
         }
         measurements.add(measurementsItem);
         return this;
@@ -185,7 +188,6 @@ public class Timeseries<T> {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Timeseries {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    unit: ").append(toIndentedString(unit)).append("\n");
         sb.append("    phenomenon: ").append(toIndentedString(phenomenon)).append("\n");
@@ -194,6 +196,24 @@ public class Timeseries<T> {
         sb.append("    measurements: ").append(toIndentedString(measurements)).append("\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    @Override
+    public Timeseries<T> clone() {
+        try {
+            @SuppressWarnings("unchecked")
+            Timeseries<T> ts = (Timeseries<T>) super.clone();
+            if (feature != null) {
+                ts.feature = this.feature.clone();
+            }
+            ts.measurements = new LinkedList<>();
+            if (this.measurements != null && !this.measurements.isEmpty()) {
+                this.measurements.forEach(m -> ts.measurements.add(m.clone()));
+            }
+            return ts;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -59,21 +59,21 @@ import org.springframework.util.ResourceUtils;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {InsertSensorGeneratorTest.class})
 public class InsertSensorGeneratorTest extends AbstractCodingTest {
-    
+
     private Object decode;
     private InsertSensorGenerator generator;
 
     @Before
     public void setUp() throws DecodingException, IOException, XmlException {
         DecoderRepository decoderRepository = initDecoderRepository();
-        
+
         DecoderHelper helper = new DecoderHelper();
         helper.setDecoderRepository(decoderRepository);
         Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess.xml");
         decode = helper.decode(path);
         generator = new InsertSensorGenerator();
     }
-    
+
     @Test
     public void generate()
             throws DecodingException,
@@ -94,7 +94,7 @@ public class InsertSensorGeneratorTest extends AbstractCodingTest {
         checkObservedProperties(request);
         checkMetadata(request);
     }
-    
+
     @Test
     public void generateHrefFeature()
             throws DecodingException,

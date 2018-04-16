@@ -185,9 +185,9 @@ public class StreamController {
                 }
 
                 // TODO: parse processor...
-                streamDefinition += "| marine-processor ";
+                streamDefinition += "| csv-processor ";
                 // TODO: parse sink...
-                streamDefinition += "| log-sink";
+                streamDefinition += "| db-sink";
 
                 Stream createdStream = null;
                 streamName = "s" + streamName;
@@ -200,8 +200,8 @@ public class StreamController {
                     // InserObservation:
                     InsertSensorGenerator generator = new InsertSensorGenerator();
                     AggregateProcess aggregateProcess = (AggregateProcess) decode;
-                    InsertSensorRequest request =  generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
-                    
+                    InsertSensorRequest request = generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
+
                     return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
                     return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
@@ -218,7 +218,7 @@ public class StreamController {
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)

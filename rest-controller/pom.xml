@@ -40,34 +40,34 @@
     <artifactId>rest-controller</artifactId>
     <name>Rest Controller</name>
     <packaging>jar</packaging>
-    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Test -->
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.n52.stream.seadatacloud</groupId>
             <artifactId>core</artifactId>
         </dependency>
-   
         <dependency>
             <groupId>org.n52.arctic-sea</groupId>
             <artifactId>svalbard</artifactId>
             <version>4.2.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
     </dependencies>
 </project>

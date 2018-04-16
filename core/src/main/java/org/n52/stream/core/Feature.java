@@ -30,9 +30,10 @@ package org.n52.stream.core;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.AbstractMap.SimpleEntry;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -41,8 +42,9 @@ import javax.validation.Valid;
  * Feature
  */
 @Validated
+public class Feature implements Cloneable, Serializable {
 
-public class Feature {
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private String id = null;
@@ -54,7 +56,7 @@ public class Feature {
     @JsonProperty("geometry")
     private Object geometry = null;
 
-    public Feature id(String id) {
+    public Feature withId(String id) {
         this.id = id;
         return this;
     }
@@ -67,7 +69,7 @@ public class Feature {
         this.id = id;
     }
 
-    public Feature properties(List<SimpleEntry<String, String>> properties) {
+    public Feature withProperties(List<SimpleEntry<String, String>> properties) {
         this.properties = properties;
         return this;
     }
@@ -89,7 +91,7 @@ public class Feature {
         this.properties = properties;
     }
 
-    public Feature geometry(Object geometry) {
+    public Feature withGeometry(Object geometry) {
         this.geometry = geometry;
         return this;
     }
@@ -125,12 +127,25 @@ public class Feature {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Feature {\n");
-
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
         sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
         sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    @Override
+    public Feature clone() {
+        try {
+            Feature f = (Feature) super.clone();
+            f.properties = new LinkedList<>();
+            if (properties != null && !properties.isEmpty()) {
+                properties.forEach(p -> f.properties.add(new SimpleEntry<>(p.getKey(), p.getValue())));
+            }
+            return f;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
