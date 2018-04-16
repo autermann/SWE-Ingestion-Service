@@ -26,18 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import org.n52.stream.seadatacloud.restcontroller.controller.AppController;
 import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
+import org.n52.stream.seadatacloud.restcontroller.util.DataRecordDefinitions;
+import org.n52.stream.seadatacloud.restcontroller.util.StreamNameURLs;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
@@ -47,14 +47,51 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootApplication
 @ComponentScan("org.n52.stream.seadatacloud.restcontroller")
+@ComponentScan("org.n52.stream.seadatacloud.core")
 @Import(RemoteConfiguration.class)
 public class RestApplication {
     
+    @Value("${resources.path}")
+    private String path;
+    
+    @Autowired
+    public DataRecordDefinitions dataRecordDefinitions;
+    
+    @Autowired
+    public StreamNameURLs streamNameURLs;
+
     @Autowired
     AppController appController;
 
     public static void main(String[] args) {
-        SpringApplication.run(RestApplication.class, args);
+        new SpringApplicationBuilder(RestApplication.class)
+                .properties("path")
+                .run(args);
+    }
+
+    @PostConstruct
+    private void init() {
+        this.dataRecordDefinitions = new DataRecordDefinitions();
+        
+        // SourceDefinitionPair mqtt = new SourceDefinitionPair("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+
+        // register applications:
+        if (path.contains("//")) {
+            
+            // -- sources --
+            appController.registerApp("mqtt-source-rabbit", "source", path+"/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
+
+            // -- processors --
+            appController.registerApp("marine-processor", "processor", path+"/marine-processor/target/marine-processor-0.0.1-SNAPSHOT-metadata.jar");
+            
+            // -- sinks --
+            appController.registerApp("log-sink", "sink", path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar");
+        
+        } else {
+            // TODO: non Windows pathing ..
+        }
+        
+        this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 
 }

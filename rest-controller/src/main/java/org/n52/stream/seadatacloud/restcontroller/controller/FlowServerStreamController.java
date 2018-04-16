@@ -202,24 +202,7 @@ public class FlowServerStreamController {
 //            return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
 //        }
 //    }
-
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Streams> getStreams() {
-        Streams result = service.getStreams();
-        return new ResponseEntity(result, HttpStatus.OK);
-    }
     
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Stream> getStream(
-            @PathVariable String streamId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        Stream result = service.getStream(streamId);
-        if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '"+streamId+"' not found.\"}", headers, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity(result, HttpStatus.OK);
-    }
     
 //    @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
 //    public ResponseEntity<Stream> putStream(
@@ -263,14 +246,14 @@ public class FlowServerStreamController {
         return new ResponseEntity(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/createStream", method = RequestMethod.GET)
-    public Stream createStream(
-            @RequestParam("streamName") String streamName,
-            @RequestParam("streamDefinition") String streamDefinition,
-            @RequestParam("deploy") boolean deploy
-    ) {
-        Stream result = service.createStream(streamName, streamDefinition, deploy);
-        return result;
-    }
+//    @RequestMapping(value = "/createStream", method = RequestMethod.GET)
+//    public Stream createStream(
+//            @RequestParam("streamName") String streamName,
+//            @RequestParam("streamDefinition") String streamDefinition,
+//            @RequestParam("deploy") boolean deploy
+//    ) {
+//        Stream result = service.createStream(streamName, streamDefinition, deploy);
+//        return result;
+//    }
     
 }

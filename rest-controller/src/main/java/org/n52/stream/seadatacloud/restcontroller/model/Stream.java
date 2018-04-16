@@ -28,7 +28,6 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.model;
 
-
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
@@ -38,6 +37,7 @@ public class Stream {
     public String name;
     public String status;
     public String definition;
+    public String processDescription;
 
     public Stream() {
     }
@@ -65,5 +65,13 @@ public class Stream {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
-    
+
+    public String getProcessDescription() {
+        return processDescription;
+    }
+
+    public void setProcessDescription(String processDescription) {
+        this.processDescription = processDescription;
+    }
+
 }

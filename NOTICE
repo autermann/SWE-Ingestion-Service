@@ -21,6 +21,7 @@ This project includes:
   AspectJ weaver under Eclipse Public License - v 1.0
   Bean Validation API under Apache License 2.0
   ClassMate under The Apache Software License, Version 2.0
+  com.vividsolutions:jts-core under GNU Lesser General Public License, Version 2.1
   Commons Lang under The Apache Software License, Version 2.0
   Core Classes under Apache License, Version 2.0
   Core Hibernate O/RM functionality under GNU Lesser General Public License
@@ -108,8 +109,6 @@ This project includes:
   OGC WaterML DR schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC XML schemas under The Apache Software License, Version 2.0
-  OkHttp under Apache 2.0
-  Okio under Apache 2.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   Portele Schape Change schema (spec. v3.0) under The Apache Software License, Version 2.0
   Postgis JDBC Driver under GNU Lesser General Public License

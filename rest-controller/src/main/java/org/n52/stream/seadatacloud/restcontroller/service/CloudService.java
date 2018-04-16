@@ -26,39 +26,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller.service;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import org.n52.stream.seadatacloud.restcontroller.decoder.ProcessorsDecoder;
-import org.n52.stream.seadatacloud.restcontroller.decoder.SWEModule;
-import org.n52.stream.seadatacloud.restcontroller.model.Processor;
+import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
-import org.n52.stream.seadatacloud.restcontroller.model.Sink;
-import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
-import org.n52.stream.seadatacloud.restcontroller.model.Source;
-import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
-import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 /**
@@ -67,7 +56,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CloudService {
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(CloudService.class);
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -95,6 +86,7 @@ public class CloudService {
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return sources;
     }
@@ -116,11 +108,12 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
-            
+
             processors = objectMapper.readValue(response, Processors.class);
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return processors;
     }
@@ -147,6 +140,7 @@ public class CloudService {
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return sinks;
     }
@@ -176,39 +170,93 @@ public class CloudService {
 
         } catch (IOException e) {
             response = e.getMessage();
+            LOG.error(e.getMessage());
         } catch (Exception e) {
             response = e.getMessage();
+            LOG.error(e.getMessage());
         }
         return response;
     }
 
-    public Stream createStream(String streamName, String streamDefinition, boolean deploy) {
-        Stream stream = null;
-        try {
-            URL url = new URL(BASE_URL + "/streams/definitions?deploy=" + deploy);
+    public Future<Stream> createStream(String streamName, String streamDefinition, boolean deploy) throws InterruptedException {
+        CompletableFuture<Stream> completableFuture = new CompletableFuture<>();
+
+        Executors.newCachedThreadPool().submit(() -> {
+            Stream stream = null;
+            URL url = new URL(BASE_URL + "/streams/definitions");
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition).getBytes());
+            InputStream inputStream;
+            try {
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition + "&deploy=" + deploy).getBytes());
+                int responseCode = conn.getResponseCode();
+                if (responseCode >= 300) {
+                    inputStream = conn.getErrorStream();
+                    Scanner scanner = new Scanner(inputStream);
+                    scanner.useDelimiter("\\Z");
+                    String response = scanner.next();
+                    LOG.error(response);
+                } 
+                inputStream = conn.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader in = new BufferedReader(inputStreamReader);
+                String line;
+                StringBuffer res = new StringBuffer();
+                while ((line = in.readLine()) != null) {
+                    res.append(line);
+                    res.append("\n");
+                }
+                in.close();
+                conn.disconnect();
+                String response = res.toString();
+                stream = objectMapper.readValue(response, Stream.class);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOG.error(e.getMessage());
             }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-            stream = objectMapper.readValue(response, Stream.class);
 
-        } catch (Exception e) {
-        }
-        return stream;
+            completableFuture.complete(stream);
+            return stream;
+        });
+
+        return completableFuture;
     }
+
+    ;
+
+//    public Stream createStream(String streamName, String streamDefinition, boolean deploy) {
+//        Stream stream = null;
+//        try {
+//            URL url = new URL(BASE_URL + "/streams/definitions?deploy=" + deploy);
+//
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//            conn.setRequestMethod("POST");
+//            conn.setDoOutput(true);
+//            conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition).getBytes());
+//
+//            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//            String line;
+//            StringBuffer res = new StringBuffer();
+//            while ((line = in.readLine()) != null) {
+//                res.append(line);
+//                res.append("\n");
+//            }
+//            in.close();
+//            conn.disconnect();
+//            String response = res.toString();
+//            stream = objectMapper.readValue(response, Stream.class);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            LOG.error(e.getMessage());
+//        }
+//        return stream;
+//    }
 
     public String undeployStream(String streamName) {
         String response = "";
@@ -309,7 +357,7 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
-            
+
             streams = objectMapper.readValue(response, Streams.class);
 
         } catch (Exception e) {
@@ -336,9 +384,9 @@ public class CloudService {
             in.close();
             conn.disconnect();
             String response = res.toString();
-            
+
             stream = objectMapper.readValue(response, Stream.class);
-            
+
         } catch (Exception e) {
             return null;
         }

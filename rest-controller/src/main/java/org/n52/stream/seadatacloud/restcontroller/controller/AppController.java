@@ -33,10 +33,11 @@
  */
 package org.n52.stream.seadatacloud.restcontroller.controller;
 
-import java.util.Optional;
-import okhttp3.Call;
+import java.util.List;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
+import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.service.CloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,21 +65,21 @@ public class AppController {
     CloudService service;
 
     @RequestMapping(value = "/sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Sources> getSources() {
+    public Sources getSources() {
         Sources result = service.getSources();
-        return new ResponseEntity(result, HttpStatus.ACCEPTED);
+        return result;
     }
     
     @RequestMapping(value = "/processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Processors> getProcessors() {
+    public Processors getProcessors() {
         Processors result = service.getProcessors();
-        return new ResponseEntity(result, HttpStatus.ACCEPTED);
+        return result;
     }
     
     @RequestMapping(value = "/sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Sinks> getSinks() {
+    public Sinks getSinks() {
         Sinks result = service.getSinks();
-        return new ResponseEntity(result, HttpStatus.ACCEPTED);
+        return result;
     }
     
     @RequestMapping(value = "/registerApp", method = RequestMethod.GET)
@@ -89,6 +90,26 @@ public class AppController {
     ) {
         String result = service.registerApp(appName, appType, appUri);
         return new ResponseEntity(result, HttpStatus.OK);
+    }
+    
+    public Source getSourceByName(String sourceName) {
+        Sources registeredSources = service.getSources();
+        for (Source current : registeredSources.getSources()) {
+            if (current.getName().equalsIgnoreCase(sourceName)) {
+                return current;
+            }
+        }
+        return null;
+    }
+    
+    public AppOption getSourceOptionByName(Source source, String appOptionName) {
+        List<AppOption> sourceOptions = source.getOptions();
+        for (AppOption current : sourceOptions) {
+            if (current.getName().equalsIgnoreCase(appOptionName)) {
+                return current;
+            }
+        }
+        return null;
     }
     
 }
