@@ -33,6 +33,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
+import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
 
 public abstract class AbstractDao {
 
@@ -61,6 +62,11 @@ public abstract class AbstractDao {
             }
         }
         return null;
+    }
+    
+    protected boolean checkForQuantity(String phenomenon, List<SmlIo> outputs) {
+        SweAbstractDataComponent component = getComponent(phenomenon, outputs);
+        return component != null && component instanceof SweQuantity;
     }
     
     public String getOfferingIdentifier(String sensorId, String offering) {

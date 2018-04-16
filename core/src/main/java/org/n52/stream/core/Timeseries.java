@@ -99,6 +99,10 @@ public class Timeseries<T> implements Cloneable, Serializable {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+    
+    public boolean hasUnit() {
+        return unit != null && !unit.isEmpty();
+    }
 
     public Timeseries<T> withPhenomenon(String phenomenon) {
         this.phenomenon = phenomenon;

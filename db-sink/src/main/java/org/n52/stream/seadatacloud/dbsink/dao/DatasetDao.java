@@ -49,16 +49,16 @@ import org.n52.series.db.beans.QuantityDatasetEntity;
 import org.n52.series.db.beans.TextDatasetEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.data.Data;
+import org.n52.series.db.beans.dataset.BooleanDataset;
+import org.n52.series.db.beans.dataset.CategoryDataset;
+import org.n52.series.db.beans.dataset.CountDataset;
 import org.n52.series.db.beans.dataset.NotInitializedDataset;
+import org.n52.series.db.beans.dataset.QuantityDataset;
+import org.n52.series.db.beans.dataset.TextDataset;
 import org.n52.shetland.ogc.UoM;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
 import org.n52.shetland.ogc.swe.simpleType.SweAbstractUomType;
-import org.n52.shetland.ogc.swe.simpleType.SweBoolean;
-import org.n52.shetland.ogc.swe.simpleType.SweCategory;
-import org.n52.shetland.ogc.swe.simpleType.SweCount;
-import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
-import org.n52.shetland.ogc.swe.simpleType.SweText;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -78,7 +78,7 @@ public class DatasetDao extends AbstractDao {
             series = preCheck(timeseries, outputs, series, offering);
         }
         if (series == null || series.isSetFeature() && !series.getFeature().getIdentifier().equals(timeseries.getFeature().getId())) {
-            series = get(timeseries);
+            series = get(timeseries, outputs);
             addValuesToSeries(series, timeseries, outputs, offering);
             series.setDeleted(false);
             series.setPublished(true);
@@ -123,14 +123,22 @@ public class DatasetDao extends AbstractDao {
         getSession().flush();
     }
 
-    private DatasetEntity get(Timeseries<?> t) {
+    private DatasetEntity get(Timeseries<?> t, List<SmlIo> outputs) {
         Measurement<?> m = t.getMeasurements().iterator().next();
         if (m.getValue() instanceof BigDecimal) {
             return new QuantityDatasetEntity();
         } else if (m.getValue() instanceof String) {
+            if (t.hasUnit()) {
+                return new CategoryDatasetEntity();
+            }
             return new TextDatasetEntity();
         } else if (m.getValue() instanceof Integer) {
+            if (t.hasUnit() && checkForQuantity(t.getPhenomenon(), outputs)) {
+                return new QuantityDatasetEntity();
+            }
             return new CountDatasetEntity();
+        } else if (m.getValue() instanceof Boolean) {
+            return new BooleanDatasetEntity();
         }
         return new NotInitializedDatasetEntity();
     }
@@ -157,27 +165,21 @@ public class DatasetDao extends AbstractDao {
     }
 
     private String getValueType(Timeseries<?> t, List<SmlIo> outputs) {
-        SweAbstractDataComponent component = getComponent(t.getPhenomenon(), outputs);
-        if (component != null) {
-            if (component instanceof SweQuantity) {
-                return QuantityDatasetEntity.DATASET_TYPE;
-            } else if (component instanceof SweText) {
-                return TextDatasetEntity.DATASET_TYPE;
-            } else if (component instanceof SweCategory) {
-                return CategoryDatasetEntity.DATASET_TYPE;
-            } else if (component instanceof SweBoolean) {
-                return BooleanDatasetEntity.DATASET_TYPE;
-            } else if (component instanceof SweCount) {
-                return CountDatasetEntity.DATASET_TYPE;
-            }
-        }
         Measurement<?> m = t.getMeasurements().iterator().next();
         if (m.getValue() instanceof BigDecimal) {
-            return QuantityDatasetEntity.DATASET_TYPE;
+            return QuantityDataset.DATASET_TYPE;
         } else if (m.getValue() instanceof String) {
-            return TextDatasetEntity.DATASET_TYPE;
+            if (t.hasUnit()) {
+                return CategoryDataset.DATASET_TYPE;
+            }
+            return TextDataset.DATASET_TYPE;
         } else if (m.getValue() instanceof Integer) {
-            return CountDatasetEntity.DATASET_TYPE;
+            if (t.hasUnit() && checkForQuantity(t.getPhenomenon(), outputs)) {
+                return QuantityDataset.DATASET_TYPE;
+            }
+            return CountDataset.DATASET_TYPE;
+        } else if (m.getValue() instanceof Boolean) {
+            return BooleanDataset.DATASET_TYPE;
         }
         return DatasetEntity.DEFAULT_VALUE_TYPE;
     }
