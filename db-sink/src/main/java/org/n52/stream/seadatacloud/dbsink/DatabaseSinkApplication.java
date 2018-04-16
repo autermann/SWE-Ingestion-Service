@@ -77,7 +77,7 @@ public class DatabaseSinkApplication {
     @Autowired
     private Configuration properties;
 
-    @Autowired
+    @Autowired(required=false)
     @Named("sensorml")
     private AggregateProcess processDescription;
     
@@ -93,7 +93,6 @@ public class DatabaseSinkApplication {
         LOG.info("init(); processor called");
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
-        checkSetting("sensorml-url", properties.getSensormlUrl());
     }
 
     @Transactional(rollbackFor=Exception.class)
@@ -116,9 +115,7 @@ public class DatabaseSinkApplication {
                             Data<?> first = null;
                             Data<?> last = null;
                             for (Measurement<?> m : series.getMeasurements()) {
-                                Data<?> data = observationDao.persist(m, datasetEntity,
-                                        observationDao.getComponent(datasetEntity.getPhenomenon().getIdentifier(),
-                                                getOutputs()));
+                                Data<?> data = observationDao.persist(m, datasetEntity, getOutputs());
                                 first = updateFirst(first, data);
                                 last = updateLast(last, data);
                             }

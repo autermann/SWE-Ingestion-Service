@@ -17,6 +17,7 @@ This project includes:
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
+  AspectJ weaver under Eclipse Public License - v 1.0
   Bean Validation API under Apache License 2.0
   ClassMate under The Apache Software License, Version 2.0
   com.vividsolutions:jts-core under GNU Lesser General Public License, Version 2.1
@@ -33,6 +34,8 @@ This project includes:
   HdrHistogram under Public Domain, per Creative Commons CC0 or BSD-2-Clause
   Hibernate Commons Annotations under GNU Lesser General Public License
   Hibernate Validator Engine under Apache License 2.0
+  hibernate-spatial under GNU Lesser General Public License (LGPL) version 2.1
+  HikariCP under The Apache Software License, Version 2.0
   INSPIRE Addresses schema (spec. v4.0) under The Apache Software License, Version 2.0
   INSPIRE Administrative Units schema (spec. v4.0) under The Apache Software License, Version 2.0
   INSPIRE base schema (spec. v3.3) under The Apache Software License, Version 2.0
@@ -46,7 +49,6 @@ This project includes:
   INSPIRE OM Observation References schema (spec. v3.0) under The Apache Software License, Version 2.0
   INSPIRE OM Process schema (spec. v3.0) under The Apache Software License, Version 2.0
   INSPIRE OM Specialised Observation schema (spec. v3.0.1) under The Apache Software License, Version 2.0
-  Integrate support for Spatial/GIS data into Hibernate O/RM under GNU Lesser General Public License
   ISO 19139 CV_DiscreteCoverage model (spec. v0.2.2) under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
@@ -55,16 +57,17 @@ This project includes:
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
   Java Annotation Indexer under Apache License, Version 2.0
+  Java client for the RabbitMQ HTTP API under The Apache Software License, Version 2.0
   Java Persistence API, Version 2.1 under Eclipse Public License (EPL), Version 1.0 or Eclipse Distribution License (EDL), Version 1.0
   Java Transaction API under Common Development and Distribution License or GNU General Public License, Version 2 with the Classpath Exception
   Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
   javax.annotation API under CDDL + GPLv2 with classpath exception
   javax.inject under The Apache Software License, Version 2.0
+  javax.transaction API under CDDL + GPLv2 with classpath exception
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
   JSON in Java under The JSON License
-  JTS Topology Suite under Lesser General Public License (LGPL)
   JUL to SLF4J bridge under MIT License
   JUnit under Eclipse Public License 1.0
   Kryo Shaded under New BSD License
@@ -111,16 +114,24 @@ This project includes:
   Portele Schape Change schema (spec. v3.0) under The Apache Software License, Version 2.0
   Postgis JDBC Driver under GNU Lesser General Public License
   PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
+  RabbitMQ Java Client under ASL 2.0 or GPL v2 or MPL 1.1
   reactive-streams under CC0
   Saxon-HE under Mozilla Public License Version 2.0
   Series Database Model - Entities under The Apache Software License, Version 2.0
+  Series Database Model - Hibernate Types under The Apache Software License, Version 2.0
   Series Database Model - Mappings under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
+  Spring AMQP Core under The Apache Software License, Version 2.0
   Spring AOP under Apache License, Version 2.0
+  Spring Aspects under Apache License, Version 2.0
   Spring Beans under Apache License, Version 2.0
   Spring Boot under Apache License, Version 2.0
+  Spring Boot AMQP Starter under Apache License, Version 2.0
+  Spring Boot AOP Starter under Apache License, Version 2.0
   Spring Boot AutoConfigure under Apache License, Version 2.0
+  Spring Boot Data JPA Starter under Apache License, Version 2.0
+  Spring Boot JDBC Starter under Apache License, Version 2.0
   Spring Boot Json Starter under Apache License, Version 2.0
   Spring Boot Logging Starter under Apache License, Version 2.0
   Spring Boot Starter under Apache License, Version 2.0
@@ -130,15 +141,24 @@ This project includes:
   Spring Commons Logging Bridge under Apache License, Version 2.0
   Spring Context under Apache License, Version 2.0
   Spring Core under Apache License, Version 2.0
+  Spring Data Core under Apache License, Version 2.0
+  Spring Data JPA under Apache License, Version 2.0
   Spring Expression Language (SpEL) under Apache License, Version 2.0
+  Spring Integration AMQP Support under The Apache Software License, Version 2.0
   Spring Integration Core under The Apache Software License, Version 2.0
   Spring Integration JMX Support under The Apache Software License, Version 2.0
+  Spring JDBC under Apache License, Version 2.0
   Spring Messaging under Apache License, Version 2.0
+  Spring Object/Relational Mapping under Apache License, Version 2.0
+  Spring RabbitMQ Support under The Apache Software License, Version 2.0
   Spring Retry under Apache 2.0
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
+  spring-cloud-starter-stream-rabbit under Apache License, Version 2.0
   spring-cloud-stream under Apache License, Version 2.0
+  spring-cloud-stream-binder-rabbit under Apache License, Version 2.0
+  spring-cloud-stream-binder-rabbit-core under Apache License, Version 2.0
   spring-integration-tuple under Apache License, Version 2.0
   spring-tuple under Apache License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
@@ -148,7 +168,6 @@ This project includes:
   W3C SOAP specification recommondation (v1.2 part 1) under The Apache Software License, Version 2.0
   W3C WS-Addressing specification schemas (v1.0) under The Apache Software License, Version 2.0
   W3C xlink schema (spec. v1.1.0) under The Apache Software License, Version 2.0
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0 or The SAX License or The W3C License
   XmlBeans under The Apache Software License, Version 2.0
   XmlBeansXPath under The Apache Software License, Version 2.0
   XMLUnit for Java under BSD License

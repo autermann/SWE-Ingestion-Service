@@ -30,6 +30,7 @@ package org.n52.stream.seadatacloud.dbsink.dao;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -43,13 +44,7 @@ import org.n52.series.db.beans.data.Data.CategoryData;
 import org.n52.series.db.beans.data.Data.CountData;
 import org.n52.series.db.beans.data.Data.QuantityData;
 import org.n52.series.db.beans.data.Data.TextData;
-import org.n52.shetland.ogc.sensorML.AbstractProcess;
-import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
-import org.n52.shetland.ogc.swe.simpleType.SweBoolean;
-import org.n52.shetland.ogc.swe.simpleType.SweCategory;
-import org.n52.shetland.ogc.swe.simpleType.SweCount;
-import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
-import org.n52.shetland.ogc.swe.simpleType.SweText;
+import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.stream.core.Measurement;
 
 public class ObservationDao extends AbstractDao {
@@ -58,24 +53,7 @@ public class ObservationDao extends AbstractDao {
         super(daoFactory);
     }
 
-    public Data<?> persist(Measurement<?> m, DatasetEntity dataset, AbstractProcess process) {
-        return persist(m, dataset, getComponent(dataset.getPhenomenon().getIdentifier(), process.getOutputs()));
-    }
-
-    public Data<?> persist(Measurement<?> m, DatasetEntity dataset, SweAbstractDataComponent component) {
-        if (component != null) {
-            if (component instanceof SweQuantity) {
-                return persistQuantity(m.getValue(), m, dataset);
-            } else if (component instanceof SweText) {
-                return persistText(m.getValue(), m, dataset);
-            } else if (component instanceof SweCategory) {
-                return persistCategory(m.getValue(), m, dataset);
-            } else if (component instanceof SweBoolean) {
-                return persistBoolean(m.getValue(), m, dataset);
-            } else if (component instanceof SweCount) {
-                return persistCount(m.getValue(), m, dataset);
-            }
-        }
+    public Data<?> persist(Measurement<?> m, DatasetEntity dataset, List<SmlIo> outputs) {
         if (m.getValue() instanceof BigDecimal) {
             return persistQuantity(m.getValue(), m, dataset);
         } else if (m.getValue() instanceof String) {
@@ -84,6 +62,9 @@ public class ObservationDao extends AbstractDao {
             }
             return persistText(m.getValue(), m, dataset);
         } else if (m.getValue() instanceof Integer) {
+            if (dataset.hasUnit() && checkForQuantity(dataset.getPhenomenon().getIdentifier(), outputs)) {
+                return persistQuantity(m.getValue(), m, dataset);
+            }
             return persistCount(m.getValue(), m, dataset);
         } else if (m.getValue() instanceof Boolean) {
             return persistBoolean(m.getValue(), m, dataset);
