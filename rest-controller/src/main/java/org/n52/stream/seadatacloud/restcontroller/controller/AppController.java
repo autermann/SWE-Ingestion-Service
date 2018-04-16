@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Component
-@RequestMapping("/api")
+@RequestMapping("/api/")
 public class AppController {
     
     public final String APPLICATION_JSON = "application/json";
@@ -64,25 +64,25 @@ public class AppController {
     @Autowired
     CloudService service;
 
-    @RequestMapping(value = "/sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sources getSources() {
         Sources result = service.getSources();
         return result;
     }
     
-    @RequestMapping(value = "/processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Processors getProcessors() {
         Processors result = service.getProcessors();
         return result;
     }
     
-    @RequestMapping(value = "/sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sinks getSinks() {
         Sinks result = service.getSinks();
         return result;
     }
     
-    @RequestMapping(value = "/registerApp", method = RequestMethod.GET)
+    @RequestMapping(value = "registerApp", method = RequestMethod.GET)
     public ResponseEntity<String> registerApp(
             @RequestParam("name") String appName,
             @RequestParam("type") String appType,

@@ -81,7 +81,8 @@ public class StreamController {
 
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
-    HttpHeaders headers = new HttpHeaders();
+    HttpHeaders CONTENT_TYPE_APPLICATION_JSON = new HttpHeaders();
+    HttpHeaders CONTENT_TYPE_APPLICATION_XML = new HttpHeaders();
 
     @Autowired
     CloudService service;
@@ -101,7 +102,8 @@ public class StreamController {
     @PostConstruct
     public void init() {
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        CONTENT_TYPE_APPLICATION_JSON.setContentType(MediaType.APPLICATION_JSON);
+        CONTENT_TYPE_APPLICATION_XML.setContentType(MediaType.APPLICATION_XML);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_XML, produces = APPLICATION_JSON)
@@ -183,33 +185,93 @@ public class StreamController {
 
                 if (createdStream != null) {
                     this.streamNameURLs.add(streamName, streamXML);
-                    return new ResponseEntity(createdStream, HttpStatus.CREATED);
+                    return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
-                    return new ResponseEntity(null, headers, HttpStatus.CONFLICT);
+                    return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
                 }
             } else {
-                return new ResponseEntity(null, headers, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
         }
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
-        return new ResponseEntity(result, headers, HttpStatus.OK);
+        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", headers, HttpStatus.NOT_FOUND);
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity(result, headers, HttpStatus.OK);
+        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, consumes = APPLICATION_JSON, produces = APPLICATION_XML)
+    public ResponseEntity<Stream> getStreamSensorMLURL(
+            @PathVariable String streamId) {
+        Stream result = service.getStream(streamId);
+        if (result == null) {
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+        }
+        if (this.streamNameURLs.hasStreamNameUrl(streamId)) {
+            String SensormlURL = this.streamNameURLs.getSensormlURL(streamId);
+            if (SensormlURL != null) {
+                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
+            } else {
+                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * DELETE deletes a stream.
+     *
+     * @param streamId - name of the stream
+     * @return succes or error message
+     */
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteStream(
+            @PathVariable String streamId) {
+        String result = service.deleteStream(streamId);
+        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+    }
+
+//    @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
+//    public ResponseEntity<Stream> putStream(
+//            @PathVariable String streamId,
+//            @RequestBody Map<String, Object> payload) {
+//        Stream stream = service.getStream(streamId);
+//        if (stream == null) {
+//            return new ResponseEntity(null, HttpStatus.EXPECTATION_FAILED);
+//        } else {
+//            String status = stream.getStatus();
+//            if (status.equals("deploying")) {
+//                // what to do when it's currently deploying?
+//                return new ResponseEntity(status, HttpStatus.CONFLICT);
+//            } else if (status.equals("undeployed")) {
+//                // deploy Stream
+//                service.deployStream(streamId);
+//                stream.setStatus("deploying");
+//                return new ResponseEntity(stream, HttpStatus.OK);
+//            } else if (status.equals("deployed")) {
+//                // undeploy Stream
+//                service.undeployStream(streamId);
+//                stream.setStatus("undeployed");
+//                return new ResponseEntity(stream, HttpStatus.OK);
+//            } else {
+//                // NoSuchStreamDefinitionException ==> Error
+//                return new ResponseEntity(stream, HttpStatus.NOT_FOUND);
+//            }
+//        }
+//    }
 }
