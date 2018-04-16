@@ -29,7 +29,6 @@
 package org.n52.stream.seadatacloud.restcontroller;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import org.n52.stream.seadatacloud.restcontroller.controller.AppController;
 import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
 import org.n52.stream.seadatacloud.restcontroller.util.DataRecordDefinitions;
@@ -53,6 +52,10 @@ public class RestApplication {
     
     @Value("${resources.path}")
     private String path;
+    @Value("${server.url}")
+    public String BASE_URL;
+    @Value("${server.port}")
+    public String BASE_URL_PORT;
     
     @Autowired
     public DataRecordDefinitions dataRecordDefinitions;
@@ -65,7 +68,7 @@ public class RestApplication {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(RestApplication.class)
-                .properties("path")
+                .properties("server.url,server.port,resources.path")
                 .run(args);
     }
 
@@ -73,10 +76,8 @@ public class RestApplication {
     private void init() {
         this.dataRecordDefinitions = new DataRecordDefinitions();
         
-        // SourceDefinitionPair mqtt = new SourceDefinitionPair("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
-
         // register applications:
-        if (path.contains("//")) {
+        if (path.contains("//")) { // windows-solution
             
             // -- sources --
             appController.registerApp("mqtt-source-rabbit", "source", path+"/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");

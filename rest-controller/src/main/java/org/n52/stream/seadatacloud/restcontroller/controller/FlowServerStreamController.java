@@ -56,13 +56,12 @@ public class FlowServerStreamController {
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<String> getApi() {
-        String results = "";
-        String sources = "{\"id\": \"/api/sources\", \"name\": \"sources\", \"description\":\"List of registered sources.\", \"href\": \"" +BASE_URL+ "/api/sources\"}";
-        String processors = "{\"id\": \"/api/processors\", \"name\": \"processors\", \"description\":\"List of registered processors.\", \"href\": \"" +BASE_URL+ "/api/processors\"}";
-        String sinks = "{\"id\": \"/api/sinks\", \"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \"" +BASE_URL+ "/api/sinks\"}";
-        String streams = "{\"id\": \"/api/streams\", \"name\": \"streams\", \"description\":\"List of registered streams.\", \"href\": \"" +BASE_URL+ "/api/streams\"}";
-        results = "{ \"resources\" : [" + sources + "," + processors + "," + sinks + "," + streams + "] }";
-        return new ResponseEntity(results, HttpStatus.ACCEPTED);
+        String sources = "{\"name\": \"sources\", \"description\":\"List of registered sources.\", \"href\": \"" +BASE_URL+ "/api/sources\"}";
+        String processors = "{\"name\": \"processors\", \"description\":\"List of registered processors.\", \"href\": \"" +BASE_URL+ "/api/processors\"}";
+        String sinks = "{\"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \"" +BASE_URL+ "/api/sinks\"}";
+        String streams = "{\"name\": \"streams\", \"description\":\"List of registered streams.\", \"href\": \"" +BASE_URL+ "/api/streams\"}";
+        String resources = "{ \"resources\" : [" + sources + "," + processors + "," + sinks + "," + streams + "] }";
+        return new ResponseEntity(resources, HttpStatus.ACCEPTED);
     }
 
 }

@@ -41,7 +41,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import static org.n52.stream.seadatacloud.restcontroller.service.CloudService.BASE_URL;
+import static org.n52.stream.seadatacloud.restcontroller.service.CloudService.BASE_URL_FLOW_SERVER;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.stream.seadatacloud.restcontroller.model.AppOptions;
 import org.n52.stream.seadatacloud.restcontroller.model.Sink;
@@ -73,7 +73,7 @@ public class SinksDecoder extends BaseDeserializer<Sinks> {
             current.setName(sink.get("name").asText());
 
             try {
-                URL url = new URL(BASE_URL + "/apps/" + "sink" + "/" + current.getName());
+                URL url = new URL(BASE_URL_FLOW_SERVER + "/apps/" + "sink" + "/" + current.getName());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestMethod("GET");

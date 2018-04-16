@@ -41,7 +41,7 @@ import org.n52.stream.seadatacloud.restcontroller.model.Stream;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 public class StreamDecoder extends BaseDeserializer<Stream> {
-
+    
     @Override
     public Stream deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Stream result = new Stream();

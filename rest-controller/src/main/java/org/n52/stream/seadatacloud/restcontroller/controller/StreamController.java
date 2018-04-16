@@ -30,6 +30,7 @@ package org.n52.stream.seadatacloud.restcontroller.controller;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -38,10 +39,13 @@ import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
+import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.shetland.ogc.swe.SweDataRecord;
 import org.n52.shetland.ogc.swe.SweField;
 import org.n52.shetland.ogc.swe.simpleType.SweText;
+import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
@@ -81,8 +85,10 @@ public class StreamController {
 
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
-    HttpHeaders CONTENT_TYPE_APPLICATION_JSON = new HttpHeaders();
-    HttpHeaders CONTENT_TYPE_APPLICATION_XML = new HttpHeaders();
+    private final HttpHeaders CONTENT_TYPE_APPLICATION_JSON = new HttpHeaders();
+    private final HttpHeaders CONTENT_TYPE_APPLICATION_XML = new HttpHeaders();
+    private final HttpHeaders HEADER_ACCEPT_ALL = new HttpHeaders();
+    private final HttpHeaders HEADER_ACCEPT_XML = new HttpHeaders();
 
     @Autowired
     CloudService service;
@@ -104,6 +110,15 @@ public class StreamController {
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         CONTENT_TYPE_APPLICATION_JSON.setContentType(MediaType.APPLICATION_JSON);
         CONTENT_TYPE_APPLICATION_XML.setContentType(MediaType.APPLICATION_XML);
+        List<MediaType> defaultMediaType = new ArrayList();
+        defaultMediaType.add(MediaType.TEXT_HTML);
+        defaultMediaType.add(MediaType.TEXT_PLAIN);
+        defaultMediaType.add(MediaType.APPLICATION_JSON);
+        defaultMediaType.remove(MediaType.APPLICATION_XML);
+        HEADER_ACCEPT_ALL.setAccept(defaultMediaType);
+        List<MediaType> xmlMediaType = new ArrayList();
+        xmlMediaType.add(MediaType.APPLICATION_XML);
+        HEADER_ACCEPT_XML.setAccept(xmlMediaType);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_XML, produces = APPLICATION_JSON)
@@ -131,7 +146,6 @@ public class StreamController {
 
                 String sdrDefinition = sdr.getDefinition();
                 String sourceName = "";
-                // get Source:
                 Source source;
 
                 if (dataRecordDefinitions.hasDataRecordDefinition(sdrDefinition)) {
@@ -177,14 +191,17 @@ public class StreamController {
 
                 Stream createdStream = null;
                 streamName = "s" + streamName;
-                LOG.info(streamName);
-                LOG.info(streamDefinition);
                 Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
 
                 createdStream = futureStream.get(15, TimeUnit.SECONDS);
 
                 if (createdStream != null) {
                     this.streamNameURLs.add(streamName, streamXML);
+                    // InserObservation:
+                    InsertSensorGenerator generator = new InsertSensorGenerator();
+                    AggregateProcess aggregateProcess = (AggregateProcess) decode;
+                    InsertSensorRequest request =  generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
+                    
                     return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
                     return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
@@ -201,10 +218,10 @@ public class StreamController {
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
-        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+        return new ResponseEntity(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
@@ -214,7 +231,7 @@ public class StreamController {
         return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, consumes = APPLICATION_JSON, produces = APPLICATION_XML)
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_XML)
     public ResponseEntity<Stream> getStreamSensorMLURL(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
@@ -226,10 +243,10 @@ public class StreamController {
             if (SensormlURL != null) {
                 return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
-                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
             }
         } else {
-            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
     }
 

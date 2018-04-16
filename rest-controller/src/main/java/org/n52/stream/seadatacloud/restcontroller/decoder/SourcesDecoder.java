@@ -41,7 +41,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import static org.n52.stream.seadatacloud.restcontroller.service.CloudService.BASE_URL;
+import static org.n52.stream.seadatacloud.restcontroller.service.CloudService.BASE_URL_FLOW_SERVER;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.stream.seadatacloud.restcontroller.model.AppOptions;
 import org.n52.stream.seadatacloud.restcontroller.model.Source;
@@ -73,7 +73,7 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
             current.setName(source.get("name").asText());
 
             try {
-                URL url = new URL(BASE_URL + "/apps/" + "source" + "/" + current.getName());
+                URL url = new URL(BASE_URL_FLOW_SERVER + "/apps/" + "source" + "/" + current.getName());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestMethod("GET");
