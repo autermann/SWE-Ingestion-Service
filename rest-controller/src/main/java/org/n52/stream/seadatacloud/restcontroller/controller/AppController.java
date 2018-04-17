@@ -26,15 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller.controller;
 
+import java.util.List;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
+import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.service.CloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Component
-@RequestMapping("/api")
+@RequestMapping("/api/")
 public class AppController {
 
     public final String APPLICATION_JSON = "application/json";
@@ -61,32 +59,51 @@ public class AppController {
     @Autowired
     CloudService service;
 
-    @RequestMapping(value = "/sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sources getSources() {
         Sources result = service.getSources();
         return result;
     }
-
-    @RequestMapping(value = "/processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    
+    @RequestMapping(value = "processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Processors getProcessors() {
         Processors result = service.getProcessors();
         return result;
     }
-
-    @RequestMapping(value = "/sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    
+    @RequestMapping(value = "sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sinks getSinks() {
         Sinks result = service.getSinks();
         return result;
     }
-
-    @RequestMapping(value = "/registerApp", method = RequestMethod.GET)
+    
+    @RequestMapping(value = "registerApp", method = RequestMethod.GET)
     public ResponseEntity<String> registerApp(
             @RequestParam("name") String appName,
             @RequestParam("type") String appType,
             @RequestParam("uri") String appUri
     ) {
         String result = service.registerApp(appName, appType, appUri);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity(result, HttpStatus.OK);
     }
-
+    
+    public Source getSourceByName(String sourceName) {
+        Sources registeredSources = service.getSources();
+        for (Source current : registeredSources.getSources()) {
+            if (current.getName().equalsIgnoreCase(sourceName)) {
+                return current;
+            }
+        }
+        return null;
+    }
+    
+    public AppOption getSourceOptionByName(Source source, String appOptionName) {
+        List<AppOption> sourceOptions = source.getOptions();
+        for (AppOption current : sourceOptions) {
+            if (current.getName().equalsIgnoreCase(appOptionName)) {
+                return current;
+            }
+        }
+        return null;
+    }
 }

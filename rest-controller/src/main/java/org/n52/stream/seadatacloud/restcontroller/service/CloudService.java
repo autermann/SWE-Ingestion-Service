@@ -26,32 +26,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
-import org.n52.stream.seadatacloud.restcontroller.model.Processor;
+import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.n52.stream.seadatacloud.restcontroller.model.Processors;
-import org.n52.stream.seadatacloud.restcontroller.model.Sink;
 import org.n52.stream.seadatacloud.restcontroller.model.Sinks;
-import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Sources;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -61,46 +57,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class CloudService {
 
-    public static final String BASE_URL = "http://localhost:9393";
+    private static final Logger LOG = LoggerFactory.getLogger(CloudService.class);
 
-    private List<AppOption> getAppOptions(String appType, String appName) {
-        List<AppOption> options = new ArrayList<>();
-        try {
-            URL url = new URL(BASE_URL + "/apps/" + appType + "/" + appName);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-            JSONObject json = new JSONObject(response);
-            JSONArray jsoptions = json.getJSONArray("options");
-            for (int i = 0; i < jsoptions.length(); i++) {
-                JSONObject jscurrent = jsoptions.getJSONObject(i);
-                AppOption current = new AppOption();
-                current.setName(jscurrent.getString("name"));
-                current.setDescription(jscurrent.getString("description"));
-                current.setType(jscurrent.getString("type"));
-                current.setDefaultValue(jscurrent.get("defaultValue").toString());
-                options.add(current);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return options;
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public static final String BASE_URL_FLOW_SERVER = "http://localhost:9393";
 
     public Sources getSources() {
         Sources sources = new Sources();
         try {
-            URL url = new URL(BASE_URL + "/apps?type=source");
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=source");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -115,28 +82,19 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            JSONArray jssources = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Source> sourcesList = new ArrayList<>();
-            for (int i = 0; i < jssources.length(); i++) {
-                JSONObject jscurrent = jssources.getJSONObject(i);
-                Source current = new Source();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("source", current.getName()));
-                sourcesList.add(current);
-            }
-            sources.setSources(sourcesList);
+            sources = objectMapper.readValue(response, Sources.class);
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return sources;
     }
 
     public Processors getProcessors() {
-        Processors processors = new Processors();
+        Processors processors = null;
         try {
-            URL url = new URL(BASE_URL + "/apps?type=processor");
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=processor");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -151,28 +109,19 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            JSONArray jsprocessors = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Processor> processorList = new ArrayList<>();
-            for (int i = 0; i < jsprocessors.length(); i++) {
-                JSONObject jscurrent = jsprocessors.getJSONObject(i);
-                Processor current = new Processor();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("processor", current.getName()));
-                processorList.add(current);
-            }
-            processors.setProcessors(processorList);
+            processors = objectMapper.readValue(response, Processors.class);
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return processors;
     }
 
     public Sinks getSinks() {
-        Sinks sinks = new Sinks();
+        Sinks sinks = null;
         try {
-            URL url = new URL(BASE_URL + "/apps?type=sink");
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=sink");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -187,20 +136,11 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            JSONArray jssinks = json.getJSONObject("_embedded").getJSONArray("appRegistrationResourceList");
-            List<Sink> sinkList = new ArrayList<>();
-            for (int i = 0; i < jssinks.length(); i++) {
-                JSONObject jscurrent = jssinks.getJSONObject(i);
-                Sink current = new Sink();
-                current.setName(jscurrent.getString("name"));
-                current.setOptions(getAppOptions("sink", current.getName()));
-                sinkList.add(current);
-            }
-            sinks.setSinks(sinkList);
+            sinks = objectMapper.readValue(response, Sinks.class);
 
         } catch (Exception e) {
             System.out.println(e);
+            LOG.error(e.getMessage());
         }
         return sinks;
     }
@@ -209,7 +149,7 @@ public class CloudService {
         String response = "";
         try {
 
-            URL url = new URL(BASE_URL + "/apps/" + appType + "/" + appName);
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps/" + appType + "/" + appName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -230,44 +170,67 @@ public class CloudService {
 
         } catch (IOException e) {
             response = e.getMessage();
+            LOG.error(e.getMessage());
         } catch (Exception e) {
             response = e.getMessage();
+            LOG.error(e.getMessage());
         }
         return response;
     }
 
-    public String createStream(String streamName, String streamDefinition, boolean deploy) {
-        String response = "";
-        try {
-            URL url = new URL(BASE_URL + "/streams/definitions?deploy=" + deploy);
+    public Future<Stream> createStream(String streamName, String streamDefinition, boolean deploy) throws InterruptedException {
+        CompletableFuture<Stream> completableFuture = new CompletableFuture<>();
+
+        Executors.newCachedThreadPool().submit(() -> {
+            Stream stream = null;
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions");
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition).getBytes());
+            InputStream inputStream;
+            try {
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(("name=" + streamName + "&definition=" + streamDefinition + "&deploy=" + deploy).getBytes());
+                int responseCode = conn.getResponseCode();
+                if (responseCode >= 300) {
+                    inputStream = conn.getErrorStream();
+                    Scanner scanner = new Scanner(inputStream);
+                    scanner.useDelimiter("\\Z");
+                    String response = scanner.next();
+                    LOG.error(response);
+                } 
+                inputStream = conn.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader in = new BufferedReader(inputStreamReader);
+                String line;
+                StringBuffer res = new StringBuffer();
+                while ((line = in.readLine()) != null) {
+                    res.append(line);
+                    res.append("\n");
+                }
+                in.close();
+                conn.disconnect();
+                String response = res.toString();
+                stream = objectMapper.readValue(response, Stream.class);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOG.error(e.getMessage());
             }
-            in.close();
-            conn.disconnect();
-            response = res.toString() + "success.";
-        } catch (Exception e) {
-            response = e.getMessage() + "failed.";
-        }
-        return response;
-    }
+
+            completableFuture.complete(stream);
+            return stream;
+        });
+
+        return completableFuture;
+    };
 
     public String undeployStream(String streamName) {
         String response = "";
         try {
 
-            URL url = new URL(BASE_URL + "/streams/deployments/" + streamName);
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
@@ -294,7 +257,7 @@ public class CloudService {
         String response = "";
         try {
 
-            URL url = new URL(BASE_URL + "/streams/deployments/" + streamName);
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
@@ -324,7 +287,7 @@ public class CloudService {
     public String deleteStream(String streamName) {
         String response = "";
         try {
-            URL url = new URL(BASE_URL + "/streams/definitions/" + streamName);
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions/" + streamName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
             conn.setDoOutput(true);
@@ -348,7 +311,7 @@ public class CloudService {
     public Streams getStreams() {
         Streams streams = new Streams();
         try {
-            URL url = new URL(BASE_URL + "/streams/definitions");
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions?size=100");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -363,23 +326,8 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            if (!json.has("_embedded")) {
-                streams.setStreams(new ArrayList<>());
-            } else {
-                JSONArray jsstreams = json.getJSONObject("_embedded").getJSONArray("streamDefinitionResourceList");
+            streams = objectMapper.readValue(response, Streams.class);
 
-                List<Stream> streamsList = new ArrayList<>();
-                for (int i = 0; i < jsstreams.length(); i++) {
-                    JSONObject jscurrent = jsstreams.getJSONObject(i);
-                    Stream current = new Stream();
-                    current.setName(jscurrent.getString("name"));
-                    current.setStatus(jscurrent.getString("status"));
-                    current.setDefinition(jscurrent.getString("dslText"));
-                    streamsList.add(current);
-                }
-                streams.setStreams(streamsList);
-            }
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -387,9 +335,9 @@ public class CloudService {
     }
 
     public Stream getStream(String streamId) {
-        Stream stream = new Stream();
+        Stream stream = null;
         try {
-            URL url = new URL(BASE_URL + "/streams/definitions/" + streamId);
+            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions/" + streamId);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoOutput(true);
@@ -405,13 +353,9 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
 
-            JSONObject json = new JSONObject(response);
-            stream.setName(json.getString("name"));
-            stream.setStatus(json.getString("status"));
-            stream.setDefinition(json.getString("dslText"));
+            stream = objectMapper.readValue(response, Stream.class);
 
         } catch (Exception e) {
-            // TODO: error
             return null;
         }
         return stream;

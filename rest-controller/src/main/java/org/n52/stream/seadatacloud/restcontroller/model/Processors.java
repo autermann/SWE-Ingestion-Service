@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Processors {
+public class Processors implements BaseEntity{
     
     public List<Processor> processors;
 

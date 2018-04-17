@@ -1,2 +1,6 @@
 server:
   port: 8080
+  url: http://localhost
+  
+resources:
+    path: file://C:/Develop/2018/n52/SWE-Ingestion-Service

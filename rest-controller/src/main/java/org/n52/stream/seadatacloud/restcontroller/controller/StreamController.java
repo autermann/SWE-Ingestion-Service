@@ -26,28 +26,49 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.restcontroller.controller;
 
-import org.n52.stream.seadatacloud.restcontroller.service.CloudService;
-
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+import org.n52.shetland.ogc.sensorML.AbstractProcess;
+import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
+import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
+import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
+import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
+import org.n52.shetland.ogc.swe.SweDataRecord;
+import org.n52.shetland.ogc.swe.SweField;
+import org.n52.shetland.ogc.swe.simpleType.SweText;
+import org.n52.stream.generate.InsertSensorGenerator;
+import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
+import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
+import org.n52.stream.seadatacloud.restcontroller.service.CloudService;
+import org.n52.stream.seadatacloud.restcontroller.util.DataRecordDefinitions;
+import org.n52.stream.seadatacloud.restcontroller.util.StreamNameURLs;
+import org.n52.stream.util.DecoderHelper;
+import org.n52.svalbard.decode.DecoderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -56,79 +77,142 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Component
+@ImportResource("classpath*:/svalbard-*.xml")
 @RequestMapping("/api/streams")
 public class StreamController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StreamController.class);
+
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
+    private final HttpHeaders CONTENT_TYPE_APPLICATION_JSON = new HttpHeaders();
+    private final HttpHeaders CONTENT_TYPE_APPLICATION_XML = new HttpHeaders();
+    private final HttpHeaders HEADER_ACCEPT_ALL = new HttpHeaders();
+    private final HttpHeaders HEADER_ACCEPT_XML = new HttpHeaders();
 
     @Autowired
     CloudService service;
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_JSON)
-    public ResponseEntity<String> createJsonStream(
-            @RequestBody Map<String, Object> payload) {
+    @Autowired
+    AppController appController;
 
-        try {
-            String streamDefinition = "";
-            String streamName = (String) payload.get("name");
-            Stream stream = service.getStream(streamName);
-            if (stream != null) {
-                return new ResponseEntity<>("{Error: Stream " + streamName + " already exists.}", HttpStatus.CONFLICT);
-            }
-            Map<String, Object> source = (Map<String, Object>) payload.get("source");
-            String sourceName = (String) source.get("name");
-            Map<String, Object> processor = (Map<String, Object>) payload.get("processor");
-            String processorName = (String) processor.get("name");
-            Map<String, Object> sink = (Map<String, Object>) payload.get("sink");
-            String sinkName = (String) sink.get("name");
-            if (sourceName.equals("mqttrabbitsource")) {
-                streamDefinition = sourceName;
-                String mqttUrl = (String) source.get("url");
-                if (mqttUrl != null) {
-                    streamDefinition += " --url=" + mqttUrl;
-                    String mqttPort = (String) source.get("port");
-                    if (mqttPort != null) {
-                        streamDefinition += ":" + mqttPort;
-                    }
-                }
-                String mqttTopic = (String) source.get("topic");
-                if (mqttTopic != null) {
-                    streamDefinition += " --topics=" + mqttTopic;
-                }
-                String mqttUsername = (String) source.get("username");
-                if (mqttUsername != null) {
-                    streamDefinition += " --username=" + mqttUsername;
-                }
-                String mqttPassword = (String) source.get("password");
-                if (mqttPassword != null) {
-                    streamDefinition += " --password=" + mqttPassword;
-                }
-            } else if (streamName.equals("some other source")) {
+    @Autowired
+    private DecoderRepository decoderRepository;
 
-            } else {
+    @Autowired
+    private DataRecordDefinitions dataRecordDefinitions;
 
-            }
+    @Autowired
+    private StreamNameURLs streamNameURLs;
 
-            streamDefinition += " | " + processorName + " | " + sinkName;
-
-            String attempt = createStream(streamName, streamDefinition, false);
-            if (attempt.endsWith("success.")) {
-                return new ResponseEntity<>(attempt, HttpStatus.CREATED);
-            } else {
-                return new ResponseEntity<>(attempt, HttpStatus.EXPECTATION_FAILED);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    @PostConstruct
+    public void init() {
+        this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+        CONTENT_TYPE_APPLICATION_JSON.setContentType(MediaType.APPLICATION_JSON);
+        CONTENT_TYPE_APPLICATION_XML.setContentType(MediaType.APPLICATION_XML);
+        List<MediaType> defaultMediaType = new ArrayList();
+        defaultMediaType.add(MediaType.TEXT_HTML);
+        defaultMediaType.add(MediaType.TEXT_PLAIN);
+        defaultMediaType.add(MediaType.APPLICATION_JSON);
+        defaultMediaType.remove(MediaType.APPLICATION_XML);
+        HEADER_ACCEPT_ALL.setAccept(defaultMediaType);
+        List<MediaType> xmlMediaType = new ArrayList();
+        xmlMediaType.add(MediaType.APPLICATION_XML);
+        HEADER_ACCEPT_XML.setAccept(xmlMediaType);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_XML)
-    public ResponseEntity<String> createJXmlStream(
-            @RequestBody String xml) {
-        String result = xml;
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+    @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_XML, produces = APPLICATION_JSON)
+    public ResponseEntity<Stream> uploadConfig(
+            @RequestBody byte[] requestBody) {
+        String streamName = UUID.randomUUID().toString();
+        try {
+            String streamXML = new String(requestBody);
+
+            DecoderHelper helper = new DecoderHelper();
+            decoderRepository.init();
+            helper.setDecoderRepository(decoderRepository);
+
+            Object decode = helper.decode(streamXML);
+
+            if (decode instanceof AggregateProcess) {
+                ArrayList<SmlComponent> al = (ArrayList<SmlComponent>) ((AggregateProcess) decode).getComponents();
+                SmlComponent comp = al.get(0);
+                // TODO: instanceof Abfragen:
+                AbstractProcess asml = (AbstractProcess) comp.getProcess();
+                ArrayList<SmlIo> smlOutputs = (ArrayList<SmlIo>) asml.getOutputs();
+                SmlIo smlIo = smlOutputs.get(0);
+                SmlDataInterface smlDataInterface = (SmlDataInterface) smlIo.getIoValue();
+                SweDataRecord sdr = smlDataInterface.getInterfaceParameters();
+
+                String sdrDefinition = sdr.getDefinition();
+                String sourceName = "";
+                Source source;
+
+                if (dataRecordDefinitions.hasDataRecordDefinition(sdrDefinition)) {
+                    source = appController.getSourceByName(dataRecordDefinitions.getSourceType(sdrDefinition));
+                } else {
+                    return new ResponseEntity("{\"error\":\"No supported Source found for DataRecord definition '" + sdrDefinition + "'\"}", HttpStatus.NOT_FOUND);
+                }
+                if (source == null) {
+                    return new ResponseEntity("{ \"error\": \"DataRecord definition '" + sdrDefinition + "' is supposed to be supported by Source '" + sourceName + "', but Source '" + sourceName + "' not found.\"}", HttpStatus.NOT_FOUND);
+                }
+                sourceName = source.getName();
+
+                LinkedList<SweField> sweFields = (LinkedList<SweField>) sdr.getFields();
+
+                String streamSourceDefinition = "";
+                String streamDefinition = "";
+
+                for (SweField current : sweFields) {
+                    SweText sweText = (SweText) current.getElement();
+                    String optionUrl = sweText.getDefinition();
+                    String appOptionName;
+                    if (optionUrl.indexOf('#') > -1) {
+                        appOptionName = optionUrl.substring(optionUrl.lastIndexOf('#') + 1);
+                    } else {
+                        return new ResponseEntity("{ \"error\": \"swe:Text definition '" + optionUrl + "' requires a hashtag ( # ) option.\"}", HttpStatus.BAD_REQUEST);
+                    }
+                    AppOption ao = appController.getSourceOptionByName(source, appOptionName);
+                    if (ao == null) {
+                        return new ResponseEntity("{ \"error\": \"Option '" + appOptionName + "' is not supported by source '" + sourceName + "'.\"}", HttpStatus.BAD_REQUEST);
+                    }
+                    streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
+                };
+                if (streamSourceDefinition.length() > 0) {
+                    streamDefinition = sourceName + streamSourceDefinition + " ";
+                } else {
+                    streamDefinition = sourceName + " ";
+                }
+
+                // TODO: parse processor...
+                streamDefinition += "| csv-processor ";
+                // TODO: parse sink...
+                streamDefinition += "| db-sink";
+
+                Stream createdStream = null;
+                streamName = "s" + streamName;
+                Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
+
+                createdStream = futureStream.get(15, TimeUnit.SECONDS);
+
+                if (createdStream != null) {
+                    this.streamNameURLs.add(streamName, streamXML);
+                    // InserObservation:
+                    InsertSensorGenerator generator = new InsertSensorGenerator();
+                    AggregateProcess aggregateProcess = (AggregateProcess) decode;
+                    InsertSensorRequest request = generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
+
+                    return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
+                } else {
+                    return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
+                }
+            } else {
+                return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
@@ -141,35 +225,28 @@ public class StreamController {
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        if (result == null) {
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
-    public ResponseEntity<Stream> putStream(
-            @PathVariable String streamId,
-            @RequestBody Map<String, Object> payload) {
-        Stream stream = service.getStream(streamId);
-        if (stream == null) {
-            return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
-        } else {
-            String status = stream.getStatus();
-            if (status.equals("deploying")) {
-                // what to do when it's currently deploying?
-                return new ResponseEntity<>(stream, HttpStatus.CONFLICT);
-            } else if (status.equals("undeployed")) {
-                // deploy Stream
-                service.deployStream(streamId);
-                stream.setStatus("deploying");
-                return new ResponseEntity<>(stream, HttpStatus.OK);
-            } else if (status.equals("deployed")) {
-                // undeploy Stream
-                service.undeployStream(streamId);
-                stream.setStatus("undeployed");
-                return new ResponseEntity<>(stream, HttpStatus.OK);
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_XML)
+    public ResponseEntity<Stream> getStreamSensorMLURL(
+            @PathVariable String streamId) {
+        Stream result = service.getStream(streamId);
+        if (result == null) {
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+        }
+        if (this.streamNameURLs.hasStreamNameUrl(streamId)) {
+            String SensormlURL = this.streamNameURLs.getSensormlURL(streamId);
+            if (SensormlURL != null) {
+                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
-                // NoSuchStreamDefinitionException ==> Error
-                return new ResponseEntity<>(stream, HttpStatus.NOT_FOUND);
+                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
             }
+        } else {
+            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -183,17 +260,35 @@ public class StreamController {
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/createStream", method = RequestMethod.GET)
-    public String createStream(
-            @RequestParam("streamName") String streamName,
-            @RequestParam("streamDefinition") String streamDefinition,
-            @RequestParam("deploy") boolean deploy
-    ) {
-        String result = "";
-        result = service.createStream(streamName, streamDefinition, deploy);
-        return result;
-    }
+//    @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
+//    public ResponseEntity<Stream> putStream(
+//            @PathVariable String streamId,
+//            @RequestBody Map<String, Object> payload) {
+//        Stream stream = service.getStream(streamId);
+//        if (stream == null) {
+//            return new ResponseEntity(null, HttpStatus.EXPECTATION_FAILED);
+//        } else {
+//            String status = stream.getStatus();
+//            if (status.equals("deploying")) {
+//                // what to do when it's currently deploying?
+//                return new ResponseEntity(status, HttpStatus.CONFLICT);
+//            } else if (status.equals("undeployed")) {
+//                // deploy Stream
+//                service.deployStream(streamId);
+//                stream.setStatus("deploying");
+//                return new ResponseEntity(stream, HttpStatus.OK);
+//            } else if (status.equals("deployed")) {
+//                // undeploy Stream
+//                service.undeployStream(streamId);
+//                stream.setStatus("undeployed");
+//                return new ResponseEntity(stream, HttpStatus.OK);
+//            } else {
+//                // NoSuchStreamDefinitionException ==> Error
+//                return new ResponseEntity(stream, HttpStatus.NOT_FOUND);
+//            }
+//        }
+//    }
 }
