@@ -193,11 +193,6 @@
 				<version>2.0.0.RELEASE</version>
 				<scope>compile</scope>
 			</dependency>
-			<dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20160810</version>
-            </dependency>
             
             <!-- DB sink -->
             <dependency>
@@ -341,7 +336,7 @@
                         <id>generate-notice</id>
                         <phase>initialize</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
