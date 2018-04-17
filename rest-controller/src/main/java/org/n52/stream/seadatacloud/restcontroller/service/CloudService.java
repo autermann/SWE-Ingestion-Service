@@ -47,7 +47,6 @@ import org.n52.stream.seadatacloud.restcontroller.model.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -199,7 +198,7 @@ public class CloudService {
                     scanner.useDelimiter("\\Z");
                     String response = scanner.next();
                     LOG.error(response);
-                } 
+                }
                 inputStream = conn.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader in = new BufferedReader(inputStreamReader);
@@ -224,12 +223,13 @@ public class CloudService {
         });
 
         return completableFuture;
-    };
+    }
 
-    public String undeployStream(String streamName) {
-        String response = "";
+    ;
+
+    public Stream undeployStream(String streamName) {
+        Stream stream = null;
         try {
-
             URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -246,17 +246,17 @@ public class CloudService {
             }
             in.close();
             conn.disconnect();
-            response = res.toString();
+            String response = res.toString();
+            stream = objectMapper.readValue(response, Stream.class);
         } catch (Exception e) {
-            response = e.getMessage();
+            LOG.error(e.getMessage());
         }
-        return response;
+        return stream;
     }
 
-    public String deployStream(String streamName) {
-        String response = "";
+    public Stream deployStream(String streamName) {
+        Stream stream = null;
         try {
-
             URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -274,14 +274,12 @@ public class CloudService {
             }
             in.close();
             conn.disconnect();
-            response = res.toString() + "success.";
-
-        } catch (IOException e) {
-            response = e.getMessage();
+            String response = res.toString();
+            stream = objectMapper.readValue(response, Stream.class);
         } catch (Exception e) {
-            response = e.getMessage();
+            LOG.error(e.getMessage());
         }
-        return response;
+        return stream;
     }
 
     public String deleteStream(String streamName) {

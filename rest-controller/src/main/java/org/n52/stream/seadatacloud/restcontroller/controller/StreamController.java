@@ -49,6 +49,7 @@ import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.restcontroller.model.AppOption;
 import org.n52.stream.seadatacloud.restcontroller.model.Source;
 import org.n52.stream.seadatacloud.restcontroller.model.Stream;
+import org.n52.stream.seadatacloud.restcontroller.model.StreamStatus;
 import org.n52.stream.seadatacloud.restcontroller.model.Streams;
 import org.n52.stream.seadatacloud.restcontroller.service.CloudService;
 import org.n52.stream.seadatacloud.restcontroller.util.DataRecordDefinitions;
@@ -201,7 +202,7 @@ public class StreamController {
                     InsertSensorGenerator generator = new InsertSensorGenerator();
                     AggregateProcess aggregateProcess = (AggregateProcess) decode;
                     InsertSensorRequest request = generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
-
+                    
                     return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
                     return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
@@ -256,39 +257,40 @@ public class StreamController {
      * @param streamId - name of the stream
      * @return succes or error message
      */
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{streamId}", produces = APPLICATION_JSON, method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
         return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/{streamId}", method = RequestMethod.PUT)
-//    public ResponseEntity<Stream> putStream(
-//            @PathVariable String streamId,
-//            @RequestBody Map<String, Object> payload) {
-//        Stream stream = service.getStream(streamId);
-//        if (stream == null) {
-//            return new ResponseEntity(null, HttpStatus.EXPECTATION_FAILED);
-//        } else {
-//            String status = stream.getStatus();
-//            if (status.equals("deploying")) {
-//                // what to do when it's currently deploying?
-//                return new ResponseEntity(status, HttpStatus.CONFLICT);
-//            } else if (status.equals("undeployed")) {
-//                // deploy Stream
-//                service.deployStream(streamId);
-//                stream.setStatus("deploying");
-//                return new ResponseEntity(stream, HttpStatus.OK);
-//            } else if (status.equals("deployed")) {
-//                // undeploy Stream
-//                service.undeployStream(streamId);
-//                stream.setStatus("undeployed");
-//                return new ResponseEntity(stream, HttpStatus.OK);
-//            } else {
-//                // NoSuchStreamDefinitionException ==> Error
-//                return new ResponseEntity(stream, HttpStatus.NOT_FOUND);
-//            }
-//        }
-//    }
+    @RequestMapping(value = "/{streamId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON, method = RequestMethod.PUT)
+    public ResponseEntity<Stream> putStream(
+            @PathVariable String streamId,
+            @RequestBody StreamStatus requestStatus) {
+        Stream stream = service.getStream(streamId);
+        if (stream == null) {
+            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+        } else {
+            String status = stream.getStatus();
+            if (status.equals("deploying")) {
+                return new ResponseEntity("{\"Accepted\": \"The Stream '" + streamId + "' is currently 'deploying' and thus, the resource' status will not be changed.\"}", HttpStatus.ACCEPTED);
+            }
+            if (requestStatus.getStatus() == null) {
+                return new ResponseEntity("{\"error\":\"Request is missing required field 'status'.\"}", HttpStatus.BAD_REQUEST);
+            }
+            switch (requestStatus.getStatus()) {
+                case "deployed":
+                    Stream deployedStream = service.deployStream(streamId);
+                    return new ResponseEntity(deployedStream, HttpStatus.OK);
+                case "undeployed":
+                    Stream undeployedStream = service.undeployStream(streamId);
+                    return new ResponseEntity(undeployedStream, HttpStatus.OK);
+                default:
+                    return new ResponseEntity("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
+            }
+        }
+    }
+    
+    
 }
