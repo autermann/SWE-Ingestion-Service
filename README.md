@@ -18,7 +18,7 @@ The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deplo
 
 |Library|License|Link/Source|
 |:----:|:----:|:-----:|
-|SWE-Ingestion-Service|Apache License Version 2.0|[https://github.com/MojioMS/SWE-Ingestion-Service/blob/master/LICENSE](https://github.com/MojioMS/SWE-Ingestion-Service/blob/master/LICENSE)|
+|SWE-Ingestion-Service|GNU GENERAL PUBLIC LICENSE 2.0|[https://github.com/52North/SWE-Ingestion-Service/blob/dev/LICENSE](https://github.com/52North/SWE-Ingestion-Service/blob/dev/LICENSE)|
 
 ## Requirements
 
