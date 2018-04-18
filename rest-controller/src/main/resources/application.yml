@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  port: 9081
   
-resources:
-    path: file://C:/Develop/2018/n52/SWE-Ingestion-Service
+org.n52.stream:
+  apps:
+    basepath: file:///tmp/apps/

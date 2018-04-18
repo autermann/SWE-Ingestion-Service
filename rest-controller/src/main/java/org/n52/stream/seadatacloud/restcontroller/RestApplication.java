@@ -29,6 +29,7 @@
 package org.n52.stream.seadatacloud.restcontroller;
 
 import javax.annotation.PostConstruct;
+
 import org.n52.stream.seadatacloud.restcontroller.controller.AppController;
 import org.n52.stream.seadatacloud.restcontroller.exception.AppRegisterException;
 import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;
@@ -52,7 +53,7 @@ import org.springframework.http.ResponseEntity;
 @Import(RemoteConfiguration.class)
 public class RestApplication {
 
-    @Value("${resources.path}")
+    @Value("${org.n52.stream.apps.basepath}")
     private String path;
 
     @Autowired
@@ -74,37 +75,36 @@ public class RestApplication {
     private void init() throws AppRegisterException {
         this.dataRecordDefinitions = new DataRecordDefinitions();
 
-        // register applications:
-        if (path.contains("//")) { // windows-solution
+        // -- sources --
+        
+        String sourceUrl = path + "sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar";
+        ResponseEntity<String> response = appController.registerApp("mqtt-source-rabbit", "source", sourceUrl);
+        if ((response.getStatusCodeValue() != 200)
+                && (response.getStatusCodeValue() != 409)) {
+            throw new AppRegisterException("Could not register unregistered source 'mqtt-source-rabbit' from '" + sourceUrl + "'.");
+        }
 
-            // -- sources --
-            ResponseEntity<String> response = appController.registerApp("mqtt-source-rabbit", "source", path + "/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'mqtt-source-rabbit' from '" + path + "/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar'.");
-            }
+        // -- processors --
+        String processorUrl = path + "processors/csv-processor-0.0.1-SNAPSHOT.jar";
+        response = appController.registerApp("csv-processor", "processor", processorUrl);
+        if ((response.getStatusCodeValue() != 200)
+                && (response.getStatusCodeValue() != 409)) {
+            throw new AppRegisterException("Could not register unregistered source 'csv-processor' from '" + processorUrl + "'.");
+        }
 
-            // -- processors --
-            response = appController.registerApp("csv-processor", "processor", path + "/csv-processor/target/csv-processor-0.0.1-SNAPSHOT-metadata.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'csv-processor' from '" + path + "/csv-processor/target/csv-processor-0.0.1-SNAPSHOT-metadata.jar'.");
-            }
+        // -- sinks --
+        String logSinkUrl = path + "sinks/log-sink-0.0.1-SNAPSHOT.jar";
+        response = appController.registerApp("log-sink", "sink", logSinkUrl);
+        if ((response.getStatusCodeValue() != 200)
+                && (response.getStatusCodeValue() != 409)) {
+            throw new AppRegisterException("Could not register unregistered source 'log-sink' from '" + logSinkUrl + "'.");
+        }
 
-            // -- sinks --
-            response = appController.registerApp("log-sink", "sink", path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'log-sink' from '" + path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar'.");
-            }
-
-            response = appController.registerApp("db-sink", "sink", path + "/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'db-sink' from '" + path + "/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar'.");
-            }
-        } else {
-            // TODO: non Windows pathing ..
+        String sinkUrl = path + "sinks/db-sink-0.0.1-SNAPSHOT.jar";
+        response = appController.registerApp("db-sink", "sink", sinkUrl);
+        if ((response.getStatusCodeValue() != 200)
+                && (response.getStatusCodeValue() != 409)) {
+            throw new AppRegisterException("Could not register unregistered source 'db-sink' from '" + sinkUrl + "'.");
         }
 
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
