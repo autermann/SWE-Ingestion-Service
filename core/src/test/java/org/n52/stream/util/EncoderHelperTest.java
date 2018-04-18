@@ -50,6 +50,7 @@ public class EncoderHelperTest extends AbstractCodingTest {
 
     private EncoderHelper helper;
     private InsertSensorRequest request;
+    private InsertSensorRequest requestWeather;
 
     @Before
     public void setUp() throws DecodingException, IOException, XmlException {
@@ -57,6 +58,8 @@ public class EncoderHelperTest extends AbstractCodingTest {
         decoderHelper.setDecoderRepository(initDecoderRepository());
         Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess.xml");
         request = new InsertSensorGenerator().generate((PhysicalSystem) ((AggregateProcess) decoderHelper.decode(path)).getComponents().get(1).getProcess());
+        Path pathWeather = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess-Weather.xml");
+        requestWeather = new InsertSensorGenerator().generate((PhysicalSystem) ((AggregateProcess) decoderHelper.decode(pathWeather)).getComponents().get(1).getProcess());
         helper = new EncoderHelper();
         helper.setEncoderRepository(initEncoderRepository());
     }
@@ -72,6 +75,21 @@ public class EncoderHelperTest extends AbstractCodingTest {
     public void encodeToString() throws EncodingException, IOException, XmlException {
         Assert.isTrue(request != null, "Request should not null");
         String encode = helper.encodeToString(request);
+        Assert.isTrue(encode != null, "Should not null");
+        Assert.isTrue(!encode.isEmpty(), "Should not empty");
+    }
+    
+    @Test
+    public void encode2() throws EncodingException, IOException, XmlException {
+        Assert.isTrue(requestWeather != null, "Request should not null");
+        XmlObject encode = helper.encode(requestWeather);
+        Assert.isTrue(encode != null, "Should not null");
+    }
+
+    @Test
+    public void encodeToString2() throws EncodingException, IOException, XmlException {
+        Assert.isTrue(requestWeather != null, "Request should not null");
+        String encode = helper.encodeToString(requestWeather);
         Assert.isTrue(encode != null, "Should not null");
         Assert.isTrue(!encode.isEmpty(), "Should not empty");
     }
