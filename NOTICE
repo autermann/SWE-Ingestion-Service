@@ -2,7 +2,7 @@ Copyright (C) 2018 52°North Initiative for Geospatial Open Source Software GmbH
 
 Licensed under GNU General Public License, Version 2.0
 
-This project includes: 
+This project includes:
 
   52°North Faroe Annotations under The Apache Software License, Version 2.0
   52°North Faroe Utilities under The Apache Software License, Version 2.0
@@ -130,6 +130,7 @@ This project includes:
   Spring Boot AMQP Starter under Apache License, Version 2.0
   Spring Boot AOP Starter under Apache License, Version 2.0
   Spring Boot AutoConfigure under Apache License, Version 2.0
+  Spring Boot Configuration Processor under Apache License, Version 2.0
   Spring Boot Data JPA Starter under Apache License, Version 2.0
   Spring Boot JDBC Starter under Apache License, Version 2.0
   Spring Boot Json Starter under Apache License, Version 2.0
@@ -155,7 +156,6 @@ This project includes:
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
-  spring-cloud-starter-stream-rabbit under Apache License, Version 2.0
   spring-cloud-stream under Apache License, Version 2.0
   spring-cloud-stream-binder-rabbit under Apache License, Version 2.0
   spring-cloud-stream-binder-rabbit-core under Apache License, Version 2.0

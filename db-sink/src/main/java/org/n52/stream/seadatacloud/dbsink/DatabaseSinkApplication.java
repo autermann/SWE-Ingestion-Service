@@ -27,6 +27,7 @@
  * Public License for more details.
  */
 package org.n52.stream.seadatacloud.dbsink;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -43,7 +44,6 @@ import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.stream.AbstractIngestionServiceApp;
-import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -76,21 +76,21 @@ import org.springframework.transaction.annotation.Transactional;
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
-@EnableConfigurationProperties(Configuration.class)
+@EnableConfigurationProperties(AppConfiguration.class)
 public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSinkApplication.class);
 
     @Autowired
     private EntityManagerFactory entityManagerFactory;
-    
+
     @Autowired
-    private Configuration properties;
+    private AppConfiguration properties;
 
     @Autowired(required=false)
     @Named("sensorml")
     private AggregateProcess processDescription;
-    
+
     public static void main(String[] args) {
         SpringApplication.run(DatabaseSinkApplication.class, args);
     }
