@@ -1,0 +1,66 @@
+#
+#
+#   Please update path in line 23 to match your local set-up
+#   
+#   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up
+#
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+  dataflow:
+    image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
+    ports:
+      - 9393:9393
+      - 19002:19002
+    environment:
+      - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
+    volumes:
+      - "./etc/:/tmp/apps/"
+      - "./csv-processor/target/csv-processor-0.0.1-SNAPSHOT.jar:/tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar"
+      - "./db-sink/target/db-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar"
+      - "./log-sink/target/log-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar"
+      - "/home/eike/Projects/2018_02_sea-data-cloud/infrastructure/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
+    depends_on:
+      - rabbitmq
+      - database
+      - nginx
+    links:
+      - database:postgres
+  database:
+    image: mdillon/postgis:9.5-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sos
+    volumes:
+      - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
+  nginx:
+    image: nginx:latest
+    ports:
+      - 9080:80
+    volumes:
+      - "./etc/sensors:/usr/share/nginx/html"
+  app-import:
+    image: alpine:3.7
+    depends_on:
+      - dataflow
+    command: >
+      /bin/sh -c "
+        while ! nc -z dataflow 9393;
+        do
+          sleep 1;
+        done;
+        wget -qO- 'http://dataflow:9393/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
+        echo 'MQTT Source Rabbit app imported'
+        wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'CsvProcessor app imported'
+        wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'DbSink app imported'
+        wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'LogSink apps imported'"
