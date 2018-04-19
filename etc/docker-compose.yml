@@ -23,7 +23,7 @@ services:
       - "./csv-processor/target/csv-processor-0.0.1-SNAPSHOT.jar:/tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar"
       - "./db-sink/target/db-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar"
       - "./log-sink/target/log-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar"
-      - "/home/eike/Projects/2018_02_sea-data-cloud/infrastructure/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
+      - "D:/work/03_Projekte/01_Actual/SeaDataCloude/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
     depends_on:
       - rabbitmq
       - database
@@ -40,11 +40,29 @@ services:
       - POSTGRES_DB=sos
     volumes:
       - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
+  sos:
+    # change to 7- or 9- to change the tomcat version
+    image: tomcat:8-jre8-alpine
+    ports:
+      - 8080:8080
+      - 8000:8000
+    volumes:
+      - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+      - "D:/dev/git/SOS/docker/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
+    depends_on:
+      - database
+    environment:
+      - JPDA_ADDRESS=8000
+      - JPDA_TRANSPORT=dt_socket
+    container_name: sos
+    command: ["catalina.sh", "jpda", "run"]
   nginx:
     image: nginx:latest
     ports:
       - 9080:80
     volumes:
+      - "D:/dev/git/SOS/docker/nginx-proxy.conf:/etc/nginx/conf.d/default.conf"
+      - "D:/dev/git/SOS/docker/htpasswd:/etc/nginx/htpasswd"
       - "./etc/sensors:/usr/share/nginx/html"
   app-import:
     image: alpine:3.7
