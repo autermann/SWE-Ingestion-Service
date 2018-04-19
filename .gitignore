@@ -22,3 +22,6 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+etc/processors/
+etc/sinks/
+etc/sources/
