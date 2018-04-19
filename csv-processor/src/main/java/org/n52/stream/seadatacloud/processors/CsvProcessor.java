@@ -198,7 +198,7 @@ public class CsvProcessor {
             throw logErrorAndCreateException("Element <outputs><OutputList><output> of first component is NOT set!");
         }
         List<SmlIo> ioValue = process.getOutputs().stream().
-                filter(p -> p.getIoName().equalsIgnoreCase("fluorometerOutput") &&
+                filter(p -> p.getIoName().equalsIgnoreCase("streamOutput") &&
                         p.getIoValue().getClass().getName().equalsIgnoreCase(SmlDataInterface.class.getName())).
                 collect(Collectors.toList());
         if (ioValue.isEmpty() || ioValue.size() > 1 || !(ioValue.get(0).getIoValue() instanceof SmlDataInterface)) {
