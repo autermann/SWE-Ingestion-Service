@@ -10,7 +10,7 @@ spring:
           destination: log
   
   datasource:
-      url: jdbc:postgresql://localhost:5432/sos
+      url: jdbc:postgresql://database:5432/sos
       username: postgres
       password: postgres
       testWhileIdle: true
