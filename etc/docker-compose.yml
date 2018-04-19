@@ -40,14 +40,13 @@ services:
     volumes:
       - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
   sos:
-    # change to 7- or 9- to change the tomcat version
-    image: tomcat:8-jre8-alpine
+    image: tomcat:9-jre8-alpine
     ports:
       - 8081:8080
       - 8000:8000
-    volumes:
-      - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
-      - "D:/dev/git/SOS/docker/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
+    #volumes:
+    #  - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+    #  - "D:/dev/git/SOS/docker/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
     depends_on:
       - database
     environment:
