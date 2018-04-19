@@ -35,24 +35,55 @@ import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
 import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
 
+/**
+ * Abstract DAO class.
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public abstract class AbstractDao {
 
     private DaoFactory daoFactory;
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public AbstractDao(DaoFactory daoFactory) {
         this.daoFactory = daoFactory;
     }
-    
-    
-    public DaoFactory getDaoFactory( ) {
+
+    /**
+     * Get the {@link DaoFactory}
+     * 
+     * @return the {@link DaoFactory}
+     */
+    public DaoFactory getDaoFactory() {
         return daoFactory;
     }
-    
+
+    /**
+     * Get the {@link Session}
+     * 
+     * @return the {@link Session}
+     */
     public Session getSession() {
         return getDaoFactory().getSession();
     }
-    
-    public SweAbstractDataComponent getComponent(String phenomenon, List<SmlIo> outputs) {
+
+    /**
+     * Get the output for the phenomenon
+     * 
+     * @param phenomenon
+     *            the phenomenon to get the output for
+     * @param outputs
+     *            the outputs to check
+     * @return the matching output or null if not found
+     */
+    protected SweAbstractDataComponent getOutput(String phenomenon, List<SmlIo> outputs) {
         if (outputs != null) {
             for (SmlIo smlIo : outputs) {
                 if (smlIo.getIoValue() != null && smlIo.getIoValue().isSetDefinition()
@@ -63,16 +94,34 @@ public abstract class AbstractDao {
         }
         return null;
     }
-    
+
+    /**
+     * check if phenomenon is of type {@link SweQuantity}
+     * 
+     * @param phenomenon
+     *            the phenomenon to check
+     * @param outputs
+     *            the outputs to check
+     * @return <code>true</code> if phenomenon is of type {@link SweQuantity}
+     */
     protected boolean checkForQuantity(String phenomenon, List<SmlIo> outputs) {
-        SweAbstractDataComponent component = getComponent(phenomenon, outputs);
+        SweAbstractDataComponent component = getOutput(phenomenon, outputs);
         return component != null && component instanceof SweQuantity;
     }
-    
-    public String getOfferingIdentifier(String sensorId, String offering) {
+
+    /**
+     * Get the offering identifier from definition or create from sensor id.
+     * 
+     * @param sensorId
+     *            the sensor id
+     * @param offering
+     *            the offering definition
+     * @return offering identifier
+     */
+    protected String getOfferingIdentifier(String sensorId, String offering) {
         if (offering != null && !offering.isEmpty()) {
             return offering;
         }
-        return sensorId  + "/observations";
+        return sensorId + "/observations";
     }
 }

@@ -38,14 +38,49 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.stream.core.Feature;
 
+/**
+ * DAO implementation for {@link AbstractFeatureEntity}s
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class FeatureDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public FeatureDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
 
+    /**
+     * Get {@link AbstractFeatureEntity} for identifier
+     * 
+     * @param identifier
+     *            the feature identifier
+     * @return the matching {@link AbstractFeatureEntity}
+     */
+    public AbstractFeatureEntity get(String identifier) {
+        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
+        CriteriaQuery<AbstractFeatureEntity> cq = builder.createQuery(AbstractFeatureEntity.class);
+        Root<AbstractFeatureEntity> root = cq.from(AbstractFeatureEntity.class);
+        cq.select(root).where(builder.equal(root.get(AbstractFeatureEntity.IDENTIFIER), identifier));
+        Query<AbstractFeatureEntity> q = getSession().createQuery(cq);
+        return q.uniqueResult();
+    }
+
+    /**
+     * Get or insert an {@link AbstractFeatureEntity}
+     * 
+     * @param f
+     *            the {@link Feature} to get/insert
+     * @return the matching {@link AbstractFeatureEntity} or the new created
+     */
     public AbstractFeatureEntity getOrInsert(Feature f) {
         AbstractFeatureEntity feature = get(f.getId());
         if (feature == null) {
@@ -61,14 +96,5 @@ public class FeatureDao
         }
         // don't flush here because we may be batching
         return feature;
-    }
-    
-    public AbstractFeatureEntity get(String identifier) {
-        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
-        CriteriaQuery<AbstractFeatureEntity> cq = builder.createQuery(AbstractFeatureEntity.class);
-        Root<AbstractFeatureEntity> root = cq.from(AbstractFeatureEntity.class);
-        cq.select(root).where(builder.equal(root.get(AbstractFeatureEntity.IDENTIFIER), identifier));
-        Query<AbstractFeatureEntity> q = getSession().createQuery(cq);
-        return q.uniqueResult();
     }
 }

@@ -100,14 +100,14 @@
                </sml:featuresOfInterest>
                <sml:outputs>
                   <sml:OutputList>
-                     <sml:output name="weatherOutput">
+                     <sml:output name="streamOutput">
                         <sml:DataInterface>
                            <sml:data>
                               <swe:DataStream>
                                  <swe:elementType name="weatherOutputStream">
                                     <swe:DataRecord>
                                        <swe:field name="datetime">
-                                          <swe:Time definition="http://www.opengis.net/def/property/OGC/0/ResultTime">
+                                          <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
                                              <swe:label>Date and time</swe:label>
                                              <swe:description>Date-time is a time stamp from a Global Positioning System receiver at the cable observatory shore station in the format YYYY-MM-DDThh:mm:ss.sss .</swe:description>
                                              <swe:uom/>

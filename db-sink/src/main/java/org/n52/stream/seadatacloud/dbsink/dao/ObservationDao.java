@@ -47,12 +47,38 @@ import org.n52.series.db.beans.data.Data.TextData;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.stream.core.Measurement;
 
-public class ObservationDao extends AbstractDao {
+/**
+ * DAO implementation for {@link Data} persisting
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
+public class ObservationDao
+        extends
+        AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public ObservationDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
 
+    /**
+     * Persist the {@link Measurement} into the database
+     * 
+     * @param m
+     *            the {@link Measurement} to persist
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @param outputs
+     *            the outputs
+     * @return the persisted {@link Data}
+     */
     public Data<?> persist(Measurement<?> m, DatasetEntity dataset, List<SmlIo> outputs) {
         if (m.getValue() instanceof BigDecimal) {
             return persistQuantity(m.getValue(), m, dataset);
@@ -69,39 +95,106 @@ public class ObservationDao extends AbstractDao {
         } else if (m.getValue() instanceof Boolean) {
             return persistBoolean(m.getValue(), m, dataset);
         }
-//        LOG.info("Not supported value type");
+        // LOG.info("Not supported value type");
         return null;
     }
 
+    /**
+     * Persist a {@link QuantityData} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
     protected Data<?> persistQuantity(Object value, Measurement<?> m, DatasetEntity dataset) {
         QuantityData data = new QuantityDataEntity();
         data.setValue(new BigDecimal(value.toString()));
         return persist(data, m, dataset);
     }
 
-    protected Data<?> persistText(Object value, Measurement<?> m, DatasetEntity dataset){
+    /**
+     * Persist a {@link TextData} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
+    protected Data<?> persistText(Object value, Measurement<?> m, DatasetEntity dataset) {
         TextData data = new TextDataEntity();
         data.setValue(value.toString());
         return persist(data, m, dataset);
     }
-    protected Data<?> persistCategory(Object value, Measurement<?> m, DatasetEntity dataset){
+
+    /**
+     * Persist a {@link CategoryData} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
+    protected Data<?> persistCategory(Object value, Measurement<?> m, DatasetEntity dataset) {
         CategoryData data = new CategoryDataEntity();
         data.setValue(value.toString());
         return persist(data, m, dataset);
     }
-    
+
+    /**
+     * Persist a {@link CountData} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
     protected Data<?> persistCount(Object value, Measurement<?> m, DatasetEntity dataset) {
         CountData data = new CountDataEntity();
         data.setValue(Integer.parseInt(value.toString()));
         return persist(data, m, dataset);
     }
-    
+
+    /**
+     * Persist a {@link BooleanData} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
     protected Data<?> persistBoolean(Object value, Measurement<?> m, DatasetEntity dataset) {
         BooleanData data = new BooleanDataEntity();
         data.setValue(Boolean.valueOf(value.toString()));
         return persist(data, m, dataset);
     }
 
+    /**
+     * Persist a {@link Data} observation
+     * 
+     * @param value
+     *            the observed value
+     * @param m
+     *            the related {@link Measurement}
+     * @param dataset
+     *            the related {@link DatasetEntity}
+     * @return persisted {@link Data}
+     */
     private Data<?> persist(Data<?> data, Measurement<?> m, DatasetEntity dataset) {
         data.setDataset(dataset);
         java.util.Date date = Date.from(m.getResultTime().toInstant());

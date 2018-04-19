@@ -26,50 +26,51 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.dbsink.dao;
+package org.n52.stream;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
-import org.hibernate.query.Query;
-import org.n52.series.db.beans.CategoryEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * DAO implementation for {@link CategoryEntity}s
+ * Abstract class that provides some methods
  * 
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
  *
  */
-public class CategoryDao
-        extends
-        AbstractDao {
+public abstract class AbstractIngestionServiceApp {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractIngestionServiceApp.class);
 
     /**
-     * constructor
+     * Log and throw {@link IllegalArgumentException} for messae
      * 
-     * @param daoFactory
-     *            the {@link DaoFactory}
+     * @param msg
+     *            The message to log and throw
+     * @throws IllegalArgumentException
      */
-    public CategoryDao(DaoFactory daoFactory) {
-        super(daoFactory);
+    protected IllegalArgumentException logErrorAndCreateException(String msg)
+            throws IllegalArgumentException {
+        LOG.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 
     /**
-     * Get {@link CategoryEntity} for identifier
+     * Check the setting for null and emtpy
      * 
-     * @param identifier
-     *            the category identifier
-     * @return the matching {@link CategoryEntity}
+     * @param settingName
+     *            the setting name
+     * @param setting
+     *            the setting value
+     * @throws IllegalArgumentException
+     *             If the setting is null or empty
      */
-    public CategoryEntity get(String identifier) {
-        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
-        CriteriaQuery<CategoryEntity> cq = builder.createQuery(CategoryEntity.class);
-        Root<CategoryEntity> root = cq.from(CategoryEntity.class);
-        cq.select(root).where(builder.equal(root.get(CategoryEntity.IDENTIFIER), identifier));
-        Query<CategoryEntity> q = getSession().createQuery(cq);
-        return q.uniqueResult();
+    protected void checkSetting(String settingName, String setting)
+            throws IllegalArgumentException {
+        if (setting == null || setting.isEmpty()) {
+            logErrorAndCreateException(
+                    String.format("setting '%s' not set correct. Received value: '%s'.", settingName, setting));
+        }
+        LOG.trace("'{}': '{}'", settingName, setting);
     }
-
 }

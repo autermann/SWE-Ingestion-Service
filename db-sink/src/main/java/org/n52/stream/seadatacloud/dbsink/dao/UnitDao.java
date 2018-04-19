@@ -33,17 +33,58 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.query.Query;
+import org.n52.series.db.beans.CategoryEntity;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.shetland.ogc.UoM;
 
+/**
+ * DAO implementation for {@link UnitEntity}s
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class UnitDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public UnitDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
 
+    /**
+     * @param unit
+     * @return
+     */
+    /**
+     * Get {@link UnitEntity} for unit
+     * 
+     * @param unit
+     *            the unit
+     * @return the matching {@link UnitEntity}
+     */
+    public UnitEntity get(String unit) {
+        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
+        CriteriaQuery<UnitEntity> cq = builder.createQuery(UnitEntity.class);
+        Root<UnitEntity> root = cq.from(UnitEntity.class);
+        cq.select(root).where(builder.equal(root.get(UnitEntity.PROPERTY_SYMBOL), unit));
+        Query<UnitEntity> q = getSession().createQuery(cq);
+        return q.uniqueResult();
+    }
+
+    /**
+     * Get or insert an {@link UnitEntity}
+     * 
+     * @param unit
+     *            the unit to get/insert
+     * @return the matching {@link UnitEntity} or the new created
+     */
     public UnitEntity getOrInsert(String unit) {
         UnitEntity hUnitEntity =
                 get(unit);
@@ -56,15 +97,13 @@ public class UnitDao
         return hUnitEntity;
     }
     
-    public UnitEntity get(String unit) {
-        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
-        CriteriaQuery<UnitEntity> cq = builder.createQuery(UnitEntity.class);
-        Root<UnitEntity> root = cq.from(UnitEntity.class);
-        cq.select(root).where(builder.equal(root.get(UnitEntity.PROPERTY_SYMBOL), unit));
-        Query<UnitEntity> q = getSession().createQuery(cq);
-        return q.uniqueResult();
-    }
-
+    /**
+     * Get or insert an {@link UnitEntity}
+     * 
+     * @param unit
+     *            the {@link UoM} to get/insert
+     * @return the matching {@link UnitEntity} or the new created
+     */
     public UnitEntity getOrInsert(UoM unit) {
         UnitEntity hUnitEntity =
                 get(unit.getUom());

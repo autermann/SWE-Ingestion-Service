@@ -35,14 +35,33 @@ import javax.persistence.criteria.Root;
 import org.hibernate.query.Query;
 import org.n52.series.db.beans.PhenomenonEntity;
 
+/**
+ * DAO implementation for {@link PhenomenonEntity}s
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class PhenomenonDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public PhenomenonDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
     
+    /**
+     * Get {@link PhenomenonEntity} for identifier
+     * 
+     * @param identifier
+     *            the phenomenon identifier
+     * @return the matching {@link PhenomenonEntity}
+     */
     public PhenomenonEntity get(String identifier) {
         CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
         CriteriaQuery<PhenomenonEntity> cq = builder.createQuery(PhenomenonEntity.class);
