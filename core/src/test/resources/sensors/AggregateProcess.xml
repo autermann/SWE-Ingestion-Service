@@ -100,7 +100,7 @@
                </sml:featuresOfInterest>
                <sml:outputs>
                   <sml:OutputList>
-                     <sml:output name="fluorometerOutput">
+                     <sml:output name="streamOutput">
                         <sml:DataInterface>
                            <sml:data>
                               <swe:DataStream>
