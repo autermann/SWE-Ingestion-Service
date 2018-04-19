@@ -26,50 +26,56 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.dbsink.dao;
+package org.n52.stream.seadatacloud.dbsink;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
-import org.hibernate.query.Query;
-import org.n52.series.db.beans.CategoryEntity;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
- * DAO implementation for {@link CategoryEntity}s
- * 
- * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
- * @since 1.0.0
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  *
  */
-public class CategoryDao
-        extends
-        AbstractDao {
+@Validated
+@ConfigurationProperties("org.n52.stream")
+public class AppConfiguration {
 
     /**
-     * constructor
-     * 
-     * @param daoFactory
-     *            the {@link DaoFactory}
+     * sensormlurl field desc
      */
-    public CategoryDao(DaoFactory daoFactory) {
-        super(daoFactory);
+    private String sensormlurl = "http://example.com/process-description.xml";
+
+    /**
+     * offering field desc
+     */
+    private String offering = "offering-default-value";
+
+    /**
+     * sensor field desc
+     */
+    private String sensor = "sensor-default-value";
+
+    public String getSensormlurl() {
+        return sensormlurl;
     }
 
-    /**
-     * Get {@link CategoryEntity} for identifier
-     * 
-     * @param identifier
-     *            the category identifier
-     * @return the matching {@link CategoryEntity}
-     */
-    public CategoryEntity get(String identifier) {
-        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
-        CriteriaQuery<CategoryEntity> cq = builder.createQuery(CategoryEntity.class);
-        Root<CategoryEntity> root = cq.from(CategoryEntity.class);
-        cq.select(root).where(builder.equal(root.get(CategoryEntity.IDENTIFIER), identifier));
-        Query<CategoryEntity> q = getSession().createQuery(cq);
-        return q.uniqueResult();
+    public String getOffering() {
+        return offering;
+    }
+
+    public String getSensor() {
+        return sensor;
+    }
+
+    public void setSensormlurl(String sensormlUrl) {
+        sensormlurl = sensormlUrl;
+    }
+
+    public void setOffering(String offering) {
+        this.offering = offering;
+    }
+
+    public void setSensor(String sensor) {
+        this.sensor = sensor;
     }
 
 }

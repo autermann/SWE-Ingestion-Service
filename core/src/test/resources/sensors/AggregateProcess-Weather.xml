@@ -44,54 +44,54 @@
    <sml:components>
       <sml:ComponentList>
          <sml:component name="source_output">
-            <sml:PhysicalSystem gml:id="marine-fluo">
-               <gml:identifier codeSpace="uniqueID">WL-ECO-FLNTU-4476</gml:identifier>
+            <sml:PhysicalSystem gml:id="marine-weather">
+               <gml:identifier codeSpace="uniqueID">AIRMAR-RINVILLE-1</gml:identifier>
                <sml:identification>
                   <sml:IdentifierList>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/">
                            <sml:label>Long name</sml:label>
-                           <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
+                           <sml:value>Marine Institute - AIRMAR Weather Station</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/">
                            <sml:label>Short name</sml:label>
-                           <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
+                           <sml:value>Marine Institute - AIRMAR WX Series WeatherStation</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0012/">
                            <sml:label>Manufacturer</sml:label>
-                           <sml:value>WetLabs</sml:value>
+                           <sml:value>AIRMAR</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0003/">
                            <sml:label>Model name</sml:label>
-                           <sml:value>ECO-FLNTU</sml:value>
+                           <sml:value>300WX</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0005/">
                            <sml:label>Serial number</sml:label>
-                           <sml:value>3137</sml:value>
+                           <sml:value>4252</sml:value>
                         </sml:Term>
                      </sml:identifier>
                   </sml:IdentifierList>
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                    <swe:label>Galway Bay Cable Observatory</swe:label>
-                    <sml:feature>
-                        <sams:SF_SpatialSamplingFeature gml:id="galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>52°North</gml:name>
+                     <swe:label>Marine Institute</swe:label>
+                     <sml:feature>
+                        <sams:SF_SpatialSamplingFeature gml:id="airmar-rinville-1">
+                            <gml:identifier codeSpace="">Marine Institute</gml:identifier>
+                            <gml:name>Marine Intitute Ireland</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
-                                <gml:Point gml:id="point-galway-bay-cable-observatory">
-                                    <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.227317 -9.265783</gml:pos>
+                                <gml:Point gml:id="point-airmar-rinville-1">
+                                    <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.247642 -8.977098</gml:pos>
                                 </gml:Point>
                             </sams:shape>
                         </sams:SF_SpatialSamplingFeature>
@@ -104,10 +104,10 @@
                         <sml:DataInterface>
                            <sml:data>
                               <swe:DataStream>
-                                 <swe:elementType name="fluorometerOutputStream">
+                                 <swe:elementType name="weatherOutputStream">
                                     <swe:DataRecord>
                                        <swe:field name="datetime">
-                                          <swe:Time definition="http://www.opengis.net/def/property/OGC/0/ResultTime">
+                                          <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
                                              <swe:label>Date and time</swe:label>
                                              <swe:description>Date-time is a time stamp from a Global Positioning System receiver at the cable observatory shore station in the format YYYY-MM-DDThh:mm:ss.sss .</swe:description>
                                              <swe:uom/>
@@ -119,43 +119,44 @@
                                              <swe:description>Instrument-ID is a unique identifier for the instrument based on its manufacturer, model number and serial number</swe:description>
                                           </swe:Text>
                                        </swe:field>
-                                       <swe:field name="Instument_datetime">
-                                          <swe:Text definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
-                                             <swe:label>Instrument date</swe:label>
-                                             <swe:description>Instrument clock date in the format MM/DD/YYYY</swe:description>
-                                          </swe:Text>
-                                       </swe:field>
-                                       <swe:field name="Wavelength_for_Fluorescence_Measurements">
-                                          <swe:Quantity>
-                                             <swe:label>Wavelength of light used to make fluorescence measurements</swe:label>
-                                             <swe:description>Wavelength of light used to make fluorescence measurements in nanometres</swe:description>
-                                             <swe:uom code="nm"/>
-                                          </swe:Quantity>
-                                       </swe:field>
-                                       <swe:field name="Fluorescence">
-                                          <swe:Count definition="http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/">
-                                             <swe:label>Fluorescence</swe:label>
-                                             <swe:description>Chlorophyll fluorometer instrument output (counts) (no units)</swe:description>
-                                          </swe:Count>
-                                       </swe:field>
-                                       <swe:field name="Wavelength_for_Turbidity_Measurements">
-                                          <swe:Quantity>
-                                             <swe:label>Wavelength of light used to make turbidity measurements</swe:label>
-                                             <swe:description>Wavelength of light used to make turbidity measurements in nanometres</swe:description>
-                                             <swe:uom code="nm"/>
-                                          </swe:Quantity>
-                                       </swe:field>
-                                       <swe:field name="Turbidity">
-                                          <swe:Count definition="http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/">
-                                             <swe:label>Turbidity</swe:label>
-                                             <swe:description>Optical scattering turbidity sensor instrument output (counts) (no units)</swe:description>
-                                          </swe:Count>
-                                       </swe:field>
-                                       <swe:field name="Thermistor">
-                                          <swe:Quantity>
-                                             <swe:uom/>
-                                          </swe:Quantity>
-                                       </swe:field>
+                                        <swe:field name="AirTemperature">
+                                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/airtemp/">
+                                                <swe:label>air temperature</swe:label>
+                                                <swe:description>Air temperature is the bulk temperature of the air, not the surface (skin) temperature.
+                                                </swe:description>
+                                                <swe:uom code="degC" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPAA/" xlink:title="Degrees Celsius" />
+                                            </swe:Quantity>
+                                        </swe:field>
+                                        <swe:field name="RelativeHumidity">
+                                            <swe:Quantity  definition="http://vocab.nerc.ac.uk/collection/B39/current/humidity/">
+                                                <swe:label>relative_humidity</swe:label>
+                                                <swe:description>The ratio of the amount of water vapour in the air compared to the maximum amount of water vapour  that can theoretically be held at the air's temperature
+                                                </swe:description>
+                                                <swe:uom code="%" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPCT/" xlink:title="Percent" />
+                                            </swe:Quantity>
+                                        </swe:field>
+                                        <swe:field name="DewPoint">
+                                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P01/current/CDEWZZ01/">
+                                                <swe:label>DewPoint</swe:label>
+                                                <swe:description>The temperature to which air must cool to
+                                                    become saturated with water vapour</swe:description>
+                                                <swe:uom code="degC" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPAA/" xlink:title="Degrees Celsius" />
+                                            </swe:Quantity>
+                                        </swe:field>
+                                        <swe:field name="WindDirection">
+                                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/truewinddir/">
+                                                <swe:label>earthrelativewinddirection</swe:label>
+                                                <swe:description>Direction from of wind relative to True North {wind direction} in the atmosphere by in-situ anemometer</swe:description>
+                                                <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True" />
+                                            </swe:Quantity>
+                                        </swe:field>
+                                        <swe:field name="WindSpeed">
+                                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/truewindspeed/">
+                                                <swe:label> earth relative wind speed</swe:label>
+                                                <swe:description>Speed of wind {wind speed} in the atmosphere by in-situ anemometer</swe:description>
+                                                <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second" />
+                                            </swe:Quantity>
+                                        </swe:field>
                                     </swe:DataRecord>
                                  </swe:elementType>
                                  <swe:encoding>
@@ -170,7 +171,7 @@
                               <swe:DataRecord definition="https://52north.org/swe-ingestion/mqtt/3.1">
                                  <swe:field name="mqtt_broker_url">
                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#url">
-                                       <swe:value>tcp://nexos.dev.52north.org:1883</swe:value>
+                                       <swe:value>tcp://nexos.dev.52north.org:1884</swe:value>
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="mqtt_broker_password">
@@ -185,7 +186,7 @@
                                  </swe:field>
                                  <swe:field name="mqtt_broker_topics">
                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#topics">
-                                       <swe:value>spiddal-fluorometer</swe:value>
+                                       <swe:value>airmar-rinville-1</swe:value>
                                     </swe:Text>
                                  </swe:field>
                               </swe:DataRecord>
@@ -199,19 +200,19 @@
                      <swe:coordinate name="easting">
                         <swe:Quantity axisID="x">
                            <swe:uom code="degree"/>
-                           <swe:value>-9.26629</swe:value>
+                           <swe:value>-8.977098</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                      <swe:coordinate name="northing">
                         <swe:Quantity axisID="y">
                            <swe:uom code="degree"/>
-                           <swe:value>53.22733</swe:value>
+                           <swe:value>53.247642</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                      <swe:coordinate name="altitude">
                         <swe:Quantity axisID="z">
                            <swe:uom code="m"/>
-                           <swe:value>52.0</swe:value>
+                           <swe:value>17.0</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                   </swe:Vector>
@@ -219,54 +220,54 @@
             </sml:PhysicalSystem>
          </sml:component>
          <sml:component name="sos_input">
-            <sml:PhysicalSystem gml:id="marine-fluo-sos">
-               <gml:identifier codeSpace="uniqueID">WL-ECO-FLNTU-4476</gml:identifier>
+            <sml:PhysicalSystem gml:id="marine-weather-sos">
+               <gml:identifier codeSpace="uniqueID">AIRMAR-RINVILLE-1</gml:identifier>
                <sml:identification>
                   <sml:IdentifierList>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/">
                            <sml:label>Long name</sml:label>
-                           <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
+                           <sml:value>Marine Institute - AIRMAR Weather Station</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/">
                            <sml:label>Short name</sml:label>
-                           <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
+                           <sml:value>Marine Institute - AIRMAR WX Series WeatherStation</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0012/">
                            <sml:label>Manufacturer</sml:label>
-                           <sml:value>WetLabs</sml:value>
+                           <sml:value>AIRMAR</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0003/">
                            <sml:label>Model name</sml:label>
-                           <sml:value>ECO-FLNTU</sml:value>
+                           <sml:value>300WX</sml:value>
                         </sml:Term>
                      </sml:identifier>
                      <sml:identifier>
                         <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0005/">
                            <sml:label>Serial number</sml:label>
-                           <sml:value>3137</sml:value>
+                           <sml:value>4252</sml:value>
                         </sml:Term>
                      </sml:identifier>
                   </sml:IdentifierList>
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                     <swe:label>Galway Bay Cable Observatory</swe:label>
+                     <swe:label>Marine Institute</swe:label>
                      <sml:feature>
-                        <sams:SF_SpatialSamplingFeature gml:id="sf_galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>Galway Bay Cable Observatory</gml:name>
+                        <sams:SF_SpatialSamplingFeature gml:id="sf-airmar-rinville-1">
+                            <gml:identifier codeSpace="">Marine Institute</gml:identifier>
+                            <gml:name>Marine Intitute Ireland</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
-                               <gml:Point gml:id="p-galway-bay-cable-observatory">
-                                    <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.22733 -9.26629</gml:pos>
+                                <gml:Point gml:id="p-airmar-rinville-1">
+                                    <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.247642 -8.977098</gml:pos>
                                 </gml:Point>
                             </sams:shape>
                         </sams:SF_SpatialSamplingFeature>
@@ -275,17 +276,40 @@
                </sml:featuresOfInterest>
                <sml:outputs>
                   <sml:OutputList>
-                     <sml:output name="Fluorescence">
-                        <swe:Count definition="http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/">
-                           <swe:label>Fluorescence</swe:label>
-                           <swe:description>Chlorophyll fluorometer instrument output (counts) (no units)</swe:description>
-                        </swe:Count>
+                     <sml:output name="AirTemperature">
+                        <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/airtemp/">
+                           <swe:label>air temperature</swe:label>
+                           <swe:description>Air temperature is the bulk temperature of the air, not the surface (skin) temperature.</swe:description>
+                           <swe:uom code="degC" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPAA/" xlink:title="Degrees Celsius"/>
+                        </swe:Quantity>
                      </sml:output>
-                     <sml:output name="Turbidity">
-                        <swe:Count definition="http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/">
-                           <swe:label>Turbidity</swe:label>
-                           <swe:description>Optical scattering turbidity sensor instrument output (counts) (no units)</swe:description>
-                        </swe:Count>
+                     <sml:output name="RelativeHumidity">
+                        <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/humidity/">
+                           <swe:label>relative_humidity</swe:label>
+                           <swe:description>The ratio of the amount of water vapour in the air compared to the maximum amount of water vapour that can theoretically be held at the air's temperature</swe:description>
+                           <swe:uom code="%" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPCT/" xlink:title="Percent" />
+                        </swe:Quantity>
+                     </sml:output>
+                     <sml:output name="DewPoint">
+                        <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P01/current/CDEWZZ01/">
+                           <swe:label>DewPoint</swe:label>
+                           <swe:description>The temperature to which air must cool to become saturated with water vapour</swe:description>
+                           <swe:uom code="degC" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPAA/" xlink:title="Degrees Celsius"/>
+                        </swe:Quantity>
+                     </sml:output>
+                     <sml:output name="WindDirection">
+                        <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/truewinddir/">
+                           <swe:label>earthrelativewinddirection</swe:label>
+                           <swe:description>Direction from of wind relative to True North {wind direction} in the atmosphere by in-situ anemometer</swe:description>
+                           <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True" />
+                        </swe:Quantity>
+                     </sml:output>
+                     <sml:output name="WindSpeed">
+                        <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/truewindspeed/">
+                           <swe:label>	earth relative wind speed</swe:label>
+                           <swe:description>Speed of wind {wind speed} in the atmosphere by in-situ anemometer</swe:description>
+                           <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second" />
+                        </swe:Quantity>
                      </sml:output>
                   </sml:OutputList>
                </sml:outputs>
@@ -294,19 +318,19 @@
                      <swe:coordinate name="easting">
                         <swe:Quantity axisID="x">
                            <swe:uom code="degree"/>
-                           <swe:value>-9.26629</swe:value>
+                           <swe:value>-8.977098</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                      <swe:coordinate name="northing">
                         <swe:Quantity axisID="y">
                            <swe:uom code="degree"/>
-                           <swe:value>53.22733</swe:value>
+                           <swe:value>53.247642</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                      <swe:coordinate name="altitude">
                         <swe:Quantity axisID="z">
                            <swe:uom code="m"/>
-                           <swe:value>52.0</swe:value>
+                           <swe:value>17.0</swe:value>
                         </swe:Quantity>
                      </swe:coordinate>
                   </swe:Vector>
@@ -319,14 +343,32 @@
       <sml:ConnectionList>
          <sml:connection>
             <sml:Link>
-               <sml:source ref="components/marine-fluo/outputs/Fluorescence"/>
-               <sml:destination ref="components/marine-fluo-sos/outputs/Fluorescence"/>
+               <sml:source ref="components/marine-weather/outputs/AirTemperature"/>
+               <sml:destination ref="components/marine-weather-sos/outputs/AirTemperature"/>
             </sml:Link>
          </sml:connection>
          <sml:connection>
             <sml:Link>
-               <sml:source ref="components/marine-fluo/outputs/Turbidity"/>
-               <sml:destination ref="components/marine-fluo-sos/outputs/Turbidity"/>
+               <sml:source ref="components/marine-weather/outputs/RelativeHumidity"/>
+               <sml:destination ref="components/marine-weather-sos/outputs/RelativeHumidity"/>
+            </sml:Link>
+         </sml:connection>
+         <sml:connection>
+            <sml:Link>
+               <sml:source ref="components/marine-weather/outputs/DewPoint"/>
+               <sml:destination ref="components/marine-weather-sos/outputs/DewPoint"/>
+            </sml:Link>
+         </sml:connection>
+         <sml:connection>
+            <sml:Link>
+               <sml:source ref="components/marine-weather/outputs/WindDirection"/>
+               <sml:destination ref="components/marine-weather-sos/outputs/WindDirection"/>
+            </sml:Link>
+         </sml:connection>
+         <sml:connection>
+            <sml:Link>
+               <sml:source ref="components/marine-weather/outputs/WindSpeed"/>
+               <sml:destination ref="components/marine-weather-sos/outputs/WindSpeed"/>
             </sml:Link>
          </sml:connection>
       </sml:ConnectionList>

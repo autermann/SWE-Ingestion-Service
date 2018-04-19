@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
  * @since 1.0.0
  *
  */
-@ImportResource("classpath*:svalbard-*.xml")
+@ImportResource("classpath*:/svalbard-*.xml")
 @Component
 public class EncoderHelper {
 

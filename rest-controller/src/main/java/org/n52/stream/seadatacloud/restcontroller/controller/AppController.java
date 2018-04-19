@@ -64,19 +64,19 @@ public class AppController {
         Sources result = service.getSources();
         return result;
     }
-    
+
     @RequestMapping(value = "processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Processors getProcessors() {
         Processors result = service.getProcessors();
         return result;
     }
-    
+
     @RequestMapping(value = "sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sinks getSinks() {
         Sinks result = service.getSinks();
         return result;
     }
-    
+
     @RequestMapping(value = "registerApp", method = RequestMethod.GET)
     public ResponseEntity<String> registerApp(
             @RequestParam("name") String appName,
@@ -84,9 +84,9 @@ public class AppController {
             @RequestParam("uri") String appUri
     ) {
         String result = service.registerApp(appName, appType, appUri);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
     public Source getSourceByName(String sourceName) {
         Sources registeredSources = service.getSources();
         for (Source current : registeredSources.getSources()) {
@@ -96,7 +96,7 @@ public class AppController {
         }
         return null;
     }
-    
+
     public AppOption getSourceOptionByName(Source source, String appOptionName) {
         List<AppOption> sourceOptions = source.getOptions();
         for (AppOption current : sourceOptions) {

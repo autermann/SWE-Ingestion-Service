@@ -2,9 +2,12 @@ server:
   port: 8082
   servlet:
     contextPath: /cnc
-  
-resources:
-    path: file://C:/Develop/2018/n52/SWE-Ingestion-Service
+
+spring:
+  datasource:
+    url: jdbc:postgresql://database:5432/sos
+    username: postgres
+    password: postgres
     
-#dbsink:
-    
+org.n52.stream:
+  sosendpoint: http://sos:8080/52n-sos-webapp/service

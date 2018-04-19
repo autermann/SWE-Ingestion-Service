@@ -61,7 +61,7 @@ public class FlowServerStreamController {
         String sinks = "{\"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \"" +BASE_URL+ "/api/sinks\"}";
         String streams = "{\"name\": \"streams\", \"description\":\"List of registered streams.\", \"href\": \"" +BASE_URL+ "/api/streams\"}";
         String resources = "{ \"resources\" : [" + sources + "," + processors + "," + sinks + "," + streams + "] }";
-        return new ResponseEntity(resources, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(resources, HttpStatus.ACCEPTED);
     }
 
 }

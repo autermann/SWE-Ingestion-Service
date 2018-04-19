@@ -35,12 +35,31 @@ import javax.persistence.criteria.Root;
 import org.hibernate.query.Query;
 import org.n52.series.db.beans.ProcedureEntity;
 
+/**
+ * DAO implementation for {@link ProcedureEntity}s
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class ProcedureDao extends AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public ProcedureDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
 
+    /**
+     * Get {@link ProcedureEntity} for identifier
+     * 
+     * @param identifier
+     *            the procedure identifier
+     * @return the matching {@link ProcedureEntity}
+     */
     public ProcedureEntity get(String identifier) {
         CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
         CriteriaQuery<ProcedureEntity> cq = builder.createQuery(ProcedureEntity.class);

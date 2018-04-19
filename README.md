@@ -18,7 +18,7 @@ The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deplo
 
 |Library|License|Link/Source|
 |:----:|:----:|:-----:|
-|SWE-Ingestion-Service|Apache License Version 2.0|[https://github.com/MojioMS/SWE-Ingestion-Service/blob/master/LICENSE](https://github.com/MojioMS/SWE-Ingestion-Service/blob/master/LICENSE)|
+|SWE-Ingestion-Service|GNU GENERAL PUBLIC LICENSE 2.0|[https://github.com/52North/SWE-Ingestion-Service/blob/dev/LICENSE](https://github.com/52North/SWE-Ingestion-Service/blob/dev/LICENSE)|
 
 ## Requirements
 
@@ -70,8 +70,7 @@ The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deplo
 
   * POST api/streams consumes=application/xml - registers a new Stream.
     RequestBody payload example:
-	```
-	<?xml version="1.0" encoding="UTF-8"?>
+	```<?xml version="1.0" encoding="UTF-8"?>
 <sml:AggregateProcess gml:id="sdc" xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:sml="http://www.opengis.net/sensorml/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorML/2.0/sensorML.xsd">
    <sml:components>
       <sml:ComponentList>

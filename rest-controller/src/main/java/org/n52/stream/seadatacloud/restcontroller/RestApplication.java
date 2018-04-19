@@ -52,9 +52,6 @@ import org.springframework.http.ResponseEntity;
 @Import(RemoteConfiguration.class)
 public class RestApplication {
 
-    @Value("${resources.path}")
-    private String path;
-
     @Autowired
     public DataRecordDefinitions dataRecordDefinitions;
 
@@ -66,47 +63,13 @@ public class RestApplication {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(RestApplication.class)
-                .properties("server.servlet.contextPath,resources.path,")
+                .properties("server.servlet.contextPath")
                 .run(args);
     }
 
     @PostConstruct
     private void init() throws AppRegisterException {
         this.dataRecordDefinitions = new DataRecordDefinitions();
-
-        // register applications:
-        if (path.contains("//")) { // windows-solution
-
-            // -- sources --
-            ResponseEntity<String> response = appController.registerApp("mqtt-source-rabbit", "source", path + "/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'mqtt-source-rabbit' from '" + path + "/rest-controller/src/main/resources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar'.");
-            }
-
-            // -- processors --
-            response = appController.registerApp("csv-processor", "processor", path + "/csv-processor/target/csv-processor-0.0.1-SNAPSHOT-metadata.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'csv-processor' from '" + path + "/csv-processor/target/csv-processor-0.0.1-SNAPSHOT-metadata.jar'.");
-            }
-
-            // -- sinks --
-            response = appController.registerApp("log-sink", "sink", path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'log-sink' from '" + path + "/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar'.");
-            }
-
-            response = appController.registerApp("db-sink", "sink", path + "/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar");
-            if ((response.getStatusCodeValue() != 200)
-                    && (response.getStatusCodeValue() != 409)) {
-                throw new AppRegisterException("Could not register unregistered source 'db-sink' from '" + path + "/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar'.");
-            }
-        } else {
-            // TODO: non Windows pathing ..
-        }
-
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 

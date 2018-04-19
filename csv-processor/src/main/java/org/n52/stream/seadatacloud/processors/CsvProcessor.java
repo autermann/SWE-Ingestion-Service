@@ -53,7 +53,7 @@ import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
 import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
 import org.n52.shetland.ogc.swe.simpleType.SweCategory;
 import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
-import org.n52.stream.core.Configuration;
+import org.n52.stream.AbstractIngestionServiceApp;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
@@ -77,8 +77,8 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableBinding(Processor.class)
-@EnableConfigurationProperties(Configuration.class)
-public class CsvProcessor {
+@EnableConfigurationProperties(AppConfiguration.class)
+public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private static final String DEFINITION_PHENOMENON_TIME = "http://www.opengis.net/def/property/OGC/0/PhenomenonTime";
 
@@ -87,7 +87,7 @@ public class CsvProcessor {
     private int msgCount = 0;
 
     @Autowired
-    private Configuration properties;
+    private AppConfiguration properties;
 
     @Autowired
     @Named("sensorml")
@@ -115,7 +115,7 @@ public class CsvProcessor {
         LOG.info("init(); processor called");
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
-        checkSetting("sensorml-url", properties.getSensormlUrl());
+        checkSetting("sensorml-url", properties.getSensormlurl());
         AbstractProcessV20 process = checkAndExtractProcess();
         extractFeature(process);
         SmlDataInterface dataInterface = checkAndExtractDataInterface(process);
@@ -199,7 +199,7 @@ public class CsvProcessor {
             throw logErrorAndCreateException("Element <outputs><OutputList><output> of first component is NOT set!");
         }
         List<SmlIo> ioValue = process.getOutputs().stream().
-                filter(p -> p.getIoName().equalsIgnoreCase("fluorometerOutput") &&
+                filter(p -> p.getIoName().equalsIgnoreCase("streamOutput") &&
                         p.getIoValue().getClass().getName().equalsIgnoreCase(SmlDataInterface.class.getName())).
                 collect(Collectors.toList());
         if (ioValue.isEmpty() || ioValue.size() > 1 || !(ioValue.get(0).getIoValue() instanceof SmlDataInterface)) {
@@ -370,20 +370,6 @@ public class CsvProcessor {
             return Collections.emptyList();
         }
         return tokens;
-    }
-
-    private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
-        LOG.error(msg);
-        return new IllegalArgumentException(msg);
-    }
-
-    private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
-        if (setting == null || setting.isEmpty()) {
-            throw logErrorAndCreateException(String.format("setting '%s' not set correct. Received value: '%s'.",
-                    settingName,
-                    setting));
-        }
-        LOG.trace("'{}': '{}'", settingName, setting);
     }
 
 }
