@@ -32,19 +32,40 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.hql.spi.FilterTranslator;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.data.Data;
 
+/**
+ * DAO implementation for {@link OfferingEntity}s
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class OfferingDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public OfferingDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
 
-    
+    /**
+     * Get {@link OfferingEntity} for identifier
+     * 
+     * @param identifier
+     *            the offering identifier
+     * @return the matching {@link OfferingEntity}
+     */
     public OfferingEntity get(String identifier) {
         CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
         CriteriaQuery<OfferingEntity> cq = builder.createQuery(OfferingEntity.class);
@@ -53,52 +74,64 @@ public class OfferingDao
         Query<OfferingEntity> q = getSession().createQuery(cq);
         return q.uniqueResult();
     }
-    
+
+    /**
+     * Update the {@link OfferingEntity} with metadata
+     * @param offering the {@link OfferingEntity} to update
+     * @param first the first {@link Data} to update
+     * @param last the last {@link Data} to update
+     * @param geometry the {@link Geometry} to update
+     * @return the updated {@link OfferingEntity}
+     */
     public OfferingEntity updateMetadata(OfferingEntity offering, Data<?> first, Data<?> last, Object geometry) {
-        if (offering.getSamplingTimeStart() == null || (offering.getSamplingTimeStart() != null
-                && first.getSamplingTimeStart() != null
-                && offering.getSamplingTimeStart().after(first.getSamplingTimeStart()))) {
+        if (offering.getSamplingTimeStart() == null
+                || (offering.getSamplingTimeStart() != null && first.getSamplingTimeStart() != null
+                        && offering.getSamplingTimeStart().after(first.getSamplingTimeStart()))) {
             offering.setSamplingTimeStart(first.getSamplingTimeStart());
         }
-        if (offering.getSamplingTimeEnd() == null || (offering.getSamplingTimeEnd() != null
-                && last.getSamplingTimeEnd() != null
-                && offering.getSamplingTimeEnd().before(last.getSamplingTimeEnd()))) {
+        if (offering.getSamplingTimeEnd() == null
+                || (offering.getSamplingTimeEnd() != null && last.getSamplingTimeEnd() != null
+                        && offering.getSamplingTimeEnd().before(last.getSamplingTimeEnd()))) {
             offering.setSamplingTimeEnd(last.getSamplingTimeEnd());
         }
         if (offering.getResultTimeStart() == null || (offering.getResultTimeStart() != null
-                && first.getResultTime() != null
-                && offering.getResultTimeStart().after(first.getResultTime()))) {
+                && first.getResultTime() != null && offering.getResultTimeStart().after(first.getResultTime()))) {
             offering.setResultTimeStart(first.getResultTime());
         }
-        if (offering.getResultTimeEnd() == null || (offering.getResultTimeEnd() != null
-                && last.getResultTime() != null
+        if (offering.getResultTimeEnd() == null || (offering.getResultTimeEnd() != null && last.getResultTime() != null
                 && offering.getResultTimeEnd().before(last.getResultTime()))) {
             offering.setResultTimeEnd(last.getResultTime());
         }
-//        if (offering.getValidTimeStart() == null || (offering.getValidTimeStart() != null
-//                && observation.getValidTimeStart() != null
-//                && offering.getValidTimeStart().after(observation.getValidTimeStart()))) {
-//            offering.setValidTimeStart(observation.getValidTimeStart());
-//        }
-//        if (offering.getValidTimeEnd() == null || (offering.getValidTimeEnd() != null
-//                && observation.getValidTimeEnd() != null
-//                && offering.getValidTimeEnd().before(observation.getValidTimeEnd()))) {
-//            offering.setValidTimeEnd(observation.getValidTimeEnd());
-//        }
-//        if (observation.isSetGeometryEntity()) {
-//            if (offering.isSetGeometry()) {
-//                offering.getGeometryEntity().getGeometry().union(observation.getGeometryEntity().getGeometry());
-//            } else {
-//                offering.setGeometryEntity(observation.getGeometryEntity());
-//            }
-//        } else if (observation.getDataset().isSetFeature() && observation.getDataset().getFeature().isSetGeometry()) {
-//            if (offering.isSetGeometry()) {
-//                offering.getGeometryEntity().getGeometry()
-//                        .union(observation.getDataset().getFeature().getGeometryEntity().getGeometry());
-//            } else {
-//                offering.setGeometryEntity(observation.getDataset().getFeature().getGeometryEntity());
-//            }
-//        }
+        // if (offering.getValidTimeStart() == null ||
+        // (offering.getValidTimeStart() != null
+        // && observation.getValidTimeStart() != null
+        // &&
+        // offering.getValidTimeStart().after(observation.getValidTimeStart())))
+        // {
+        // offering.setValidTimeStart(observation.getValidTimeStart());
+        // }
+        // if (offering.getValidTimeEnd() == null || (offering.getValidTimeEnd()
+        // != null
+        // && observation.getValidTimeEnd() != null
+        // && offering.getValidTimeEnd().before(observation.getValidTimeEnd())))
+        // {
+        // offering.setValidTimeEnd(observation.getValidTimeEnd());
+        // }
+        // if (observation.isSetGeometryEntity()) {
+        // if (offering.isSetGeometry()) {
+        // offering.getGeometryEntity().getGeometry().union(observation.getGeometryEntity().getGeometry());
+        // } else {
+        // offering.setGeometryEntity(observation.getGeometryEntity());
+        // }
+        // } else if (observation.getDataset().isSetFeature() &&
+        // observation.getDataset().getFeature().isSetGeometry()) {
+        // if (offering.isSetGeometry()) {
+        // offering.getGeometryEntity().getGeometry()
+        // .union(observation.getDataset().getFeature().getGeometryEntity().getGeometry());
+        // } else {
+        // offering.setGeometryEntity(observation.getDataset().getFeature().getGeometryEntity());
+        // }
+        // }
         getSession().saveOrUpdate(offering);
         return offering;
     }

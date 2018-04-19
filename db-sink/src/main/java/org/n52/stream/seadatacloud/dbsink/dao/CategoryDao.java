@@ -35,14 +35,34 @@ import javax.persistence.criteria.Root;
 import org.hibernate.query.Query;
 import org.n52.series.db.beans.CategoryEntity;
 
+/**
+ * DAO implementation for {@link CategoryEntity}s
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class CategoryDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public CategoryDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
-    
+
+    /**
+     * Get {@link CategoryEntity} for identifier
+     * 
+     * @param identifier
+     *            the category identifier
+     * @return the matching {@link CategoryEntity}
+     */
     public CategoryEntity get(String identifier) {
         CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
         CriteriaQuery<CategoryEntity> cq = builder.createQuery(CategoryEntity.class);
