@@ -42,7 +42,9 @@ services:
   cnc:
     image: openjdk:8-jdk-alpine
     volumes:
-      - "./rest-controller/target/rest-controller-0.0.1-SNAPSHOT.jar:/tmp/service.jar"
+      - "${PWD}/rest-controller/target/rest-controller-0.0.1-SNAPSHOT.jar:/tmp/service.jar"
+    ports:
+      - 8082:8082
     command: [
       "java",
       "-jar",
