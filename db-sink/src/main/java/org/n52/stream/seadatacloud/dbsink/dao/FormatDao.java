@@ -33,19 +33,57 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.query.Query;
+import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.stream.core.Feature;
 
+/**
+ * DAO implementation for {@link FormatEntity}s
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class FormatDao
         extends
         AbstractDao {
 
+    /**
+     * constructor
+     * 
+     * @param daoFactory
+     *            the {@link DaoFactory}
+     */
     public FormatDao(DaoFactory daoFactory) {
         super(daoFactory);
     }
     
+    /**
+     * Get {@link FormatEntity} for format
+     * 
+     * @param format
+     *            the format
+     * @return the matching {@link FormatEntity}
+     */
+    public FormatEntity get(String format) {
+        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
+        CriteriaQuery<FormatEntity> cq = builder.createQuery(FormatEntity.class);
+        Root<FormatEntity> root = cq.from(FormatEntity.class);
+        cq.select(root).where(builder.equal(root.get(FormatEntity.FORMAT), format));
+        Query<FormatEntity> q = getSession().createQuery(cq);
+        return q.uniqueResult();
+    }
+
+    /**
+     * Get or insert an {@link FormatEntity}
+     * 
+     * @param format
+     *            the format to get/insert
+     * @return the matching {@link FormatEntity} or the new created
+     */
     public FormatEntity getOrInsert(String format) {
         FormatEntity hFormatEntity =
-                getFormatEntityObject(format);
+                get(format);
         if (hFormatEntity == null) {
             hFormatEntity = new FormatEntity();
             hFormatEntity.setFormat(format);
@@ -53,15 +91,6 @@ public class FormatDao
             getSession().flush();
         }
         return hFormatEntity;
-    }
-    
-    public FormatEntity getFormatEntityObject(String format) {
-        CriteriaBuilder builder = getDaoFactory().getSession().getCriteriaBuilder();
-        CriteriaQuery<FormatEntity> cq = builder.createQuery(FormatEntity.class);
-        Root<FormatEntity> root = cq.from(FormatEntity.class);
-        cq.select(root).where(builder.equal(root.get(FormatEntity.FORMAT), format));
-        Query<FormatEntity> q = getSession().createQuery(cq);
-        return q.uniqueResult();
     }
 
 }

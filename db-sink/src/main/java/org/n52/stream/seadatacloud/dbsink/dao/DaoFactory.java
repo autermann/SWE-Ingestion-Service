@@ -30,14 +30,21 @@ package org.n52.stream.seadatacloud.dbsink.dao;
 
 import org.hibernate.Session;
 
+/**
+ * Factory class that creates new DAOs
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 public class DaoFactory {
 
     private Session session;
 
     public DaoFactory(Session session) {
-        this.session =  session;
+        this.session = session;
     }
-    
+
     public Session getSession() {
         return session;
     }
@@ -53,19 +60,19 @@ public class DaoFactory {
     public ProcedureDao getProcedureDAO() {
         return new ProcedureDao(this);
     }
-    
+
     public PhenomenonDao getPhenomenonDao() {
         return new PhenomenonDao(this);
     }
-    
+
     public CategoryDao getCategoryDao() {
         return new CategoryDao(this);
     }
-    
+
     public OfferingDao getOfferingDao() {
         return new OfferingDao(this);
     }
-    
+
     public FeatureDao getFeatureDao() {
         return new FeatureDao(this);
     }

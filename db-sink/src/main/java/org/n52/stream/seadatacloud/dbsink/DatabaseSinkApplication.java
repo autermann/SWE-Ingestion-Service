@@ -43,6 +43,7 @@ import org.n52.series.db.beans.data.Data;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.stream.AbstractIngestionServiceApp;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -62,12 +63,21 @@ import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Sink} implementation for database insertion.
+ * 
+ * Requires an existing database with SOS data model
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
 @EnableConfigurationProperties(AppConfiguration.class)
-public class DatabaseSinkApplication {
+public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSinkApplication.class);
 
@@ -95,6 +105,11 @@ public class DatabaseSinkApplication {
         checkSetting("sensor", properties.getSensor());
     }
 
+    /**
+     * Input method to process the {@link DataMessage}s
+     * 
+     * @param message to process
+     */
     @Transactional(rollbackFor=Exception.class)
     @StreamListener(Sink.INPUT)
     public synchronized void input(DataMessage message) {
@@ -116,8 +131,8 @@ public class DatabaseSinkApplication {
                             Data<?> last = null;
                             for (Measurement<?> m : series.getMeasurements()) {
                                 Data<?> data = observationDao.persist(m, datasetEntity, getOutputs());
-                                first = updateFirst(first, data);
-                                last = updateLast(last, data);
+                                first = checkFirst(first, data);
+                                last = checkLast(last, data);
                             }
                             // update dataset and offering with times and geometry
                             datasetDao.updateMetadata(datasetEntity, first, last);
@@ -139,40 +154,53 @@ public class DatabaseSinkApplication {
         LOG.info("Received processor output:\n{}", message);
     }
 
-    private Data<?> updateFirst(Data<?> first, Data<?> data) {
-        return  first == null || first.getSamplingTimeStart().after(data.getSamplingTimeStart()) ? data : first;
+    /**
+     * Check which {@link Data} is the first
+     * 
+     * @param first
+     *            Current first {@link Data}
+     * @param data
+     *            {@link Data} to check
+     * @return the first {@link Data}
+     */
+    private Data<?> checkFirst(Data<?> first, Data<?> data) {
+        return first == null || first.getSamplingTimeStart().after(data.getSamplingTimeStart()) ? data : first;
     }
 
-    private Data<?> updateLast(Data<?> last, Data<?> data) {
-        return last == null ||last.getSamplingTimeEnd().before(data.getSamplingTimeEnd()) ? data : last;
+    /**
+     * Check which {@link Data} is the last
+     * 
+     * @param last
+     *            Current last {@link Data}
+     * @param data
+     *            {@link Data} to check
+     * @return the last {@link Data}
+     */
+    private Data<?> checkLast(Data<?> last, Data<?> data) {
+        return last == null || last.getSamplingTimeEnd().before(data.getSamplingTimeEnd()) ? data : last;
     }
 
+    /**
+     * Get the {@link SmlIo} outputs from the process description
+     * 
+     * @return Outputs or an emtpy list
+     */
     private List<SmlIo> getOutputs() {
         if (processDescription != null) {
             if (processDescription.isSetOutputs()) {
                 return processDescription.getOutputs();
-            } else  if (processDescription.isSetComponents()
-                    && processDescription.getComponents().get(processDescription.getComponents().size()-1).isSetProcess()
-                    && processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess() instanceof AbstractProcess
-                    && ((AbstractProcess) processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess()).isSetOutputs()) {
-                    return ((AbstractProcess) processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess()).getOutputs();
+            } else if (processDescription.isSetComponents()
+                    && processDescription.getComponents().get(processDescription.getComponents().size() - 1)
+                            .isSetProcess()
+                    && processDescription.getComponents().get(processDescription.getComponents().size() - 1)
+                            .getProcess() instanceof AbstractProcess
+                    && ((AbstractProcess) processDescription.getComponents()
+                            .get(processDescription.getComponents().size() - 1).getProcess()).isSetOutputs()) {
+                return ((AbstractProcess) processDescription.getComponents()
+                        .get(processDescription.getComponents().size() - 1).getProcess()).getOutputs();
             }
         }
         return Collections.emptyList();
-    }
-
-    private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
-        LOG.error(msg);
-        return new IllegalArgumentException(msg);
-    }
-
-    private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
-        if (setting == null || setting.isEmpty()) {
-            throw logErrorAndCreateException(String.format("setting '%s' not set correct. Received value: '%s'.",
-                    settingName,
-                    setting));
-        }
-        LOG.trace("'{}': '{}'", settingName, setting);
     }
 
 }

@@ -53,6 +53,7 @@ import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
 import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
 import org.n52.shetland.ogc.swe.simpleType.SweCategory;
 import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
+import org.n52.stream.AbstractIngestionServiceApp;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
@@ -77,7 +78,7 @@ import org.springframework.cloud.stream.messaging.Processor;
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(AppConfiguration.class)
-public class CsvProcessor {
+public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private static final String DEFINITION_PHENOMENON_TIME = "http://www.opengis.net/def/property/OGC/0/PhenomenonTime";
 
@@ -369,20 +370,6 @@ public class CsvProcessor {
             return Collections.emptyList();
         }
         return tokens;
-    }
-
-    private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
-        LOG.error(msg);
-        return new IllegalArgumentException(msg);
-    }
-
-    private void checkSetting(String settingName, String setting) throws IllegalArgumentException {
-        if (setting == null || setting.isEmpty()) {
-            throw logErrorAndCreateException(String.format("setting '%s' not set correct. Received value: '%s'.",
-                    settingName,
-                    setting));
-        }
-        LOG.trace("'{}': '{}'", settingName, setting);
     }
 
 }
