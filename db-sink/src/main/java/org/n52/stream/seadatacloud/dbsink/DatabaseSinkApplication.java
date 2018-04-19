@@ -27,6 +27,7 @@
  * Public License for more details.
  */
 package org.n52.stream.seadatacloud.dbsink;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +43,6 @@ import org.n52.series.db.beans.data.Data;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
-import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
@@ -75,7 +75,7 @@ public class DatabaseSinkApplication {
     private EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    private Configuration properties;
+    private AppConfiguration properties;
 
     @Autowired(required=false)
     @Named("sensorml")
