@@ -29,7 +29,6 @@
 package org.n52.stream.seadatacloud.restcontroller;
 
 import javax.annotation.PostConstruct;
-
 import org.n52.stream.seadatacloud.restcontroller.controller.AppController;
 import org.n52.stream.seadatacloud.restcontroller.exception.AppRegisterException;
 import org.n52.stream.seadatacloud.restcontroller.remote.RemoteConfiguration;

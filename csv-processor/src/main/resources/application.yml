@@ -16,7 +16,7 @@ server:
   port: 8083
 
 org.n52.stream:
-  sensorml-url: http://localhost:9080/AggregateProcess.xml
+  sensormlurl: http://localhost:9080/AggregateProcess.xml
   offering: WL-ECO-FLNTU-4476/observations
   sensor: WL-ECO-FLNTU-4476
 

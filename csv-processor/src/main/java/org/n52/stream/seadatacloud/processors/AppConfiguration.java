@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.core;
+package org.n52.stream.seadatacloud.processors;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -37,16 +37,25 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @ConfigurationProperties("org.n52.stream")
-public class Configuration {
+public class AppConfiguration {
 
-    private String sensormlUrl = "";
+    /**
+     * sensormlurl field desc
+     */
+    private String sensormlurl = "http://example.com/process-description.xml";
 
-    private String offering = "";
+    /**
+     * offering field desc
+     */
+    private String offering = "offering-default-value";
 
-    private String sensor = "";
+    /**
+     * sensor field desc
+     */
+    private String sensor = "sensor-default-value";
 
-    public String getSensormlUrl() {
-        return sensormlUrl;
+    public String getSensormlurl() {
+        return sensormlurl;
     }
 
     public String getOffering() {
@@ -57,19 +66,16 @@ public class Configuration {
         return sensor;
     }
 
-    public Configuration setSensormlUrl(String sensormlUrl) {
-        this.sensormlUrl = sensormlUrl;
-        return this;
+    public void setSensormlurl(String sensormlUrl) {
+        sensormlurl = sensormlUrl;
     }
 
-    public Configuration setOffering(String offering) {
+    public void setOffering(String offering) {
         this.offering = offering;
-        return this;
     }
 
-    public Configuration setSensor(String sensor) {
+    public void setSensor(String sensor) {
         this.sensor = sensor;
-        return this;
     }
 
 }

@@ -66,21 +66,21 @@ import org.springframework.transaction.annotation.Transactional;
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
-@EnableConfigurationProperties(Configuration.class)
+@EnableConfigurationProperties(AppConfiguration.class)
 public class DatabaseSinkApplication {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSinkApplication.class);
 
     @Autowired
     private EntityManagerFactory entityManagerFactory;
-    
+
     @Autowired
     private Configuration properties;
 
     @Autowired(required=false)
     @Named("sensorml")
     private AggregateProcess processDescription;
-    
+
     public static void main(String[] args) {
         SpringApplication.run(DatabaseSinkApplication.class, args);
     }
@@ -151,7 +151,7 @@ public class DatabaseSinkApplication {
         if (processDescription != null) {
             if (processDescription.isSetOutputs()) {
                 return processDescription.getOutputs();
-            } else  if (processDescription.isSetComponents() 
+            } else  if (processDescription.isSetComponents()
                     && processDescription.getComponents().get(processDescription.getComponents().size()-1).isSetProcess()
                     && processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess() instanceof AbstractProcess
                     && ((AbstractProcess) processDescription.getComponents().get(processDescription.getComponents().size()-1).getProcess()).isSetOutputs()) {
@@ -160,7 +160,7 @@ public class DatabaseSinkApplication {
         }
         return Collections.emptyList();
     }
-    
+
     private IllegalArgumentException logErrorAndCreateException(String msg) throws IllegalArgumentException {
         LOG.error(msg);
         return new IllegalArgumentException(msg);

@@ -53,7 +53,6 @@ import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
 import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
 import org.n52.shetland.ogc.swe.simpleType.SweCategory;
 import org.n52.shetland.ogc.swe.simpleType.SweQuantity;
-import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
@@ -77,7 +76,7 @@ import org.springframework.cloud.stream.messaging.Processor;
  */
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableBinding(Processor.class)
-@EnableConfigurationProperties(Configuration.class)
+@EnableConfigurationProperties(AppConfiguration.class)
 public class CsvProcessor {
 
     private static final String DEFINITION_PHENOMENON_TIME = "http://www.opengis.net/def/property/OGC/0/PhenomenonTime";
@@ -87,7 +86,7 @@ public class CsvProcessor {
     private int msgCount = 0;
 
     @Autowired
-    private Configuration properties;
+    private AppConfiguration properties;
 
     @Autowired
     @Named("sensorml")
@@ -115,7 +114,7 @@ public class CsvProcessor {
         LOG.info("init(); processor called");
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
-        checkSetting("sensorml-url", properties.getSensormlUrl());
+        checkSetting("sensorml-url", properties.getSensormlurl());
         AbstractProcessV20 process = checkAndExtractProcess();
         extractFeature(process);
         SmlDataInterface dataInterface = checkAndExtractDataInterface(process);

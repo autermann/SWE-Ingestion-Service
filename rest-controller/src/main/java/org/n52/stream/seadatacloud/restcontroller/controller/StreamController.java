@@ -108,16 +108,16 @@ public class StreamController {
 
     @PostConstruct
     public void init() {
-        this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+        dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         CONTENT_TYPE_APPLICATION_JSON.setContentType(MediaType.APPLICATION_JSON);
         CONTENT_TYPE_APPLICATION_XML.setContentType(MediaType.APPLICATION_XML);
-        List<MediaType> defaultMediaType = new ArrayList();
+        List<MediaType> defaultMediaType = new ArrayList<>();
         defaultMediaType.add(MediaType.TEXT_HTML);
         defaultMediaType.add(MediaType.TEXT_PLAIN);
         defaultMediaType.add(MediaType.APPLICATION_JSON);
         defaultMediaType.remove(MediaType.APPLICATION_XML);
         HEADER_ACCEPT_ALL.setAccept(defaultMediaType);
-        List<MediaType> xmlMediaType = new ArrayList();
+        List<MediaType> xmlMediaType = new ArrayList<>();
         xmlMediaType.add(MediaType.APPLICATION_XML);
         HEADER_ACCEPT_XML.setAccept(xmlMediaType);
     }
@@ -197,18 +197,18 @@ public class StreamController {
                 createdStream = futureStream.get(15, TimeUnit.SECONDS);
 
                 if (createdStream != null) {
-                    this.streamNameURLs.add(streamName, streamXML);
+                    streamNameURLs.add(streamName, streamXML);
                     // InserObservation:
                     InsertSensorGenerator generator = new InsertSensorGenerator();
                     AggregateProcess aggregateProcess = (AggregateProcess) decode;
                     InsertSensorRequest request = generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
-                    
-                    return new ResponseEntity(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
+
+                    return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
-                    return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
+                    return new ResponseEntity<>(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
                 }
             } else {
-                return new ResponseEntity(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -229,7 +229,7 @@ public class StreamController {
         if (result == null) {
             return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_XML)
@@ -239,8 +239,8 @@ public class StreamController {
         if (result == null) {
             return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
-        if (this.streamNameURLs.hasStreamNameUrl(streamId)) {
-            String SensormlURL = this.streamNameURLs.getSensormlURL(streamId);
+        if (streamNameURLs.hasStreamNameUrl(streamId)) {
+            String SensormlURL = streamNameURLs.getSensormlURL(streamId);
             if (SensormlURL != null) {
                 return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
@@ -261,7 +261,7 @@ public class StreamController {
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
-        return new ResponseEntity(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{streamId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON, method = RequestMethod.PUT)
@@ -282,15 +282,15 @@ public class StreamController {
             switch (requestStatus.getStatus()) {
                 case "deployed":
                     Stream deployedStream = service.deployStream(streamId);
-                    return new ResponseEntity(deployedStream, HttpStatus.OK);
+                    return new ResponseEntity<>(deployedStream, HttpStatus.OK);
                 case "undeployed":
                     Stream undeployedStream = service.undeployStream(streamId);
-                    return new ResponseEntity(undeployedStream, HttpStatus.OK);
+                    return new ResponseEntity<>(undeployedStream, HttpStatus.OK);
                 default:
                     return new ResponseEntity("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
             }
         }
     }
-    
-    
+
+
 }
