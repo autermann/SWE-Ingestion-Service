@@ -1,5 +1,10 @@
 server:
-  port: 8080
+  port: 8082
+  servlet:
+    contextPath: /cnc
   
 resources:
     path: file://C:/Develop/2018/n52/SWE-Ingestion-Service
+    
+#dbsink:
+    

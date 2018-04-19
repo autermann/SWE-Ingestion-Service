@@ -67,7 +67,6 @@ This project includes:
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
-  JSON in Java under The JSON License
   JUL to SLF4J bridge under MIT License
   JUnit under Eclipse Public License 1.0
   Kryo Shaded under New BSD License
@@ -107,6 +106,7 @@ This project includes:
   OGC SWECommon schema (spec. v1.0.1) under The Apache Software License, Version 2.0
   OGC SWECommon schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC SWES schema (spec. v2.0) under The Apache Software License, Version 2.0
+  OGC TimeseriesML schema (spec. v1.0) under The Apache Software License, Version 2.0
   OGC WaterML DR schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC XML schemas under The Apache Software License, Version 2.0

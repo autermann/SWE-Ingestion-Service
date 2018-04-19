@@ -66,7 +66,7 @@ public class RestApplication {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(RestApplication.class)
-                .properties("server.url,server.port,resources.path")
+                .properties("server.servlet.contextPath,resources.path,")
                 .run(args);
     }
 
