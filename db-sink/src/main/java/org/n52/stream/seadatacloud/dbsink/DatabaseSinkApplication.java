@@ -42,6 +42,7 @@ import org.n52.series.db.beans.data.Data;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.stream.AbstractIngestionServiceApp;
 import org.n52.stream.core.Configuration;
 import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Measurement;
@@ -62,12 +63,21 @@ import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Sink} implementation for database insertion.
+ * 
+ * Requires an existing database with SOS data model
+ * 
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
+ * @since 1.0.0
+ *
+ */
 @SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
 @EnableTransactionManagement
 @Transactional
 @EnableBinding(Sink.class)
 @EnableConfigurationProperties(Configuration.class)
-public class DatabaseSinkApplication {
+public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
     
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSinkApplication.class);
 
