@@ -52,9 +52,6 @@ import org.springframework.http.ResponseEntity;
 @Import(RemoteConfiguration.class)
 public class RestApplication {
 
-    @Value("${org.n52.stream.apps.basepath}")
-    private String path;
-
     @Autowired
     public DataRecordDefinitions dataRecordDefinitions;
 
@@ -66,46 +63,13 @@ public class RestApplication {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(RestApplication.class)
-                .properties("server.url,server.port,resources.path")
+                .properties("server.servlet.contextPath")
                 .run(args);
     }
 
     @PostConstruct
     private void init() throws AppRegisterException {
         this.dataRecordDefinitions = new DataRecordDefinitions();
-
-        // -- sources --
-        
-        String sourceUrl = path + "sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar";
-        ResponseEntity<String> response = appController.registerApp("mqtt-source-rabbit", "source", sourceUrl);
-        if ((response.getStatusCodeValue() != 200)
-                && (response.getStatusCodeValue() != 409)) {
-            throw new AppRegisterException("Could not register unregistered source 'mqtt-source-rabbit' from '" + sourceUrl + "'.");
-        }
-
-        // -- processors --
-        String processorUrl = path + "processors/csv-processor-0.0.1-SNAPSHOT.jar";
-        response = appController.registerApp("csv-processor", "processor", processorUrl);
-        if ((response.getStatusCodeValue() != 200)
-                && (response.getStatusCodeValue() != 409)) {
-            throw new AppRegisterException("Could not register unregistered source 'csv-processor' from '" + processorUrl + "'.");
-        }
-
-        // -- sinks --
-        String logSinkUrl = path + "sinks/log-sink-0.0.1-SNAPSHOT.jar";
-        response = appController.registerApp("log-sink", "sink", logSinkUrl);
-        if ((response.getStatusCodeValue() != 200)
-                && (response.getStatusCodeValue() != 409)) {
-            throw new AppRegisterException("Could not register unregistered source 'log-sink' from '" + logSinkUrl + "'.");
-        }
-
-        String sinkUrl = path + "sinks/db-sink-0.0.1-SNAPSHOT.jar";
-        response = appController.registerApp("db-sink", "sink", sinkUrl);
-        if ((response.getStatusCodeValue() != 200)
-                && (response.getStatusCodeValue() != 409)) {
-            throw new AppRegisterException("Could not register unregistered source 'db-sink' from '" + sinkUrl + "'.");
-        }
-
         this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 

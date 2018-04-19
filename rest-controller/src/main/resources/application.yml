@@ -1,6 +1,13 @@
 server:
-  port: 9081
-  
+  port: 8082
+  servlet:
+    contextPath: /cnc
+
+spring:
+  datasource:
+    url: jdbc:postgresql://database:5432/sos
+    username: postgres
+    password: postgres
+    
 org.n52.stream:
-  apps:
-    basepath: file:///tmp/apps/
+  sosendpoint: http://sos:8080/52n-sos-webapp/service

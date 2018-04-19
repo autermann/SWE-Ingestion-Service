@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class FlowServerStreamController {
 
-    public final String BASE_URL = "http://localhost:8080";
+    public final String BASE_URL = "http://localhost:8081/cnc";
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
 

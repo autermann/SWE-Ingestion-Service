@@ -27,7 +27,6 @@ services:
     depends_on:
       - rabbitmq
       - database
-      - nginx
     links:
       - database:postgres
   database:
@@ -44,7 +43,7 @@ services:
     # change to 7- or 9- to change the tomcat version
     image: tomcat:8-jre8-alpine
     ports:
-      - 8080:8080
+      - 8081:8080
       - 8000:8000
     volumes:
       - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
@@ -56,14 +55,22 @@ services:
       - JPDA_TRANSPORT=dt_socket
     container_name: sos
     command: ["catalina.sh", "jpda", "run"]
-  nginx:
-    image: nginx:latest
-    ports:
-      - 9080:80
+  cnc:
+    image: openjdk:8-jdk-alpine
     volumes:
       - "D:/dev/git/SOS/docker/nginx-proxy.conf:/etc/nginx/conf.d/default.conf"
       - "D:/dev/git/SOS/docker/htpasswd:/etc/nginx/htpasswd"
       - "./etc/sensors:/usr/share/nginx/html"
+      - "./rest-controller/target/rest-controller-0.0.1-SNAPSHOT.jar:/tmp/service.jar"
+    command: [
+      "java",
+      "-jar",
+      "/tmp/service.jar",
+      "--server.port=8082",
+      "--server.servlet.contextPath=/cnc"
+    ]
+    depends_on:
+      - dataflow
   app-import:
     image: alpine:3.7
     depends_on:
@@ -82,3 +89,9 @@ services:
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'LogSink apps imported'"
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+      - "./etc/sensors:/usr/share/nginx/html"
