@@ -27,7 +27,6 @@ services:
     depends_on:
       - rabbitmq
       - database
-      - nginx
     links:
       - database:postgres
   database:
@@ -40,12 +39,19 @@ services:
       - POSTGRES_DB=sos
     volumes:
       - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
-  nginx:
-    image: nginx:latest
-    ports:
-      - 9080:80
+  cnc:
+    image: openjdk:8-jdk-alpine
     volumes:
-      - "./etc/sensors:/usr/share/nginx/html"
+      - "./rest-controller/target/rest-controller-0.0.1-SNAPSHOT.jar:/tmp/service.jar"
+    command: [
+      "java",
+      "-jar",
+      "/tmp/service.jar",
+      "--server.port=8082",
+      "--server.servlet.contextPath=/cnc"
+    ]
+    depends_on:
+      - dataflow
   app-import:
     image: alpine:3.7
     depends_on:
@@ -64,3 +70,9 @@ services:
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'LogSink apps imported'"
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+      - "./etc/sensors:/usr/share/nginx/html"
