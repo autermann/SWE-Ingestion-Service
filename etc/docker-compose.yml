@@ -1,6 +1,7 @@
 #
 #
-#   Please update path in line 23 to match your local set-up
+#   Before starting:
+#     - update all volumne path starting with ADJUST_ME to match your local set-up
 #   
 #   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up
 #
@@ -28,7 +29,7 @@ services:
       - "${PWD}/csv-processor/target/csv-processor-0.0.1-SNAPSHOT.jar:/tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar"
       - "${PWD}/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar"
       - "${PWD}/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar"
-      - "D:/work/03_Projekte/01_Actual/SeaDataCloud/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
+      - "ADJUST_ME/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
     depends_on:
       - rabbitmq
       - database
@@ -47,7 +48,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=sos
     volumes:
-      - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
+      - "${PWD}/etc/sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
     networks:
       network:
         ipv4_address: 172.52.0.103
@@ -60,7 +61,7 @@ services:
     links:
       - database:database
     volumes:
-      - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+      - "ADJUST_ME/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
       - "${PWD}/etc/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
       - "${PWD}/etc/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
@@ -88,7 +89,13 @@ services:
       "-jar",
       "/tmp/service.jar",
       "--server.port=8082",
-      "--server.servlet.contextPath=/cnc"
+      "--server.servlet.contextPath=/cnc",
+      "--org.n52.stream.sosendpoint=http://sos:8080/52n-sos-webapp/service",
+      "--org.n52.stream.dataflowhost=http://dataflow:9393",
+      "--org.n52.stream.baseurl=http://cnc:8082/cnc",
+      "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
+      "--org.n52.stream.datasource.username=postgres",
+      "--org.n52.stream.datasource.password=postgres"
     ]
     depends_on:
       - dataflow
@@ -113,7 +120,7 @@ services:
         wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
-        echo 'LogSink apps imported'"
+        echo 'LogSink app imported'"
     networks:
       network:
         ipv4_address: 172.52.0.106
