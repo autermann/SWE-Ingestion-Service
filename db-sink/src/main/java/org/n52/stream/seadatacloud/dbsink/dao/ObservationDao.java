@@ -197,10 +197,14 @@ public class ObservationDao
      */
     private Data<?> persist(Data<?> data, Measurement<?> m, DatasetEntity dataset) {
         data.setDataset(dataset);
-        java.util.Date date = Date.from(m.getResultTime().toInstant());
-        data.setSamplingTimeStart(date);
-        data.setSamplingTimeEnd(date);
-        data.setResultTime(date);
+        java.util.Date samplingDate = Date.from(m.getPhenomenonTime().toInstant());
+        data.setSamplingTimeStart(samplingDate);
+        data.setSamplingTimeEnd(samplingDate);
+        if (m.hasResultTime()) {
+            data.setResultTime(Date.from(m.getResultTime().toInstant()));
+        } else {
+            data.setResultTime(samplingDate);
+        }
         getSession().saveOrUpdate(data);
         getSession().flush();
         getSession().refresh(data);

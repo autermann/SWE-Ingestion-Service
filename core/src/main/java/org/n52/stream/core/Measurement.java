@@ -81,6 +81,10 @@ public class Measurement<T> implements Cloneable, Serializable {
     public void setResultTime(OffsetDateTime resultTime) {
         this.resultTime = resultTime;
     }
+    
+    public boolean hasResultTime( ) {
+        return getResultTime() != null;
+    }
 
     public Measurement<T> withValue(T value) {
         this.value = value;
