@@ -121,7 +121,6 @@ services:
     environment:
       - JPDA_ADDRESS=8000
       - JPDA_TRANSPORT=dt_socket
-    container_name: sos
     command: ["catalina.sh", "jpda", "run"]
     networks:
       network:
