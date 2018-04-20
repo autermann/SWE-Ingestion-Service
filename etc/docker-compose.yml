@@ -1,6 +1,7 @@
 #
 #
-#   Please update path in line 23 to match your local set-up
+#   Before starting:
+#     - update all volumne path starting with ADJUST_ME to match your local set-up
 #   
 #   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up
 #
@@ -53,7 +54,7 @@ services:
     links:
       - database:database
     volumes:
-      - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+      - "ADJUST_ME/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
       - "${PWD}/etc/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
     depends_on:
