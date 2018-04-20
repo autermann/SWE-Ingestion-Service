@@ -50,9 +50,12 @@ services:
     ports:
       - 8081:8080
       - 8000:8000
-    #volumes:
-    #  - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
-    #  - "D:/dev/git/SOS/docker/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
+    links:
+      - database:database
+    volumes:
+      - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+      - "${PWD}/etc/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
+      - "${PWD}/etc/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
     depends_on:
       - database
     environment:
@@ -113,7 +116,7 @@ services:
     ports:
       - 8080:80
     volumes:
-      - "./etc/sensors:/usr/share/nginx/html"
+      - "${PWD}/etc/sensors:/usr/share/nginx/html"
     networks:
       network:
         ipv4_address: 172.52.0.106
