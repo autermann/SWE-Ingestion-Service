@@ -33,6 +33,8 @@
 #   Before starting:                                                           #
 #     - update all volumne path starting with ADJUST_ME to match               #
 #       your local set-up                                                      #
+#     - requies environment where PWD is supported (git bash under             #
+#       windows).                                                              #
 #                                                                              #
 #   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up   #
 #                                                                              #
