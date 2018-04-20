@@ -416,7 +416,7 @@
     },
     "service.capabilitiesCacheUpdateInterval" : {
       "type" : "integer",
-      "value" : 120
+      "value" : 5
     },
     "service.exposeChildObservableProperties" : {
       "type" : "boolean",
