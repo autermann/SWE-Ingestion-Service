@@ -26,29 +26,52 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.cnc.decoder;
+package org.n52.stream.seadatacloud.cnc;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.n52.stream.seadatacloud.cnc.decoder.AppOptionsDecoder;
+import org.n52.stream.seadatacloud.cnc.decoder.ProcessorsDecoder;
+import org.n52.stream.seadatacloud.cnc.decoder.SinksDecoder;
+import org.n52.stream.seadatacloud.cnc.decoder.SourcesDecoder;
+import org.n52.stream.seadatacloud.cnc.decoder.StreamDecoder;
+import org.n52.stream.seadatacloud.cnc.decoder.StreamsDecoder;
 import org.n52.stream.seadatacloud.cnc.model.AppOptions;
 import org.n52.stream.seadatacloud.cnc.model.Processors;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
 import org.n52.stream.seadatacloud.cnc.model.Sources;
-import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.n52.stream.seadatacloud.cnc.model.Stream;
+import org.n52.stream.seadatacloud.cnc.model.Streams;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class SWEModule extends SimpleModule {
-
-    public SWEModule() {
-        this.addDeserializer(Streams.class, new StreamsDecoder());
-        this.addDeserializer(Stream.class, new StreamDecoder());
-        this.addDeserializer(Processors.class, new ProcessorsDecoder());
-        this.addDeserializer(Sinks.class, new SinksDecoder());
-        this.addDeserializer(Sources.class, new SourcesDecoder());
-        this.addDeserializer(AppOptions.class, new AppOptionsDecoder());
+@Configuration
+public class RemoteConfiguration {
+    
+    @Autowired
+    private SourcesDecoder sourcesDecoder;
+    @Autowired
+    private ProcessorsDecoder processorsDecoder;
+    @Autowired
+    private SinksDecoder sinksDecoder;
+    
+    @Bean
+    public ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule sm = new SimpleModule();
+        sm.addDeserializer(Streams.class, new StreamsDecoder());
+        sm.addDeserializer(Stream.class, new StreamDecoder());
+        sm.addDeserializer(Processors.class, processorsDecoder);
+        sm.addDeserializer(Sinks.class, sinksDecoder);
+        sm.addDeserializer(Sources.class, sourcesDecoder);
+        sm.addDeserializer(AppOptions.class, new AppOptionsDecoder());
+        mapper.registerModule(sm);
+        return mapper;
     }
 
 }

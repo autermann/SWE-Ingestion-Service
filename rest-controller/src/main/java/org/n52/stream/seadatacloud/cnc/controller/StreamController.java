@@ -47,6 +47,7 @@ import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
+import org.n52.shetland.ogc.sos.response.InsertSensorResponse;
 import org.n52.shetland.ogc.swe.SweDataRecord;
 import org.n52.shetland.ogc.swe.SweField;
 import org.n52.shetland.ogc.swe.simpleType.SweText;
@@ -93,8 +94,6 @@ public class StreamController {
 
     private static final Logger LOG = LoggerFactory.getLogger(StreamController.class);
 
-    public final String APPLICATION_JSON = "application/json";
-    public final String APPLICATION_XML = "application/xml";
     private final HttpHeaders CONTENT_TYPE_APPLICATION_JSON = new HttpHeaders();
     private final HttpHeaders CONTENT_TYPE_APPLICATION_XML = new HttpHeaders();
     private final HttpHeaders HEADER_ACCEPT_ALL = new HttpHeaders();
@@ -137,7 +136,7 @@ public class StreamController {
         HEADER_ACCEPT_XML.setAccept(xmlMediaType);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, consumes = APPLICATION_XML, produces = APPLICATION_JSON)
+    @RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Stream> uploadConfig(
             @RequestBody byte[] requestBody) {
         String streamName = UUID.randomUUID().toString();
@@ -209,6 +208,7 @@ public class StreamController {
                     RestTemplate sosClient = new RestTemplate();
                     HttpHeaders headers = new HttpHeaders();
                     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+                    headers.setContentType(MediaType.APPLICATION_XML);
                     HttpEntity<String> entity = new HttpEntity<>(insertSensor, headers);
                     responseDocument = sosClient.exchange(sosEndpoint, HttpMethod.POST, entity, String.class);
                 } catch (RestClientException e) {
@@ -218,11 +218,15 @@ public class StreamController {
                     logAndThrowException(sosEndpoint, new RuntimeException("HttpResponseCode != 2xx."));
                 }
                 Object decodedResponse = decoderHelper.decode(responseDocument.getBody());
-                if (decodedResponse instanceof String) {
-
+                String offering = "";
+                String sensor = "";
+                if (decodedResponse instanceof InsertSensorResponse) {
+                    InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
+                    offering = isr.getAssignedOffering();
+                    sensor = isr.getAssignedProcedure();
                 } else {
                     String msg = String.format(
-                            "XML document received from '%s' isn't sml2.0:AggregateProcess! Received: %s",
+                            "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
                             sosEndpoint,
                             decodedResponse.getClass());
                     LOG.error(msg);
@@ -230,11 +234,15 @@ public class StreamController {
                 }
 
                 // parse processor:
-                String commonAppProperties = " --sensormlurl=" + properties.getBaseurl() + "/api/" + streamName;
-                commonAppProperties += " --username=" + properties.getDatasource().getUsername() + " --password=" + properties.getDatasource().getPassword() + " ";
+                String commonAppProperties = " --sensormlurl=" + properties.getBaseurl() + "/api/" + "s"+streamName
+                        + " --offering=" + offering
+                        + " --sensor=" + sensor;
                 streamDefinition += "| csv-processor" + commonAppProperties + " ";
                 // parse sink:
-                streamDefinition += "| db-sink" + commonAppProperties;
+                streamDefinition += "| db-sink" + commonAppProperties
+                        + " --url=" + properties.getDatasource().getUrl()
+                        + " --username=" + properties.getDatasource().getUsername()
+                        + " --password=" + properties.getDatasource().getPassword() + " ";
 
                 Stream createdStream = null;
                 streamName = "s" + streamName;
@@ -259,38 +267,38 @@ public class StreamController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public ResponseEntity<Stream> getStream(
-            @PathVariable String streamId) {
-        Stream result = service.getStream(streamId);
-        if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
-    }
+//    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = {"application/json"})
+//    public ResponseEntity<Stream> getStream(
+//            @PathVariable String streamId) {
+//        Stream result = service.getStream(streamId);
+//        if (result == null) {
+//            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+//    }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = APPLICATION_XML)
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET)
     public ResponseEntity<Stream> getStreamSensorMLURL(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
         if (streamNameURLs.hasStreamNameUrl(streamId)) {
             String SensormlURL = streamNameURLs.getSensormlURL(streamId);
             if (SensormlURL != null) {
                 return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
-                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
         } else {
-            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -300,14 +308,14 @@ public class StreamController {
      * @param streamId - name of the stream
      * @return succes or error message
      */
-    @RequestMapping(value = "/{streamId}", produces = APPLICATION_JSON, method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{streamId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{streamId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON, method = RequestMethod.PUT)
+    @RequestMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public ResponseEntity<Stream> putStream(
             @PathVariable String streamId,
             @RequestBody StreamStatus requestStatus) {

@@ -48,11 +48,13 @@ import org.n52.stream.seadatacloud.cnc.model.Sink;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
+@Component
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class SinksDecoder extends BaseDeserializer<Sinks> {
 

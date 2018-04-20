@@ -82,11 +82,11 @@
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                    <swe:label>Galway Bay Cable Observatory</swe:label>
+                    <swe:label>label: Galway Bay Cable Observatory</swe:label>
                     <sml:feature>
                         <sams:SF_SpatialSamplingFeature gml:id="galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>52°North</gml:name>
+                            <gml:identifier codeSpace="">identifier: Galway Bay Cable Observatory</gml:identifier>
+                            <gml:name>name: Galway Bay Cable Observatory</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
@@ -173,16 +173,6 @@
                                        <swe:value>tcp://nexos.dev.52north.org:1883</swe:value>
                                     </swe:Text>
                                  </swe:field>
-                                 <swe:field name="mqtt_broker_password">
-                                    <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#password">
-                                       <swe:value>password</swe:value>
-                                    </swe:Text>
-                                 </swe:field>
-                                 <swe:field name="mqtt_broker_username">
-                                    <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#username">
-                                       <swe:value>username</swe:value>
-                                    </swe:Text>
-                                 </swe:field>
                                  <swe:field name="mqtt_broker_topics">
                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#topics">
                                        <swe:value>spiddal-fluorometer</swe:value>
@@ -257,11 +247,11 @@
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                     <swe:label>Galway Bay Cable Observatory</swe:label>
+                     <swe:label>label: Galway Bay Cable Observatory</swe:label>
                      <sml:feature>
                         <sams:SF_SpatialSamplingFeature gml:id="sf_galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>Galway Bay Cable Observatory</gml:name>
+                            <gml:identifier codeSpace="">identifier: Galway Bay Cable Observatory</gml:identifier>
+                            <gml:name>name: Galway Bay Cable Observatory</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>

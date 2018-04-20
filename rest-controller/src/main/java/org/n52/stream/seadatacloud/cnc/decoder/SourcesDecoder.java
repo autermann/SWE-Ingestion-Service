@@ -46,22 +46,23 @@ import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.model.AppOptions;
 import org.n52.stream.seadatacloud.cnc.model.Source;
 import org.n52.stream.seadatacloud.cnc.model.Sources;
-import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
+@Component
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class SourcesDecoder extends BaseDeserializer<Sources> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SourcesDecoder.class);
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
     
     @Autowired
     private CnCServiceConfiguration properties;
@@ -79,10 +80,10 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
         }
         ArrayNode appRegistrationResourceList = (ArrayNode) embedded.get("appRegistrationResourceList");
 
-        appRegistrationResourceList.forEach((source) -> {
+        for(JsonNode source: appRegistrationResourceList){
             Source current = new Source();
             current.setName(source.get("name").asText());
-
+            // todo: change to try-with-resources
             try {
                 URL url = new URL(properties.getDataflowhost() + "/apps/" + "source" + "/" + current.getName());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -90,7 +91,7 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
                 conn.setRequestMethod("GET");
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line;
-                StringBuffer res = new StringBuffer();
+                StringBuilder res = new StringBuilder();
                 while ((line = in.readLine()) != null) {
                     res.append(line);
                     res.append("\n");
@@ -105,9 +106,8 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
-
             sourceList.add(current);
-        });
+        }
         results.setSources(sourceList);
         return results;
     }

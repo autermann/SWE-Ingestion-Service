@@ -69,13 +69,16 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
-@SpringBootApplication(scanBasePackages={"org.n52.stream.util"})
+@SpringBootApplication
+@ComponentScan("org.n52.stream")
+@ComponentScan("org.n52.stream.util")
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(AppConfiguration.class)
 public class CsvProcessor extends AbstractIngestionServiceApp {

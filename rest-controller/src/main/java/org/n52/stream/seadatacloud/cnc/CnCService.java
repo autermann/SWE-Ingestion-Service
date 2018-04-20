@@ -30,7 +30,6 @@ package org.n52.stream.seadatacloud.cnc;
 
 import javax.annotation.PostConstruct;
 import org.n52.stream.seadatacloud.cnc.exception.AppRegisterException;
-import org.n52.stream.seadatacloud.cnc.remote.RemoteConfiguration;
 import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
 import org.n52.stream.seadatacloud.cnc.util.StreamNameURLs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +54,6 @@ public class CnCService {
     @Autowired
     public DataRecordDefinitions dataRecordDefinitions;
 
-    @Autowired
-    private CnCServiceConfiguration properties;
-
-    @Autowired
-    public StreamNameURLs streamNameURLs;
-
     public static void main(String[] args) {
         new SpringApplicationBuilder(CnCService.class)
                 .properties("server.port,server.servlet.contextPath")
@@ -68,7 +61,7 @@ public class CnCService {
     }
 
     @PostConstruct
-    private void init() throws AppRegisterException {
+    protected void init() throws AppRegisterException {
         dataRecordDefinitions = new DataRecordDefinitions();
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }

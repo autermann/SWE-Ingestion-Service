@@ -28,6 +28,7 @@
  */
 package org.n52.stream.seadatacloud.cnc.controller;
 
+import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,15 +48,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class FlowServerStreamController {
 
-    public final String BASE_URL = "http://localhost:8082/cnc";
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
+    
+    @Autowired
+    private CnCServiceConfiguration properties;
 
     @Autowired
     CloudService service;
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<String> getApi() {
+        String BASE_URL = properties.getBaseurl();
         String sources = "{\"name\": \"sources\", \"description\":\"List of registered sources.\", \"href\": \"" +BASE_URL+ "/api/sources\"}";
         String processors = "{\"name\": \"processors\", \"description\":\"List of registered processors.\", \"href\": \"" +BASE_URL+ "/api/processors\"}";
         String sinks = "{\"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \"" +BASE_URL+ "/api/sinks\"}";

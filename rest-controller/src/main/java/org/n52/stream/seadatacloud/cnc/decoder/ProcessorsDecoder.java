@@ -50,11 +50,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
+@Component
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class ProcessorsDecoder extends BaseDeserializer<Processors> {
 
