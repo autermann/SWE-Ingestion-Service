@@ -63,16 +63,14 @@ public class CloudService {
 
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @Autowired
     private CnCServiceConfiguration properties;
-    
-    private final String BASE_URL_FLOW_SERVER = properties.getDataflowhost();
 
     public Sources getSources() {
         Sources sources = new Sources();
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=source");
+            URL url = new URL(properties.getDataflowhost() + "/apps?type=source");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -99,7 +97,7 @@ public class CloudService {
     public Processors getProcessors() {
         Processors processors = null;
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=processor");
+            URL url = new URL(properties.getDataflowhost() + "/apps?type=processor");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -126,7 +124,7 @@ public class CloudService {
     public Sinks getSinks() {
         Sinks sinks = null;
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps?type=sink");
+            URL url = new URL(properties.getDataflowhost() + "/apps?type=sink");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -154,7 +152,7 @@ public class CloudService {
         String response = "";
         try {
 
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/apps/" + appType + "/" + appName);
+            URL url = new URL(properties.getDataflowhost() + "/apps/" + appType + "/" + appName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -188,7 +186,7 @@ public class CloudService {
 
         Executors.newCachedThreadPool().submit(() -> {
             Stream stream = null;
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions");
+            URL url = new URL(properties.getDataflowhost() + "/streams/definitions");
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             InputStream inputStream;
@@ -236,7 +234,7 @@ public class CloudService {
     public Stream undeployStream(String streamName) {
         Stream stream = null;
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
+            URL url = new URL(properties.getDataflowhost() + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
@@ -263,7 +261,7 @@ public class CloudService {
     public Stream deployStream(String streamName) {
         Stream stream = null;
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/deployments/" + streamName);
+            URL url = new URL(properties.getDataflowhost() + "/streams/deployments/" + streamName);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
@@ -291,7 +289,7 @@ public class CloudService {
     public String deleteStream(String streamName) {
         String response = "";
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions/" + streamName);
+            URL url = new URL(properties.getDataflowhost() + "/streams/definitions/" + streamName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
             conn.setDoOutput(true);
@@ -315,7 +313,7 @@ public class CloudService {
     public Streams getStreams() {
         Streams streams = new Streams();
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions?size=100");
+            URL url = new URL(properties.getDataflowhost() + "/streams/definitions?size=100");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("GET");
@@ -341,7 +339,7 @@ public class CloudService {
     public Stream getStream(String streamId) {
         Stream stream = null;
         try {
-            URL url = new URL(BASE_URL_FLOW_SERVER + "/streams/definitions/" + streamId);
+            URL url = new URL(properties.getDataflowhost() + "/streams/definitions/" + streamId);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoOutput(true);

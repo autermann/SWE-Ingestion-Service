@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.util;
+package org.n52.stream;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,6 +37,7 @@ import javax.inject.Named;
 
 import org.apache.xmlbeans.XmlException;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.stream.util.DecoderHelper;
 import org.n52.svalbard.decode.exception.DecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class SensorMLRetriever {
 
     @Bean
     @Named("sensorml")
-    public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensorml-url}") String url)
+    public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensormlurl}") String url)
             throws DecodingException, XmlException, IOException {
         URI sensormlUrl = null;
         try {

@@ -28,7 +28,6 @@
  */
 package org.n52.stream.seadatacloud.cnc.controller;
 
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +36,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.xmlbeans.XmlObject;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
@@ -61,10 +62,8 @@ import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
 import org.n52.stream.seadatacloud.cnc.util.StreamNameURLs;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
-import org.n52.svalbard.decode.DecoderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.HttpEntity;
@@ -112,12 +111,9 @@ public class StreamController {
 
     @Autowired
     private DecoderHelper decoderHelper;
-    
-    @Autowired
-    private EncoderHelper encoderHelper;
 
     @Autowired
-    private DecoderRepository decoderRepository;
+    private EncoderHelper encoderHelper;
 
     @Autowired
     private DataRecordDefinitions dataRecordDefinitions;
@@ -148,11 +144,7 @@ public class StreamController {
         try {
             String streamXML = new String(requestBody);
 
-            DecoderHelper helper = new DecoderHelper();
-            decoderRepository.init();
-            helper.setDecoderRepository(decoderRepository);
-
-            Object decode = helper.decode(streamXML);
+            Object decode = decoderHelper.decode(streamXML);
 
             if (decode instanceof AggregateProcess) {
                 ArrayList<SmlComponent> al = (ArrayList<SmlComponent>) ((AggregateProcess) decode).getComponents();

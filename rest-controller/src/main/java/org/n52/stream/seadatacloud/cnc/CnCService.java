@@ -45,8 +45,9 @@ import org.springframework.context.annotation.Import;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @SpringBootApplication
-@ComponentScan("org.n52.stream.seadatacloud.restcontroller")
-@ComponentScan("org.n52.stream.seadatacloud.core")
+@ComponentScan("org.n52.stream.seadatacloud.cnc")
+@ComponentScan("org.n52.stream.core")
+@ComponentScan("org.n52.stream.util")
 @Import(RemoteConfiguration.class)
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class CnCService {
@@ -56,7 +57,7 @@ public class CnCService {
 
     @Autowired
     private CnCServiceConfiguration properties;
-    
+
     @Autowired
     public StreamNameURLs streamNameURLs;
 
@@ -68,8 +69,8 @@ public class CnCService {
 
     @PostConstruct
     private void init() throws AppRegisterException {
-        this.dataRecordDefinitions = new DataRecordDefinitions();
-        this.dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+        dataRecordDefinitions = new DataRecordDefinitions();
+        dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 
 }
