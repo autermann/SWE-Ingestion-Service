@@ -104,7 +104,7 @@ services:
         wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
-        echo 'LogSink apps imported'"
+        echo 'LogSink app imported'"
     networks:
       network:
         ipv4_address: 172.52.0.105
