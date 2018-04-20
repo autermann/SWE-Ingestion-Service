@@ -690,7 +690,7 @@
     },
     "service.serviceURL" : {
       "type" : "uri",
-      "value" : "http://localhost:8080/52n-sos-webapp/service"
+      "value" : "http://oceans.dev.52north.org/52n-sos-webapp/service"
     },
     "serviceProvider.role.codespace" : {
       "type" : "uri",
