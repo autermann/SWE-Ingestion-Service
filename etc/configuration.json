@@ -718,7 +718,7 @@
     }
   },
   "users" : {
-    "a" : "$2a$10$mQAWDKosRX2Od1S0J4u8SOefCkZByWj.ffaAjKPOAuxZ1szmtyc4W"
+    "admin" : "$2a$10$x8ktcF5HcM.frkk.fJz2..1d37cmQaypC4Fn56Ie.pQ3Ns4XNYF0G"
   },
   "activation" : {
     "operations" : [
