@@ -32,6 +32,5 @@ org.n52.stream:
   offering: WL-ECO-FLNTU-4476/observations
   sensor: WL-ECO-FLNTU-4476
 
-
 server:
   port: 8082

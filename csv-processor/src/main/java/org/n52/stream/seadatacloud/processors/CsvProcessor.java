@@ -351,9 +351,10 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private void setTimestamps(OffsetDateTime resultTime, OffsetDateTime phenTime, List<Measurement<?>> measurements) {
         for (Measurement<?> measurement : measurements) {
-            if (phenTime != null) {
-                measurement.setPhenomenonTime(phenTime);
+            if (phenTime == null) {
+                throw logErrorAndCreateException("Missing timestamp in payload!");
             }
+            measurement.setPhenomenonTime(phenTime);
             if (resultTime != null) {
                 measurement.setResultTime(resultTime);
             }

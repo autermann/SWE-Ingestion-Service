@@ -1,11 +1,54 @@
-#
-#
-#   Before starting:
-#     - update all volumne path starting with ADJUST_ME to match your local set-up
-#   
-#   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up
-#
+################################################################################
+#                                                                              #
+#    Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source    #
+#    Software GmbH                                                             #
+#                                                                              #
+#    This program is free software; you can redistribute it and/or modify it   #
+#    under the terms of the GNU General Public License version 2 as published  #
+#    by the Free Software Foundation.                                          #
+#                                                                              #
+#    If the program is linked with libraries which are licensed under one of   #
+#    the following licenses, the combination of the program with the linked    #
+#    library is not considered a "derivative work" of the program:             #
+#                                                                              #
+#        - Apache License, version 2.0                                         #
+#        - Apache Software License, version 1.0                                #
+#        - GNU Lesser General Public License, version 3                        #
+#        - Mozilla Public License, versions 1.0, 1.1 and 2.0                   #
+#        - Common Development and Distribution License (CDDL), version 1.0     #
+#                                                                              #
+#    Therefore the distribution of the program linked with libraries licensed  #
+#    under the aforementioned licenses, is permitted by the copyright holders  #
+#    if the distribution is compliant with both the GNU General Public         #
+#    License version 2 and the aforementioned licenses.                        #
+#                                                                              #
+#    This program is distributed in the hope that it will be useful, but       #
+#    WITHOUT ANY WARRANTY; without even the implied warranty of                #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General  #
+#    Public License for more details.                                          #
+#                                                                              #
+################################################################################
+#                                                                              #
+#                                                                              #
+#   Before starting:                                                           #
+#     - update all volumne path starting with ADJUST_ME to match               #
+#       your local set-up                                                      #
+#     - requies environment where PWD is supported (git bash under             #
+#       windows).                                                              #
+#                                                                              #
+#   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up   #
+#                                                                              #
+################################################################################
+
+
 version: '3'
+
+
+################################################################################
+#                                                                              #
+#                     Services                                                 #
+#                                                                              #
+################################################################################
 services:
 
   rabbitmq:
@@ -16,6 +59,8 @@ services:
     networks:
       network:
         ipv4_address: 172.52.0.101
+
+################################################################################
 
   dataflow:
     image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
@@ -39,6 +84,8 @@ services:
       network:
         ipv4_address: 172.52.0.102
 
+################################################################################
+
   database:
     image: mdillon/postgis:9.5-alpine
     ports:
@@ -52,6 +99,8 @@ services:
     networks:
       network:
         ipv4_address: 172.52.0.103
+
+################################################################################
 
   sos:
     image: tomcat:9-jre8-alpine
@@ -72,11 +121,12 @@ services:
     environment:
       - JPDA_ADDRESS=8000
       - JPDA_TRANSPORT=dt_socket
-    container_name: sos
     command: ["catalina.sh", "jpda", "run"]
     networks:
       network:
         ipv4_address: 172.52.0.104
+
+################################################################################
 
   cnc:
     image: openjdk:8-jdk-alpine
@@ -103,6 +153,8 @@ services:
       network:
         ipv4_address: 172.52.0.105
 
+################################################################################
+
   app-import:
     image: alpine:3.7
     depends_on:
@@ -125,6 +177,8 @@ services:
       network:
         ipv4_address: 172.52.0.106
 
+################################################################################
+
   nginx:
     image: nginx:latest
     ports:
@@ -136,9 +190,21 @@ services:
         ipv4_address: 172.52.0.107
 
 
+################################################################################
+#                                                                              #
+#                     Networks                                                 #
+#                                                                              #
+################################################################################
 networks:
   network:
     driver: bridge
     ipam:
       config:
       - subnet: 172.52.0.0/24
+
+
+################################################################################
+#                                                                              #
+#                     END OF FILE                                              #
+#                                                                              #
+################################################################################
