@@ -6,11 +6,16 @@
 #
 version: '3'
 services:
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - 5672:5672
       - 15672:15672
+    networks:
+      network:
+        ipv4_address: 172.52.0.101
+
   dataflow:
     image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
     ports:
@@ -23,7 +28,7 @@ services:
       - "${PWD}/csv-processor/target/csv-processor-0.0.1-SNAPSHOT.jar:/tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar"
       - "${PWD}/db-sink/target/db-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar"
       - "${PWD}/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar"
-      - "/home/eike/Projects/2018_02_sea-data-cloud/infrastructure/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
+      - "D:/work/03_Projekte/01_Actual/SeaDataCloud/mqtt/apps/mqtt-source-rabbit/target/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
     depends_on:
       - rabbitmq
       - database
@@ -31,7 +36,8 @@ services:
       - database:postgres
     networks:
       network:
-        ipv4_address: 172.52.0.101
+        ipv4_address: 172.52.0.102
+
   database:
     image: mdillon/postgis:9.5-alpine
     ports:
@@ -44,7 +50,8 @@ services:
       - "./sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
     networks:
       network:
-        ipv4_address: 172.52.0.102
+        ipv4_address: 172.52.0.103
+
   sos:
     image: tomcat:9-jre8-alpine
     ports:
@@ -56,6 +63,9 @@ services:
       - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
       - "${PWD}/etc/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
+      - "${PWD}/etc/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
+      - "${PWD}/etc/application.properties://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
+      - "${PWD}/etc/application-context.xml://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
     depends_on:
       - database
     environment:
@@ -65,7 +75,8 @@ services:
     command: ["catalina.sh", "jpda", "run"]
     networks:
       network:
-        ipv4_address: 172.52.0.103
+        ipv4_address: 172.52.0.104
+
   cnc:
     image: openjdk:8-jdk-alpine
     volumes:
@@ -83,7 +94,8 @@ services:
       - dataflow
     networks:
       network:
-        ipv4_address: 172.52.0.104
+        ipv4_address: 172.52.0.105
+
   app-import:
     image: alpine:3.7
     depends_on:
@@ -104,7 +116,8 @@ services:
         echo 'LogSink apps imported'"
     networks:
       network:
-        ipv4_address: 172.52.0.105
+        ipv4_address: 172.52.0.106
+
   nginx:
     image: nginx:latest
     ports:
@@ -113,7 +126,9 @@ services:
       - "${PWD}/etc/sensors:/usr/share/nginx/html"
     networks:
       network:
-        ipv4_address: 172.52.0.106
+        ipv4_address: 172.52.0.107
+
+
 networks:
   network:
     driver: bridge
