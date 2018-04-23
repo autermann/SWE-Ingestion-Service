@@ -84,6 +84,7 @@ services:
       - POSTGRES_DB=sos
     volumes:
       - "${PWD}/database/sos-init.sql:/docker-entrypoint-initdb.d/zz_sos_init.sql"
+      - "${PWD}/database/pgdata:/var/lib/postgresql/data"
     networks:
       network:
         ipv4_address: 172.52.0.103
@@ -99,10 +100,11 @@ services:
     volumes:
       - "${PWD}/sos/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
-      - "${PWD}/sos/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
-      - "${PWD}/sos/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
-      - "${PWD}/sos/application.properties://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
-      - "${PWD}/sos/application-context.xml://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
+      - "${PWD}/sos/configuration.json:/usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
+      - "${PWD}/sos/settings.json:/usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
+      - "${PWD}/sos/application.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
+      - "${PWD}/sos/application-context.xml:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
+      - "${PWD}/sos/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
     depends_on:
       - database
     networks:
@@ -159,18 +161,6 @@ services:
     networks:
       network:
         ipv4_address: 172.52.0.106
-
-################################################################################
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - 9000:80
-    volumes:
-      - "${PWD}/nginx/:/usr/share/nginx/html"
-    networks:
-      network:
-        ipv4_address: 172.52.0.107
 
 
 ################################################################################
