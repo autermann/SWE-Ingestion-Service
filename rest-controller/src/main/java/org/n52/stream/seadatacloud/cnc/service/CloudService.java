@@ -229,7 +229,6 @@ public class CloudService {
         return completableFuture;
     }
 
-    ;
 
     public Stream undeployStream(String streamName) {
         Stream stream = null;
