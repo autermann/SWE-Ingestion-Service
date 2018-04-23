@@ -28,16 +28,11 @@
  */
 package org.n52.stream;
 
-import java.io.BufferedReader;
+import static java.util.Collections.singletonList;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collections;
-
 import javax.inject.Named;
 
 import org.apache.xmlbeans.XmlException;
@@ -59,8 +54,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike
- * Hinderk</a>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @Configuration
 public class SensorMLRetriever {
@@ -75,44 +69,30 @@ public class SensorMLRetriever {
     public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensormlurl}") String url)
             throws DecodingException, XmlException, IOException {
         LOG.info(url);
-        URL sensormlUrl = null;
+        URI sensormlUrl = null;
         try {
-            sensormlUrl = new URL(url);
+            sensormlUrl = new URI(url);
             LOG.info(sensormlUrl.toString());
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             String msg = String.format("Setting 'sensormlurl' malformed: %s (set loglevel to 'TRACE' for stacktrace)",
                     e.getMessage());
             LOG.error(msg);
             LOG.trace("Exception thrown: ", e);
         }
-        /*ResponseEntity<String> responseDocument = null;*/
-        String responseDocument = "";
+        ResponseEntity<String> responseDocument = null;
         try {
-            /*RestTemplate restClient = new RestTemplate();
+            RestTemplate restClient = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+            headers.setAccept(singletonList(MediaType.APPLICATION_XML));
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            responseDocument = restClient.exchange(sensormlUrl, HttpMethod.GET, entity, String.class);*/
-            HttpURLConnection conn = (HttpURLConnection) sensormlUrl.openConnection();
-//            conn.setRequestProperty("Accept", "application/xml");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            responseDocument = res.toString();
+            responseDocument = restClient.exchange(sensormlUrl, HttpMethod.GET, entity, String.class);
         } catch (RestClientException e) {
-            logAndThrowException(sensormlUrl, e);
+            throw logAndCreateRuntimeException(sensormlUrl, e);
         }
-//        if (!responseDocument.getStatusCode().is2xxSuccessful()) {
-//            logAndThrowException(sensormlUrl, new RuntimeException("HttpResponseCode != 2xx."));
-//        }
-        Object decodedGetResponse = decoderHelper.decode(responseDocument/*.getBody()*/);
+        if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+            throw logAndCreateRuntimeException(sensormlUrl, new RuntimeException("HttpResponseCode != 2xx."));
+        }
+        Object decodedGetResponse = decoderHelper.decode(responseDocument.getBody());
         if (decodedGetResponse instanceof AggregateProcess) {
             return (AggregateProcess) decodedGetResponse;
         } else {
@@ -125,14 +105,14 @@ public class SensorMLRetriever {
         }
     }
 
-    private void logAndThrowException(URL sensormlUrl, Exception e) throws RuntimeException {
+    private RuntimeException logAndCreateRuntimeException(Object sensormlUrl, Exception e) throws RuntimeException {
         String msg = String.format("Error while retrieving file from sensormlurl ('%s') :"
                 + " %s (set loglevel to 'TRACE' for stacktrace)",
                 sensormlUrl.toString(),
                 e.getMessage());
         LOG.error(msg);
         LOG.trace("Exception thrown: ", e);
-        throw new RuntimeException(e);
+        return new RuntimeException(e);
     }
 
 }
