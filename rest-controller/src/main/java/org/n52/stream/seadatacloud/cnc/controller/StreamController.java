@@ -256,10 +256,10 @@ public class StreamController {
 
                     return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
-                    return new ResponseEntity<>(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
+                    return new ResponseEntity("{\"error\": \"A stream with the name '" + streamName + " already exists.'\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
                 }
             } else {
-                return new ResponseEntity<>(null, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();
