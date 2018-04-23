@@ -293,7 +293,7 @@ public class StreamController {
         if (streamNameURLs.hasStreamNameUrl(streamId)) {
             String SensormlURL = streamNameURLs.getSensormlURL(streamId);
             if (SensormlURL != null) {
-                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
+                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.NO_CONTENT);
             } else {
                 return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
