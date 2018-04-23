@@ -5,11 +5,11 @@
   "aggregateServices": true,
   "saveStatus": true,
   "restApiUrls": {
-        "http://oceans.dev.52north.org/52n-sos-webapp/api/": "Ocean Data Servvice"
+        "http://localhost:8081/52n-sos-webapp/api/": "Ocean Data Servvice"
     },
     "defaultProvider": {
         "serviceID": "1",
-        "apiUrl": "http://oceans.dev.52north.org/52n-sos-webapp/api/"
+        "apiUrl": "http://localhost:8081/52n-sos-webapp/api/"
     },
   "chartOptions": {
     "yaxis": {
