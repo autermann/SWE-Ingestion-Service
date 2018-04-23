@@ -234,7 +234,7 @@ public class StreamController {
                 }
 
                 // parse processor:
-                String commonAppProperties = " --sensormlurl=" + properties.getBaseurl() + "/api/" + "s"+streamName
+                String commonAppProperties = " --sensormlurl=" + properties.getBaseurl() + "/api/streams/" + "s"+streamName
                         + " --offering=" + offering
                         + " --sensor=" + sensor;
                 streamDefinition += "| csv-processor" + commonAppProperties + " ";
