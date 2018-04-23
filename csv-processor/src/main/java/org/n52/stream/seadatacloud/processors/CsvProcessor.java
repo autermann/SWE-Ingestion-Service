@@ -279,6 +279,10 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
             OffsetDateTime resultTime = null;
             OffsetDateTime phenTime = null;
             List<Measurement<?>> measurements = new LinkedList<>();
+            if (tokens.size() != tokenAssigments.getFields().size()) {
+                throw logErrorAndCreateException(
+                        "Number of values in message does NOT match number of values in stream definition.");
+            }
             for (int i = 0; i < tokens.size(); i++) {
                 String token = tokens.get(i);
                 SweAbstractDataComponent tokenSpecification = tokenAssigments.getFields().get(i).getElement();
