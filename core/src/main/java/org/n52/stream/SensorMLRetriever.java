@@ -94,7 +94,7 @@ public class SensorMLRetriever {
             HttpEntity<String> entity = new HttpEntity<>(headers);
             responseDocument = restClient.exchange(sensormlUrl, HttpMethod.GET, entity, String.class);*/
             HttpURLConnection conn = (HttpURLConnection) sensormlUrl.openConnection();
-//            conn.setRequestProperty("Accept", "application/xml");
+            conn.setRequestProperty("Accept", "application/xml");
             conn.setRequestMethod("GET");
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;

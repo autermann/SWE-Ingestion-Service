@@ -273,17 +273,17 @@ public class StreamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = {"application/json"})
-//    public ResponseEntity<Stream> getStream(
-//            @PathVariable String streamId) {
-//        Stream result = service.getStream(streamId);
-//        if (result == null) {
-//            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
-//    }
+    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<Stream> getStream(
+            @PathVariable String streamId) {
+        Stream result = service.getStream(streamId);
+        if (result == null) {
+            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+    }
 
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{streamId}", produces = "application/xml", method = RequestMethod.GET)
     public ResponseEntity<Stream> getStreamSensorMLURL(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
@@ -293,7 +293,7 @@ public class StreamController {
         if (streamNameURLs.hasStreamNameUrl(streamId)) {
             String SensormlURL = streamNameURLs.getSensormlURL(streamId);
             if (SensormlURL != null) {
-                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.NO_CONTENT);
+                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
                 return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
@@ -333,10 +333,10 @@ public class StreamController {
             switch (requestStatus.getStatus()) {
                 case "deployed":
                     Stream deployedStream = service.deployStream(streamId);
-                    return new ResponseEntity<>(deployedStream, HttpStatus.OK);
+                    return new ResponseEntity<>(deployedStream, HttpStatus.NO_CONTENT);
                 case "undeployed":
                     Stream undeployedStream = service.undeployStream(streamId);
-                    return new ResponseEntity<>(undeployedStream, HttpStatus.OK);
+                    return new ResponseEntity<>(undeployedStream, HttpStatus.NO_CONTENT);
                 default:
                     return new ResponseEntity("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
             }
