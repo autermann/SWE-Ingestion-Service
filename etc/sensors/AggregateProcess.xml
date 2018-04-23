@@ -82,11 +82,11 @@
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                    <swe:label>label: Galway Bay Cable Observatory</swe:label>
+                    <swe:label>Galway Bay Cable Observatory</swe:label>
                     <sml:feature>
                         <sams:SF_SpatialSamplingFeature gml:id="galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">identifier: Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>name: Galway Bay Cable Observatory</gml:name>
+                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
+                            <gml:name>Galway Bay Cable Observatory</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
@@ -247,11 +247,11 @@
                </sml:identification>
                <sml:featuresOfInterest>
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                     <swe:label>label: Galway Bay Cable Observatory</swe:label>
+                     <swe:label>Galway Bay Cable Observatory</swe:label>
                      <sml:feature>
                         <sams:SF_SpatialSamplingFeature gml:id="sf_galway-bay-cable-observatory">
-                            <gml:identifier codeSpace="">identifier: Galway Bay Cable Observatory</gml:identifier>
-                            <gml:name>name: Galway Bay Cable Observatory</gml:name>
+                            <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
+                            <gml:name>Galway Bay Cable Observatory</gml:name>
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
