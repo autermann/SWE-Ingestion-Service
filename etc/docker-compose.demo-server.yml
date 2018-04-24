@@ -162,6 +162,20 @@ services:
       network:
         ipv4_address: 172.52.0.106
 
+################################################################################
+
+  smle:
+    image: nginx:alpine
+    ports:
+      - 9003:80
+    depends_on:
+      - cnc
+    volumes:
+      - "${PWD}/smle:/usr/share/nginx/html"
+    networks:
+      network:
+        ipv4_address: 172.52.0.107
+
 
 ################################################################################
 #                                                                              #

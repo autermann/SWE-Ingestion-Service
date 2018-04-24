@@ -78,7 +78,6 @@ services:
       - "ADJUST_ME/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
     depends_on:
       - rabbitmq
-      - database
     networks:
       network:
         ipv4_address: 172.52.0.102
@@ -149,8 +148,6 @@ services:
       "--org.n52.stream.datasource.username=postgres",
       "--org.n52.stream.datasource.password=postgres"
     ]
-    depends_on:
-      - dataflow
     networks:
       network:
         ipv4_address: 172.52.0.105
@@ -181,12 +178,14 @@ services:
 
 ################################################################################
 
-  nginx:
-    image: nginx:latest
+  smle:
+    image: nginx:alpine
     ports:
-      - 8080:80
+      - 8083:80
+    depends_on:
+      - cnc
     volumes:
-      - "${PWD}/etc/sensors:/usr/share/nginx/html"
+      - "${PWD}/etc/smle:/usr/share/nginx/html"
     networks:
       network:
         ipv4_address: 172.52.0.107
