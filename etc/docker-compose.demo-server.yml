@@ -61,6 +61,8 @@ services:
 
   dataflow:
     image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
+    ports:
+      - 9004:9393
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
     volumes:
@@ -127,7 +129,7 @@ services:
       "--server.servlet.contextPath=/cnc",
       "--org.n52.stream.sosendpoint=http://sos:8080/52n-sos-webapp/service",
       "--org.n52.stream.dataflowhost=http://dataflow:9393",
-      "--org.n52.stream.baseurl=http://cnc:8082/cnc",
+      "--org.n52.stream.baseurl=http://oceans.dev.52north.org/cnc",
       "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
       "--org.n52.stream.datasource.username=postgres",
       "--org.n52.stream.datasource.password=postgres"
