@@ -65,13 +65,13 @@ services:
       - 9004:9393
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
+      - spring.cloud.config.enabled=false
+      - server.contextPath=/dataflow
     volumes:
       - "${PWD}/dataflow/apps/:/tmp/apps/"
     depends_on:
       - rabbitmq
       - database
-    links:
-      - database:postgres
     networks:
       network:
         ipv4_address: 172.52.0.102
@@ -97,8 +97,6 @@ services:
     image: tomcat:9-jre8-alpine
     ports:
       - 9001:8080
-    links:
-      - database:database
     volumes:
       - "${PWD}/sos/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
@@ -128,7 +126,7 @@ services:
       "--server.port=8082",
       "--server.servlet.contextPath=/cnc",
       "--org.n52.stream.sosendpoint=http://sos:8080/52n-sos-webapp/service",
-      "--org.n52.stream.dataflowhost=http://dataflow:9393",
+      "--org.n52.stream.dataflowhost=http://dataflow:9393/dataflow",
       "--org.n52.stream.baseurl=http://oceans.dev.52north.org/cnc",
       "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
       "--org.n52.stream.datasource.username=postgres",
@@ -152,13 +150,13 @@ services:
         do
           sleep 1;
         done;
-        wget -qO- 'http://dataflow:9393/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
+        wget -qO- 'http://dataflow:9393/dataflow/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
         echo 'MQTT Source Rabbit app imported'
-        wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
+        wget -qO- 'http://dataflow:9393/dataflow/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
         echo 'CsvProcessor app imported'
-        wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
+        wget -qO- 'http://dataflow:9393/dataflow/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
-        wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
+        wget -qO- 'http://dataflow:9393/dataflow/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'LogSink app imported'"
     networks:
       network:

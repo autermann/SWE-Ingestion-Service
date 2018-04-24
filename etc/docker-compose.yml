@@ -69,6 +69,7 @@ services:
       - 19002:19002
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
+      - spring.cloud.config.enabled=false
     volumes:
       - "${PWD}/etc/:/tmp/apps/"
       - "${PWD}/csv-processor/target/csv-processor-0.0.1-SNAPSHOT.jar:/tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar"
@@ -78,8 +79,6 @@ services:
     depends_on:
       - rabbitmq
       - database
-    links:
-      - database:postgres
     networks:
       network:
         ipv4_address: 172.52.0.102
@@ -107,8 +106,6 @@ services:
     ports:
       - 8081:8080
       - 8000:8000
-    links:
-      - database:database
     volumes:
       - "ADJUST_ME/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
@@ -116,6 +113,7 @@ services:
       - "${PWD}/etc/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
       - "${PWD}/etc/application.properties://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
       - "${PWD}/etc/application-context.xml://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
+      - "${PWD}/etc/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
     depends_on:
       - database
     environment:
