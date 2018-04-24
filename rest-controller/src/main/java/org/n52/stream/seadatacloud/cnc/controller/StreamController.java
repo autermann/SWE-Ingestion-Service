@@ -74,6 +74,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,6 +137,7 @@ public class StreamController {
         HEADER_ACCEPT_XML.setAccept(xmlMediaType);
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Stream> uploadConfig(
             @RequestBody byte[] requestBody) {
@@ -267,12 +269,14 @@ public class StreamController {
         }
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Streams> getStreams() {
         Streams result = service.getStreams();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<Stream> getStream(
             @PathVariable String streamId) {
@@ -283,6 +287,7 @@ public class StreamController {
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", produces = "application/xml", method = RequestMethod.GET)
     public ResponseEntity<Stream> getStreamSensorMLURL(
             @PathVariable String streamId) {
@@ -308,13 +313,15 @@ public class StreamController {
      * @param streamId - name of the stream
      * @return succes or error message
      */
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
-        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
+        return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public ResponseEntity<Stream> putStream(
             @PathVariable String streamId,

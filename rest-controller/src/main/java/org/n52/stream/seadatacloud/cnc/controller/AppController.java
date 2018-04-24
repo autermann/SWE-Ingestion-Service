@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,24 +60,28 @@ public class AppController {
     @Autowired
     CloudService service;
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "sources", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sources getSources() {
         Sources result = service.getSources();
         return result;
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "processors", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Processors getProcessors() {
         Processors result = service.getProcessors();
         return result;
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "sinks", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Sinks getSinks() {
         Sinks result = service.getSinks();
         return result;
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "registerApp", method = RequestMethod.GET)
     public ResponseEntity<String> registerApp(
             @RequestParam("name") String appName,
