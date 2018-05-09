@@ -171,7 +171,7 @@ services:
     depends_on:
       - cnc
     volumes:
-      - "${PWD}/smle:/usr/share/nginx/html"
+      - "${PWD}/smle/www:/usr/share/nginx/html"
       - "${PWD}/smle/smle_nginx.conf:/etc/nginx/conf.d/default.conf"
     networks:
       network:
