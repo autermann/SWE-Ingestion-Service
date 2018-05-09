@@ -146,7 +146,9 @@ services:
       "--org.n52.stream.baseurl=http://cnc:8082/cnc",
       "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
       "--org.n52.stream.datasource.username=postgres",
-      "--org.n52.stream.datasource.password=postgres"
+      "--org.n52.stream.datasource.password=postgres",
+      "--security.user.name=cnc-user",
+      "--security.user.password=cnc-non-secure-basic-auth-password"
     ]
     networks:
       network:

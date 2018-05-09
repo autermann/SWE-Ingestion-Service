@@ -8,6 +8,10 @@ spring:
     url: jdbc:postgresql://database:5432/sos
     username: postgres
     password: postgres
+  security:
+    user:
+      name: "cnc-user"
+      password: "cnc-non-secure-basic-auth-password"
     
 org.n52.stream:
   sosendpoint: http://sos:8080/52n-sos-webapp/service

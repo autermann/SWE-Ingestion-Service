@@ -29,9 +29,9 @@
 package org.n52.stream.seadatacloud.cnc;
 
 import javax.annotation.PostConstruct;
+
 import org.n52.stream.seadatacloud.cnc.exception.AppRegisterException;
 import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
-import org.n52.stream.seadatacloud.cnc.util.StreamNameURLs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan("org.n52.stream.seadatacloud.cnc")
 @ComponentScan("org.n52.stream.core")
 @ComponentScan("org.n52.stream.util")
-@Import(RemoteConfiguration.class)
+@Import({RemoteConfiguration.class, CnCServiceSecurityConfiguration.class})
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class CnCService {
 
@@ -56,7 +56,8 @@ public class CnCService {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(CnCService.class)
-                .properties("server.port,server.servlet.contextPath")
+                .properties("server.port", "server.servlet.contextPath",
+                        "spring.security.user.name", "spring.security.user.password")
                 .run(args);
     }
 
