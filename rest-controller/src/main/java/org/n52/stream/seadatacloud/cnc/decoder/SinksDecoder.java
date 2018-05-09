@@ -59,17 +59,17 @@ import org.springframework.stereotype.Component;
 public class SinksDecoder extends BaseDeserializer<Sinks> {
 
     ObjectMapper objectMapper = new ObjectMapper();
-       
+
     @Autowired
     private CnCServiceConfiguration properties;
-    
+
     @Override
     public Sinks deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Sinks results = new Sinks();
 
         JsonNode node = jp.readValueAsTree();
         JsonNode embedded = node.get("_embedded");
-        List<Sink> sinkList = new ArrayList();
+        List<Sink> sinkList = new ArrayList<>();
         if (embedded == null) {
             results.setSinks(sinkList);
             return results;
@@ -95,7 +95,7 @@ public class SinksDecoder extends BaseDeserializer<Sinks> {
                 in.close();
                 conn.disconnect();
                 String response = res.toString();
-                
+
                 AppOptions aos = objectMapper.readValue(response, AppOptions.class);
 
                 current.setOptions(aos.getAppOptions());

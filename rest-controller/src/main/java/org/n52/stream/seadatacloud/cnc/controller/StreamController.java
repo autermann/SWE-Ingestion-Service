@@ -139,7 +139,7 @@ public class StreamController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Stream> uploadConfig(
+    public ResponseEntity<?> createStream(
             @RequestBody byte[] requestBody) {
         String streamName = UUID.randomUUID().toString();
         try {
@@ -164,10 +164,10 @@ public class StreamController {
                 if (dataRecordDefinitions.hasDataRecordDefinition(sdrDefinition)) {
                     source = appController.getSourceByName(dataRecordDefinitions.getSourceType(sdrDefinition));
                 } else {
-                    return new ResponseEntity("{\"error\":\"No supported Source found for DataRecord definition '" + sdrDefinition + "'\"}", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("{\"error\":\"No supported Source found for DataRecord definition '" + sdrDefinition + "'\"}", HttpStatus.NOT_FOUND);
                 }
                 if (source == null) {
-                    return new ResponseEntity("{ \"error\": \"DataRecord definition '" + sdrDefinition + "' is supposed to be supported by Source '" + sourceName + "', but Source '" + sourceName + "' not found.\"}", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("{ \"error\": \"DataRecord definition '" + sdrDefinition + "' is supposed to be supported by Source '" + sourceName + "', but Source '" + sourceName + "' not found.\"}", HttpStatus.NOT_FOUND);
                 }
                 sourceName = source.getName();
 
@@ -183,11 +183,11 @@ public class StreamController {
                     if (optionUrl.indexOf('#') > -1) {
                         appOptionName = optionUrl.substring(optionUrl.lastIndexOf('#') + 1);
                     } else {
-                        return new ResponseEntity("{ \"error\": \"swe:Text definition '" + optionUrl + "' requires a hashtag ( # ) option.\"}", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("{ \"error\": \"swe:Text definition '" + optionUrl + "' requires a hashtag ( # ) option.\"}", HttpStatus.BAD_REQUEST);
                     }
                     AppOption ao = appController.getSourceOptionByName(source, appOptionName);
                     if (ao == null) {
-                        return new ResponseEntity("{ \"error\": \"Option '" + appOptionName + "' is not supported by source '" + sourceName + "'.\"}", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("{ \"error\": \"Option '" + appOptionName + "' is not supported by source '" + sourceName + "'.\"}", HttpStatus.BAD_REQUEST);
                     }
                     streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 };
@@ -226,6 +226,7 @@ public class StreamController {
                     InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
                     offering = isr.getAssignedOffering();
                     sensor = isr.getAssignedProcedure();
+                    isr.close();
                 } else {
                     String msg = String.format(
                             "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
@@ -258,14 +259,14 @@ public class StreamController {
 
                     return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
-                    return new ResponseEntity("{\"error\": \"A stream with the name '" + streamName + " already exists.'\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
+                    return new ResponseEntity<>("{\"error\": \"A stream with the name '" + streamName + " already exists.'\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
                 }
             } else {
-                return new ResponseEntity("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+            LOG.error("Exception thrown:", e);
+            return new ResponseEntity<>(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -278,32 +279,32 @@ public class StreamController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<Stream> getStream(
+    public ResponseEntity<?> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", produces = "application/xml", method = RequestMethod.GET)
-    public ResponseEntity<Stream> getStreamSensorMLURL(
+    public ResponseEntity<?> getStreamSensorMLURL(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
         if (streamNameURLs.hasStreamNameUrl(streamId)) {
             String SensormlURL = streamNameURLs.getSensormlURL(streamId);
             if (SensormlURL != null) {
-                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
+                return new ResponseEntity<>(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
-                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
         } else {
-            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -323,19 +324,19 @@ public class StreamController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-    public ResponseEntity<Stream> putStream(
+    public ResponseEntity<?> putStream(
             @PathVariable String streamId,
             @RequestBody StreamStatus requestStatus) {
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         } else {
             String status = stream.getStatus();
             if (status.equals("deploying")) {
-                return new ResponseEntity("{\"Accepted\": \"The Stream '" + streamId + "' is currently 'deploying' and thus, the resource' status will not be changed.\"}", HttpStatus.ACCEPTED);
+                return new ResponseEntity<>("{\"Accepted\": \"The Stream '" + streamId + "' is currently 'deploying' and thus, the resource' status will not be changed.\"}", HttpStatus.ACCEPTED);
             }
             if (requestStatus.getStatus() == null) {
-                return new ResponseEntity("{\"error\":\"Request is missing required field 'status'.\"}", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("{\"error\":\"Request is missing required field 'status'.\"}", HttpStatus.BAD_REQUEST);
             }
             switch (requestStatus.getStatus()) {
                 case "deployed":
@@ -345,7 +346,7 @@ public class StreamController {
                     Stream undeployedStream = service.undeployStream(streamId);
                     return new ResponseEntity<>(undeployedStream, HttpStatus.NO_CONTENT);
                 default:
-                    return new ResponseEntity("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
             }
         }
     }

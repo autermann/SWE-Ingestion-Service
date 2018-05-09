@@ -28,8 +28,6 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>

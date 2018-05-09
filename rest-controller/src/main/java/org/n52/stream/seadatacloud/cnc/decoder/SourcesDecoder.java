@@ -63,17 +63,17 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
     private static final Logger LOG = LoggerFactory.getLogger(SourcesDecoder.class);
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    
+
     @Autowired
     private CnCServiceConfiguration properties;
-    
+
     @Override
     public Sources deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Sources results = new Sources();
 
         JsonNode node = jp.readValueAsTree();
         JsonNode embedded = node.get("_embedded");
-        List<Source> sourceList = new ArrayList();
+        List<Source> sourceList = new ArrayList<>();
         if (embedded == null) {
             results.setSources(sourceList);
             return results;
@@ -99,7 +99,7 @@ public class SourcesDecoder extends BaseDeserializer<Sources> {
                 in.close();
                 conn.disconnect();
                 String response = res.toString();
-                
+
                 AppOptions aos = objectMapper.readValue(response, AppOptions.class);
 
                 current.setOptions(aos.getAppOptions());

@@ -40,19 +40,19 @@ public class StreamNameURLs {
     private HashMap<String, String> streamNameUrls;
 
     public StreamNameURLs() {
-        this.streamNameUrls = new HashMap();
+        streamNameUrls = new HashMap<>();
     }
-    
+
     public boolean hasStreamNameUrl(String streamName) {
-        return this.streamNameUrls.containsKey(streamName);
+        return streamNameUrls.containsKey(streamName);
     }
-    
+
     public String getSensormlURL(String streamName) {
-        return this.streamNameUrls.get(streamName);
+        return streamNameUrls.get(streamName);
     }
-    
+
     public void add(String streamName, String sensormlURL) {
-        this.streamNameUrls.put(streamName, sensormlURL);
+        streamNameUrls.put(streamName, sensormlURL);
     }
 
 }

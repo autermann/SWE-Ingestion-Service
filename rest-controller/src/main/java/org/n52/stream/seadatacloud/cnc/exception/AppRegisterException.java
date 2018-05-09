@@ -38,9 +38,11 @@ package org.n52.stream.seadatacloud.cnc.exception;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 public class AppRegisterException extends Exception {
-    
+
+    private static final long serialVersionUID = 1L;
+
     public AppRegisterException(String errorMessage) {
         super(errorMessage);
     }
-    
+
 }

@@ -201,6 +201,7 @@ public class CloudService {
                     Scanner scanner = new Scanner(inputStream);
                     scanner.useDelimiter("\\Z");
                     String response = scanner.next();
+                    scanner.close();
                     LOG.error(response);
                 }
                 inputStream = conn.getInputStream();
