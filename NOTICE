@@ -136,6 +136,7 @@ This project includes:
   Spring Boot JDBC Starter under Apache License, Version 2.0
   Spring Boot Json Starter under Apache License, Version 2.0
   Spring Boot Logging Starter under Apache License, Version 2.0
+  Spring Boot Security Starter under Apache License, Version 2.0
   Spring Boot Starter under Apache License, Version 2.0
   Spring Boot Tomcat Starter under Apache License, Version 2.0
   Spring Boot Validation Starter under Apache License, Version 2.0
@@ -161,6 +162,9 @@ This project includes:
   spring-cloud-stream-binder-rabbit under Apache License, Version 2.0
   spring-cloud-stream-binder-rabbit-core under Apache License, Version 2.0
   spring-integration-tuple under Apache License, Version 2.0
+  spring-security-config under The Apache Software License, Version 2.0
+  spring-security-core under The Apache Software License, Version 2.0
+  spring-security-web under The Apache Software License, Version 2.0
   spring-tuple under Apache License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0

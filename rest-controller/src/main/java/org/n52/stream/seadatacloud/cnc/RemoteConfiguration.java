@@ -47,19 +47,21 @@ import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
+ *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @Configuration
 public class RemoteConfiguration {
-    
+
     @Autowired
     private SourcesDecoder sourcesDecoder;
+
     @Autowired
     private ProcessorsDecoder processorsDecoder;
+
     @Autowired
     private SinksDecoder sinksDecoder;
-    
+
     @Bean
     public ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
