@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
+    Software GmbH
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 as published
+    by the Free Software Foundation.
+
+    If the program is linked with libraries which are licensed under one of
+    the following licenses, the combination of the program with the linked
+    library is not considered a "derivative work" of the program:
+
+        - Apache License, version 2.0
+        - Apache Software License, version 1.0
+        - GNU Lesser General Public License, version 3
+        - Mozilla Public License, versions 1.0, 1.1 and 2.0
+        - Common Development and Distribution License (CDDL), version 1.0
+
+    Therefore the distribution of the program linked with libraries licensed
+    under the aforementioned licenses, is permitted by the copyright holders
+    if the distribution is compliant with both the GNU General Public
+    License version 2 and the aforementioned licenses.
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    Public License for more details.
+
+-->
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                {"time": "%date{ISO8601}", "thread": "%thread", "level": "%level", "class": "%logger{36}", "message": "%message"}\n
+            </pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>172.52.0.110:5000</destination>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                 <pattern>
+                    {
+                        "statistics": "#asJson{%message}"
+                    }
+                 </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+    
+    <appender name="test" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+        <providers>
+                <pattern>
+                 <pattern>
+                    {
+                        "time": "%date{ISO8601}",
+                        "thread": "%thread",
+                        "level": "%level",
+                        "class": "%logger{0}",
+                        "message": "%message",
+                        "statistics": "#asJson{%message}"
+                    }
+                 </pattern>
+                </pattern>
+                <provider class="org.n52.stream.seadatacloud.logging.JsonProviderForTesting"/>
+                <provider class="net.logstash.logback.composite.loggingevent.LoggingEventFormattedTimestampJsonProvider"/>
+                <provider class="net.logstash.logback.composite.LogstashVersionJsonProvider"/>
+            </providers>
+            <!-- 
+            <providers>
+                <timestamp/>
+                <version/>
+                <message>
+                    <fieldName>customMessage</fieldName>
+                </message>
+                <nestedField>
+                    <fieldName>nested</fieldName>
+                    <providers>
+                    <uuid>
+                        <fieldName>id</fieldName>
+                        <strategy>time</strategy>
+                        <ethernet>00:C0:F0:3D:5B:7C</ethernet>
+                    </uuid>
+                    <rawMessage>
+                        <fieldName>customRawMessage</fieldName>
+                    </rawMessage>
+                    </providers>
+                </nestedField>
+                <loggerName>
+                    <shortenedLoggerNameLength>20</shortenedLoggerNameLength>
+                </loggerName>
+                <threadName/>
+                <logLevel/>
+                <logLevelValue/>
+                <callerData>
+                    <fieldName>caller</fieldName>
+                    <classFieldName>class</classFieldName>
+                    <methodFieldName>method</methodFieldName>
+                    <fileFieldName>file</fileFieldName>
+                    <lineFieldName>line</lineFieldName>
+                </callerData>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>20</maxDepthPerThrowable>
+                        <maxLength>1000</maxLength>
+                        <shortenedClassNameLength>30</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                        <exclusions>excluded1,excluded2</exclusions>
+                        <inlineHash>true</inlineHash>
+                    </throwableConverter>
+                </stackTrace>
+                <stackHash>
+                    <exclusions>excluded1,excluded2</exclusions>
+                </stackHash>
+                <context/>
+                <contextName/>
+                <jsonMessage/>
+                <mdc>
+                    <includeMdcKeyName>included</includeMdcKeyName>
+                </mdc>
+                <contextMap/>
+                <globalCustomFields>
+                    <customFields>{"customName":"customValue"}</customFields>
+                </globalCustomFields>
+                <tags/>
+                <logstashMarkers/>
+                <pattern>
+                    <pattern>{"patternName":"patternValue","relativeTime":"#asLong{%relative}"}</pattern>
+                </pattern>
+                <provider class="net.logstash.logback.TestJsonProvider"/>
+                <arguments>
+                    <includeNonStructuredArguments>true</includeNonStructuredArguments>
+                    <nonStructuredArgumentsFieldPrefix>prefix</nonStructuredArgumentsFieldPrefix>
+                </arguments>
+                <throwableClassName/>
+                <throwableRootCauseClassName>
+                    <useSimpleClassName>false</useSimpleClassName>
+                </throwableRootCauseClassName>
+            </providers>
+             -->
+        </encoder>
+    </appender>
+    
+    <appender name="listAppender" class="ch.qos.logback.core.read.ListAppender"/>
+    
+    <logger name="org.n52.stream.seadatacloud.dbsink.DatabaseSinkApplicationTest" level="DEBUG">
+        <appender-ref ref="test" />
+        <appender-ref ref="listAppender" />
+    </logger>
+</configuration>
