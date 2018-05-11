@@ -80,7 +80,7 @@ public class DatabaseSinkApplicationTest {
         Timeseries<BigDecimal> t1 = new Timeseries<BigDecimal>();
         t1.setSensor("sensor1");
         t1.setPhenomenon("phenomenon1");
-        t1.setFeature(new Feature("featuer1"));
+        t1.setFeature(new Feature().withId("featuer1"));
         Measurement<BigDecimal> m1 = new Measurement<>();
         m1.setValue(new BigDecimal("1.0"));
         m1.setPhenomenonTime(OffsetDateTime.now());
@@ -90,7 +90,7 @@ public class DatabaseSinkApplicationTest {
         Timeseries<BigDecimal> t2 = new Timeseries<BigDecimal>();
         t2.setSensor("sensor2");
         t2.setPhenomenon("phenomenon2");
-        t2.setFeature(new Feature("featuer2"));
+        t2.setFeature(new Feature().withId("featuer2"));
         Measurement<BigDecimal> m20 = new Measurement<>();
         m20.setValue(new BigDecimal("2.0"));
         m20.setPhenomenonTime(OffsetDateTime.now().plusSeconds(10));

@@ -225,7 +225,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         if (featuresOfInterest.isEmpty() || featuresOfInterest.size() > 1) {
             throw logErrorAndCreateException("Only ONE Element <featureofinterest> of first component supported!");
         }
-        feature = new Feature(featuresOfInterest.iterator().next());
+        feature = new Feature().withId(featuresOfInterest.iterator().next());
     }
 
     private AbstractProcessV20 checkAndExtractProcess() throws IllegalArgumentException {
