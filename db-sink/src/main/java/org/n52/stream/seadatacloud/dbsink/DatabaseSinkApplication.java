@@ -29,6 +29,7 @@
 package org.n52.stream.seadatacloud.dbsink;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -62,6 +63,8 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * {@link Sink} implementation for database insertion.
@@ -100,9 +103,9 @@ public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
      */
     @PostConstruct
     public void init() {
-        LOG.info("init(); processor called");
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
+        LOG.info("DbSink successfully initialized!");
     }
 
     /**
@@ -113,45 +116,47 @@ public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
     @Transactional(rollbackFor=Exception.class)
     @StreamListener(Sink.INPUT)
     public synchronized void input(DataMessage message) {
-        Session session = null;
-        try {
-            session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
-            DaoFactory daoFactory = new DaoFactory(session);
-            session.beginTransaction();
-            DatasetDao datasetDao = daoFactory.getDatasetDao();
-            OfferingDao offeringDao = daoFactory.getOfferingDao();
-            for (Timeseries<?> series : message.getTimeseries()) {
-                if (series.getMeasurements() != null && !series.getMeasurements().isEmpty()) {
-                    ProcedureEntity procedure = daoFactory.getProcedureDAO().get(series.getSensor());
-                    if (procedure != null && properties.getSensor().equals(series.getSensor())) {
-                        DatasetEntity datasetEntity = datasetDao.getOrInsert(series, getOutputs(), properties.getOffering());
-                        if (datasetEntity != null) {
-                            ObservationDao observationDao = daoFactory.getObservationDao();
-                            Data<?> first = null;
-                            Data<?> last = null;
-                            for (Measurement<?> m : series.getMeasurements()) {
-                                Data<?> data = observationDao.persist(m, datasetEntity, getOutputs());
-                                first = checkFirst(first, data);
-                                last = checkLast(last, data);
+        if (message != null && message.getTimeseries() != null) {
+            Session session = null;
+            try {
+                session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+                DaoFactory daoFactory = new DaoFactory(session);
+                session.beginTransaction();
+                DatasetDao datasetDao = daoFactory.getDatasetDao();
+                OfferingDao offeringDao = daoFactory.getOfferingDao();
+                for (Timeseries<?> t : message.getTimeseries()) {
+                    if (t.hasMeasurements()) {
+                        ProcedureEntity procedure = daoFactory.getProcedureDAO().get(t.getSensor());
+                        if (procedure != null && properties.getSensor().equals(t.getSensor())) {
+                            DatasetEntity datasetEntity = datasetDao.getOrInsert(t, getOutputs(), properties.getOffering());
+                            if (datasetEntity != null) {
+                                ObservationDao observationDao = daoFactory.getObservationDao();
+                                Data<?> first = null;
+                                Data<?> last = null;
+                                for (Measurement<?> m : t.getMeasurements()) {
+                                    Data<?> data = observationDao.persist(m, datasetEntity, getOutputs());
+                                    first = checkFirst(first, data);
+                                    last = checkLast(last, data);
+                                }
+                                // update dataset and offering with times and geometry
+                                datasetDao.updateMetadata(datasetEntity, first, last);
+                                offeringDao.updateMetadata(datasetEntity.getOffering(), first, last, null);
                             }
-                            // update dataset and offering with times and geometry
-                            datasetDao.updateMetadata(datasetEntity, first, last);
-                            offeringDao.updateMetadata(datasetEntity.getOffering(), first, last, null);
                         }
                     }
                 }
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            LOG.error("error", e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.clear();
-                session.close();
+                session.getTransaction().commit();
+                logSuccessfulInsertion(message);
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                logFailedInsertion(message);
+            } finally {
+                if (session != null && session.isOpen()) {
+                    session.clear();
+                    session.close();
+                }
             }
         }
-        LOG.info("Received processor output:\n{}", message);
     }
 
     /**
@@ -201,6 +206,39 @@ public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
             }
         }
         return Collections.emptyList();
+    }
+
+    private void logSuccessfulInsertion(DataMessage message) {
+        for (String s : getObservationLogStatements(message)) {
+            LOG.info("{}", s);
+        }
+    }
+
+    private void logFailedInsertion(DataMessage message) {
+        for (String s : getObservationLogStatements(message)) {
+            LOG.error("{}", s);
+        }
+    }
+    
+    @VisibleForTesting
+    public List<String> getObservationLogStatements(DataMessage message) {
+        List<String> list = new LinkedList<>();
+        if (message != null && message.getTimeseries() != null) {
+            for (Timeseries<?> t : message.getTimeseries()) {
+               if (t.hasMeasurements()) {
+                   for (Measurement<?> m : t.getMeasurements()) {
+                       StringBuilder sb = new StringBuilder("{");
+                       sb.append("\"procedure\":\"").append(t.getSensor()).append("\",");
+                       sb.append("\"phenomenon\":\"").append(t.getPhenomenon()).append("\",");
+                       sb.append("\"feature\":\"").append(t.getFeature().getId()).append("\",");
+                       sb.append("\"phenomenontime\":\"").append(m.getPhenomenonTime()).append("\"");
+                       sb.append("}");
+                       list.add(sb.toString());
+                   }
+               }
+            }
+        }
+        return list;
     }
 
 }
