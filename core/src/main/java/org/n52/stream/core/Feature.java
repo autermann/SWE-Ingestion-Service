@@ -56,17 +56,17 @@ public class Feature implements Cloneable, Serializable {
     @JsonProperty("geometry")
     private Object geometry = null;
 
-    public Feature withId(String id) {
+    public Feature(String id) {
         this.id = id;
-        return this;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public Feature setId(String id) {
         this.id = id;
+        return this;
     }
 
     public Feature withProperties(List<SimpleEntry<String, String>> properties) {
