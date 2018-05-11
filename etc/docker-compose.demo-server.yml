@@ -177,6 +177,49 @@ services:
       network:
         ipv4_address: 172.52.0.107
 
+################################################################################
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
+    environment:
+      - ELASTIC_PASSWORD=changeme
+    volumes:
+      - "${PWD}/etc/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
+    ports:
+      - 9300:9300
+      - 9200:9200
+    networks:
+      network:
+        ipv4_address: 172.52.0.108
+
+################################################################################
+
+  kibana :
+    image: docker.elastic.co/kibana/kibana-oss:6.2.4
+    volumes:
+      - "${PWD}/etc/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml"
+    ports:
+      - 5601:5601
+    networks:
+      network:
+        ipv4_address: 172.52.0.109 
+    depends_on:
+      - elasticsearch
+
+################################################################################
+
+  logstash :
+    image: docker.elastic.co/logstash/logstash-oss:6.2.4
+    volumes:
+      - "${PWD}/etc/logstash/config/logstash.yml/:/usr/share/logstash/config/logstash.yml"
+      - "${PWD}/etc/logstash/pipeline:/usr/share/logstash/pipeline"
+    ports:
+      - 5000:5000
+    networks:
+      network:
+        ipv4_address: 172.52.0.110
+    depends_on:
+      - elasticsearch
 
 ################################################################################
 #                                                                              #
