@@ -28,34 +28,9 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
-import java.util.List;
-
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Sink {
-    
-    public String name;
-    public List<AppOption> options;
-
-    public Sink() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<AppOption> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<AppOption> options) {
-        this.options = options;
-    }
-    
+public class Sink extends DataFlowApp {
 }

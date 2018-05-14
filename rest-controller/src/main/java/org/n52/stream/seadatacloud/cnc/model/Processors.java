@@ -28,18 +28,16 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Processors implements BaseEntity{
-    
-    public List<Processor> processors;
+public class Processors implements BaseEntity {
 
-    public Processors() {
-    }
+    public List<Processor> processors = new LinkedList<>();
 
     public List<Processor> getProcessors() {
         return processors;
@@ -48,5 +46,5 @@ public class Processors implements BaseEntity{
     public void setProcessors(List<Processor> processors) {
         this.processors = processors;
     }
-    
+
 }

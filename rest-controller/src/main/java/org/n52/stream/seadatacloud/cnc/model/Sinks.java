@@ -28,6 +28,7 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,11 +36,8 @@ import java.util.List;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 public class Sinks {
-    
-    public List<Sink> sinks;
 
-    public Sinks() {
-    }
+    public List<Sink> sinks = new LinkedList<>();
 
     public List<Sink> getSinks() {
         return sinks;

@@ -28,23 +28,27 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
-import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author Maurin Radtke <m.radtke@52north.org>
- */
-public class Sources {
+public abstract class DataFlowApp {
 
-    public List<Source> sources = new LinkedList<>();
+    private String name;
+    private List<AppOption> options;
 
-    public List<Source> getSources() {
-        return sources;
+    public String getName() {
+        return name;
     }
 
-    public void setSources(List<Source> sources) {
-        this.sources = sources;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<AppOption> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<AppOption> options) {
+        this.options = options;
     }
 
 }
