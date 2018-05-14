@@ -60,7 +60,7 @@ import org.n52.stream.seadatacloud.cnc.model.StreamStatus;
 import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
-import org.n52.stream.seadatacloud.cnc.util.StreamNameURLs;
+import org.n52.stream.seadatacloud.cnc.util.ProcessDescriptionStore;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
 import org.slf4j.Logger;
@@ -119,7 +119,7 @@ public class StreamController {
     private DataRecordDefinitions dataRecordDefinitions;
 
     @Autowired
-    private StreamNameURLs streamNameURLs;
+    private ProcessDescriptionStore processDescriptionStore;
 
     @PostConstruct
     public void init() {
@@ -143,7 +143,7 @@ public class StreamController {
             @RequestBody byte[] requestBody) {
         String streamName = UUID.randomUUID().toString();
         try {
-            String streamXML = new String(requestBody);
+            String streamName = UUID.randomUUID().toString();
 
             Object decode = decoderHelper.decode(streamXML);
 
@@ -254,7 +254,7 @@ public class StreamController {
                 createdStream = futureStream.get(15, TimeUnit.SECONDS);
 
                 if (createdStream != null) {
-                    streamNameURLs.add(streamName, streamXML);
+                    processDescriptionStore.addProcessDescription(streamName, processDescription);
                     // InserObservation:
 
                     return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
@@ -296,10 +296,10 @@ public class StreamController {
         if (result == null) {
             return new ResponseEntity<>("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
-        if (streamNameURLs.hasStreamNameUrl(streamId)) {
-            String SensormlURL = streamNameURLs.getSensormlURL(streamId);
-            if (SensormlURL != null) {
-                return new ResponseEntity<>(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
+        if (processDescriptionStore.hasProcessDescrptionForStream(streamId)) {
+            String sensorMLProcessDescription = processDescriptionStore.getProcessDescriptionForStream(streamId);
+            if (sensorMLProcessDescription != null) {
+                return new ResponseEntity<>(sensorMLProcessDescription, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
@@ -352,7 +352,7 @@ public class StreamController {
     }
 
     private void logAndThrowException(URI sensormlUrl, Exception e) throws RuntimeException {
-        String msg = String.format("Error while retrieving file from sensorml-url ('%s') :"
+        String msg = String.format("Error while inserting sensor in SOS instance ('%s') :"
                 + " %s (set loglevel to 'TRACE' for stacktrace)",
                 sensormlUrl.toString(),
                 e.getMessage());

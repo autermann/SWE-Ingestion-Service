@@ -35,24 +35,24 @@ import org.springframework.stereotype.Component;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @Component
-public class StreamNameURLs {
+public class ProcessDescriptionStore {
 
-    private HashMap<String, String> streamNameUrls;
+    private HashMap<String, String> streamIdProcessDescriptionMap;
 
-    public StreamNameURLs() {
-        streamNameUrls = new HashMap<>();
+    public ProcessDescriptionStore() {
+        streamIdProcessDescriptionMap = new HashMap<>();
     }
 
-    public boolean hasStreamNameUrl(String streamName) {
-        return streamNameUrls.containsKey(streamName);
+    public boolean hasProcessDescrptionForStream(String streamName) {
+        return streamIdProcessDescriptionMap.containsKey(streamName);
     }
 
-    public String getSensormlURL(String streamName) {
-        return streamNameUrls.get(streamName);
+    public String getProcessDescriptionForStream(String streamName) {
+        return streamIdProcessDescriptionMap.get(streamName);
     }
 
-    public void add(String streamName, String sensormlURL) {
-        streamNameUrls.put(streamName, sensormlURL);
+    public void addProcessDescription(String streamName, String processDescription) {
+        streamIdProcessDescriptionMap.put(streamName, processDescription);
     }
 
 }
