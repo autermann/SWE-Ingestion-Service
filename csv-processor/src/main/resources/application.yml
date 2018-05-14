@@ -12,6 +12,11 @@ spring:
           group: haliho
           destination: log
 
+  security:
+    user:
+      name: "cnc-user"
+      password: "cnc-non-secure-basic-auth-password"
+
 server:
   port: 8083
 

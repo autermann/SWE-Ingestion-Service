@@ -31,7 +31,6 @@ package org.n52.stream.seadatacloud.cnc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -44,19 +43,18 @@ public class CnCServiceSecurityConfiguration extends WebSecurityConfigurerAdapte
 
     @Autowired
     private CnCAuthenticationEntryPoint cncAuthEntryPoint;
-    
+
+//    // TODO add bean for this
+//    private String allowedIp = "172.52.0.102/32";
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http/*.csrf().disable()*/.authorizeRequests()
-        .antMatchers(HttpMethod.POST).authenticated()
-        .antMatchers(HttpMethod.PUT).authenticated()
-        .antMatchers(HttpMethod.DELETE).authenticated()
-        .antMatchers(HttpMethod.PATCH).authenticated()
-        .and().csrf().disable()
-                .httpBasic().authenticationEntryPoint(cncAuthEntryPoint);
-                //realmName("C&C Service");
+        http.csrf().disable();
+        http.authorizeRequests()
+            .anyRequest().authenticated().and().httpBasic().authenticationEntryPoint(cncAuthEntryPoint);
+//        .anyRequest().hasIpAddress(allowedIp);
     }
-    
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

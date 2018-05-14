@@ -15,6 +15,7 @@ spring:
       password: postgres
       testWhileIdle: true
       validationQuery: SELECT 1
+
   jpa:
     show-sql: false
     hibernate:
@@ -26,6 +27,11 @@ spring:
        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
        temp:
          use_jdbc_metadata_defaults: false
+
+  security:
+    user:
+      name: "cnc-user"
+      password: "cnc-non-secure-basic-auth-password"
 
 org.n52.stream:
   sensormlurl: http://localhost:9080/AggregateProcess.xml
