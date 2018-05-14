@@ -217,17 +217,27 @@ public class StreamController {
                     logAndThrowException(sosEndpoint, e);
                 }
                 if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+                    // TODO check for sensor already inserted error!
                     logAndThrowException(sosEndpoint, new RuntimeException("HttpResponseCode != 2xx."));
                 }
                 Object decodedResponse = decoderHelper.decode(responseDocument.getBody());
                 String offering = "";
                 String sensor = "";
-                if (decodedResponse instanceof InsertSensorResponse) {
+                if (decodedResponse instanceof CompositeOwsException) {
+                    // SOS error message returned
+                    CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
+                    if (compositeOwsException.getCause() instanceof CodedException &&
+                            ((CodedException) compositeOwsException.getCause()).getLocator().equalsIgnoreCase("offeringIdentifier")) {
+                        offering = compositeOwsException.getCause().getMessage().split("'")[1];
+                        sensor = process.getIdentifier();
+                    }
+                }
+                if (decodedResponse instanceof InsertSensorResponse ) {
                     InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
                     offering = isr.getAssignedOffering();
                     sensor = isr.getAssignedProcedure();
                     isr.close();
-                } else {
+                } else if (offering.isEmpty() || sensor.isEmpty()){
                     String msg = String.format(
                             "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
                             sosEndpoint,
