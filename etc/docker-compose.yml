@@ -108,7 +108,7 @@ services:
     volumes:
       - "D:/dev/git/SOS/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
-      - "${PWD}/etc/sos/test/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
+      - "${PWD}/etc/sos/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
       - "${PWD}/etc/sos/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
       - "${PWD}/etc/sos/application.properties://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
       - "${PWD}/etc/sos/application-context.xml://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
