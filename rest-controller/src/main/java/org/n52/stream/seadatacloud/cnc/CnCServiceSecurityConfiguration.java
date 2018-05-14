@@ -28,17 +28,44 @@
  */
 package org.n52.stream.seadatacloud.cnc;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@EnableWebSecurity
 public class CnCServiceSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private CnCAuthenticationEntryPoint cncAuthEntryPoint;
+    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http/*.csrf().disable()*/.authorizeRequests()
-                .anyRequest().authenticated().and().httpBasic().realmName("C&C Service");
+        .antMatchers(HttpMethod.POST).authenticated()
+        .antMatchers(HttpMethod.PUT).authenticated()
+        .antMatchers(HttpMethod.DELETE).authenticated()
+        .antMatchers(HttpMethod.PATCH).authenticated()
+        .and().csrf().disable()
+                .httpBasic().authenticationEntryPoint(cncAuthEntryPoint);
+                //realmName("C&C Service");
+    }
+    
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE").allowedOrigins("*")
+                        .allowedHeaders("*");
+            }
+        };
     }
 
 }

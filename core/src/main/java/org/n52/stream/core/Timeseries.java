@@ -165,6 +165,10 @@ public class Timeseries<T> implements Cloneable, Serializable {
     public void setMeasurements(List<Measurement<T>> measurements) {
         this.measurements = measurements;
     }
+    
+    public boolean hasMeasurements() {
+        return getMeasurements() != null && !getMeasurements().isEmpty();
+    }
 
     @Override
     public boolean equals(java.lang.Object o) {

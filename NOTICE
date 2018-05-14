@@ -73,6 +73,7 @@ This project includes:
   LatencyUtils under Public Domain, per Creative Commons CC0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
+  Logstash Logback Encoder under Apache License, Version 2.0 or MIT License
   micrometer-core under The Apache Software License, Version 2.0
   MinLog under New BSD License
   Non-Blocking Reactive Foundation for the JVM under The Apache Software License, Version 2.0
