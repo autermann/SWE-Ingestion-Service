@@ -42,16 +42,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class CnCAuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
 
-        @Override
+    @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authEx)
-      throws IOException, ServletException {
+            throws IOException, ServletException {
         response.addHeader("WWW-Authenticate", "Basic realm=" + getRealmName());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         PrintWriter writer = response.getWriter();
         writer.println("HTTP Status 401 - " + authEx.getMessage());
     }
 
-        @Override
+    @Override
     public void afterPropertiesSet() throws Exception {
         setRealmName("C&C Service");
         super.afterPropertiesSet();
