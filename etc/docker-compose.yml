@@ -108,10 +108,10 @@ services:
     volumes:
       - "ADJUST_ME/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
-      - "${PWD}/etc/sos/configuration.json://usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
-      - "${PWD}/etc/sos/settings.json://usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
-      - "${PWD}/etc/sos/application.properties://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
-      - "${PWD}/etc/sos/application-context.xml://usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
+      - "${PWD}/etc/sos/configuration.json:/usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
+      - "${PWD}/etc/sos/settings.json:/usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
+      - "${PWD}/etc/sos/application.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/classes/application.properties"
+      - "${PWD}/etc/sos/application-context.xml:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/spring/application-context.xml"
       - "${PWD}/etc/sos/tomcat-index.html:/usr/local/tomcat/webapps/ROOT/index.html"
     depends_on:
       - database
@@ -218,7 +218,7 @@ services:
       - 5601:5601
     networks:
       network:
-        ipv4_address: 172.52.0.109 
+        ipv4_address: 172.52.0.109
     depends_on:
       - elasticsearch
 
@@ -236,7 +236,7 @@ services:
         ipv4_address: 172.52.0.110
     depends_on:
       - elasticsearch
-     
+
 ################################################################################
 #                                                                              #
 #                     Networks                                                 #
