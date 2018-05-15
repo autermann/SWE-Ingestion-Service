@@ -26,52 +26,33 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.cnc.model;
+package org.n52.stream.seadatacloud.cnc.util;
+
+import java.util.HashMap;
+import org.springframework.stereotype.Component;
 
 /**
- *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class AppOption implements BaseEntity {
+@Component
+public class ProcessDescriptionStore {
 
-    String name;
-    String type;
-    String description;
-    String defaultValue;
+    private HashMap<String, String> streamIdProcessDescriptionMap;
 
-    public AppOption() {
+    public ProcessDescriptionStore() {
+        streamIdProcessDescriptionMap = new HashMap<>();
     }
 
-    public String getName() {
-        return name;
+    public boolean hasProcessDescrptionForStream(String streamName) {
+        return streamIdProcessDescriptionMap.containsKey(streamName);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getProcessDescriptionForStream(String streamName) {
+        return streamIdProcessDescriptionMap.get(streamName);
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
+    public void addProcessDescription(String streamName, String processDescription) {
+        streamIdProcessDescriptionMap.put(streamName, processDescription);
     }
 
 }

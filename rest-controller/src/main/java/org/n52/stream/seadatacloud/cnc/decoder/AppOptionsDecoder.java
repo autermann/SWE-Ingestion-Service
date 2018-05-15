@@ -52,8 +52,8 @@ public class AppOptionsDecoder extends BaseDeserializer<AppOptions> {
         JsonNode node = jp.readValueAsTree();
 
         ArrayNode options = (ArrayNode) node.get("options");
-        
-        ArrayList<AppOption> resultOptions = new ArrayList();
+
+        ArrayList<AppOption> resultOptions = new ArrayList<>();
         options.forEach((op) -> {
             AppOption ao = new AppOption();
             ao.setName(op.get("name").asText());

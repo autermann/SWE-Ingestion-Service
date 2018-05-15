@@ -28,6 +28,7 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,11 +36,8 @@ import java.util.List;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 public class Sources {
-    
-    public List<Source> sources;
 
-    public Sources() {
-    }
+    public List<Source> sources = new LinkedList<>();
 
     public List<Source> getSources() {
         return sources;
@@ -48,5 +46,5 @@ public class Sources {
     public void setSources(List<Source> sources) {
         this.sources = sources;
     }
-    
+
 }

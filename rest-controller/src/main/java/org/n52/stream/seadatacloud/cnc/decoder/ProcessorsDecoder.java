@@ -63,17 +63,17 @@ public class ProcessorsDecoder extends BaseDeserializer<Processors> {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessorsDecoder.class);
 
     ObjectMapper objectMapper = new ObjectMapper();
-       
+
     @Autowired
     private CnCServiceConfiguration properties;
-    
+
     @Override
     public Processors deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Processors results = new Processors();
 
         JsonNode node = jp.readValueAsTree();
         JsonNode embedded = node.get("_embedded");
-        List<Processor> processorList = new ArrayList();
+        List<Processor> processorList = new ArrayList<>();
         if (embedded == null) {
             results.setProcessors(processorList);
             return results;
@@ -99,7 +99,7 @@ public class ProcessorsDecoder extends BaseDeserializer<Processors> {
                 in.close();
                 conn.disconnect();
                 String response = res.toString();
-                
+
                 AppOptions aos = objectMapper.readValue(response, AppOptions.class);
 
                 current.setOptions(aos.getAppOptions());

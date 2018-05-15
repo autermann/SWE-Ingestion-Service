@@ -26,33 +26,29 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.cnc.util;
+package org.n52.stream.seadatacloud.cnc.model;
 
-import java.util.HashMap;
-import org.springframework.stereotype.Component;
+import java.util.List;
 
-/**
- * @author Maurin Radtke <m.radtke@52north.org>
- */
-@Component
-public class StreamNameURLs {
+public abstract class DataFlowApp {
 
-    private HashMap<String, String> streamNameUrls;
+    private String name;
+    private List<AppOption> options;
 
-    public StreamNameURLs() {
-        this.streamNameUrls = new HashMap();
+    public String getName() {
+        return name;
     }
-    
-    public boolean hasStreamNameUrl(String streamName) {
-        return this.streamNameUrls.containsKey(streamName);
+
+    public void setName(String name) {
+        this.name = name;
     }
-    
-    public String getSensormlURL(String streamName) {
-        return this.streamNameUrls.get(streamName);
+
+    public List<AppOption> getOptions() {
+        return options;
     }
-    
-    public void add(String streamName, String sensormlURL) {
-        this.streamNameUrls.put(streamName, sensormlURL);
+
+    public void setOptions(List<AppOption> options) {
+        this.options = options;
     }
 
 }

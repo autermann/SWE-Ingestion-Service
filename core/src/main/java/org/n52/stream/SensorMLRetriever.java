@@ -33,8 +33,10 @@ import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import javax.inject.Named;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.xmlbeans.XmlException;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.stream.util.DecoderHelper;
@@ -66,15 +68,17 @@ public class SensorMLRetriever {
 
     @Bean
     @Named("sensorml")
-    public AggregateProcess loadSensorML(@Value("${org.n52.stream.sensormlurl}") String url)
-            throws DecodingException, XmlException, IOException {
-        LOG.info(url);
+    public AggregateProcess loadSensorML(
+            @Value("${org.n52.stream.sensormlurl}")            String url,
+            @Value("${spring.security.user.name:#{null}}")     String userName,
+            @Value("${spring.security.user.password:#{null}}") String password)
+                    throws DecodingException, XmlException, IOException {
+        LOG.info("Load SensorML from: '{}'", url);
         URI sensormlUrl = null;
         try {
             sensormlUrl = new URI(url);
-            LOG.info(sensormlUrl.toString());
         } catch (URISyntaxException e) {
-            String msg = String.format("Setting 'sensormlurl' malformed: %s (set loglevel to 'TRACE' for stacktrace)",
+            String msg = String.format("Property 'sensormlurl' malformed: %s (set loglevel to 'TRACE' for stacktrace)",
                     e.getMessage());
             LOG.error(msg);
             LOG.trace("Exception thrown: ", e);
@@ -83,6 +87,10 @@ public class SensorMLRetriever {
         try {
             RestTemplate restClient = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
+            if (userName != null && !userName.isEmpty() && password != null && !password.isEmpty()) {
+                headers.add(HttpHeaders.AUTHORIZATION, "Basic " +
+                        new String(Base64.encodeBase64((userName + ":" + password).getBytes())));
+            }
             headers.setAccept(singletonList(MediaType.APPLICATION_XML));
             HttpEntity<String> entity = new HttpEntity<>(headers);
             responseDocument = restClient.exchange(sensormlUrl, HttpMethod.GET, entity, String.class);

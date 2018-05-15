@@ -40,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.xmlbeans.XmlObject;
+import org.n52.shetland.ogc.ows.exception.CodedException;
+import org.n52.shetland.ogc.ows.exception.CompositeOwsException;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
@@ -60,7 +62,7 @@ import org.n52.stream.seadatacloud.cnc.model.StreamStatus;
 import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
-import org.n52.stream.seadatacloud.cnc.util.StreamNameURLs;
+import org.n52.stream.seadatacloud.cnc.util.ProcessDescriptionStore;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
 import org.slf4j.Logger;
@@ -75,10 +77,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -119,7 +124,7 @@ public class StreamController {
     private DataRecordDefinitions dataRecordDefinitions;
 
     @Autowired
-    private StreamNameURLs streamNameURLs;
+    private ProcessDescriptionStore processDescriptionStore;
 
     @PostConstruct
     public void init() {
@@ -138,19 +143,33 @@ public class StreamController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Stream> uploadConfig(
-            @RequestBody byte[] requestBody) {
-        String streamName = UUID.randomUUID().toString();
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Streams> listStreams() {
+        Streams result = service.getStreams();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
+        consumes = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
         try {
-            String streamXML = new String(requestBody);
+            String streamName = UUID.randomUUID().toString();
+            String processDescription = new String(requestBody);
 
-            Object decode = decoderHelper.decode(streamXML);
+            Object decodedProcessDescription = decoderHelper.decode(processDescription);
 
-            if (decode instanceof AggregateProcess) {
-                ArrayList<SmlComponent> al = (ArrayList<SmlComponent>) ((AggregateProcess) decode).getComponents();
+            if (decodedProcessDescription instanceof AggregateProcess) {
+                ArrayList<SmlComponent> al = (ArrayList<SmlComponent>) ((AggregateProcess) decodedProcessDescription)
+                        .getComponents();
                 SmlComponent comp = al.get(0);
-                // TODO: instanceof Abfragen:
+                if (!(comp.getProcess() instanceof AbstractProcess)) {
+                    return new ResponseEntity<>("{ \"error\": \"Process Descritiopn not containing instance of '" +
+                            AbstractProcess.class.getName() +
+                            "'.\"}",
+                            CONTENT_TYPE_APPLICATION_JSON,
+                            HttpStatus.BAD_REQUEST);
+                }
                 AbstractProcess asml = (AbstractProcess) comp.getProcess();
                 ArrayList<SmlIo> smlOutputs = (ArrayList<SmlIo>) asml.getOutputs();
                 SmlIo smlIo = smlOutputs.get(0);
@@ -164,10 +183,19 @@ public class StreamController {
                 if (dataRecordDefinitions.hasDataRecordDefinition(sdrDefinition)) {
                     source = appController.getSourceByName(dataRecordDefinitions.getSourceType(sdrDefinition));
                 } else {
-                    return new ResponseEntity("{\"error\":\"No supported Source found for DataRecord definition '" + sdrDefinition + "'\"}", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("{\"error\":\"No supported Source found for DataRecord definition '" +
+                            sdrDefinition +
+                            "'\"}",
+                            HttpStatus.NOT_FOUND);
                 }
                 if (source == null) {
-                    return new ResponseEntity("{ \"error\": \"DataRecord definition '" + sdrDefinition + "' is supposed to be supported by Source '" + sourceName + "', but Source '" + sourceName + "' not found.\"}", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("{ \"error\": \"DataRecord definition '" + sdrDefinition +
+                            "' is supposed to be supported by Source '" +
+                            sourceName +
+                            "', but Source '" +
+                            sourceName +
+                            "' not found.\"}",
+                            HttpStatus.NOT_FOUND);
                 }
                 sourceName = source.getName();
 
@@ -183,11 +211,19 @@ public class StreamController {
                     if (optionUrl.indexOf('#') > -1) {
                         appOptionName = optionUrl.substring(optionUrl.lastIndexOf('#') + 1);
                     } else {
-                        return new ResponseEntity("{ \"error\": \"swe:Text definition '" + optionUrl + "' requires a hashtag ( # ) option.\"}", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("{ \"error\": \"swe:Text definition '" +
+                                optionUrl +
+                                "' requires a hashtag ( # ) option.\"}",
+                                HttpStatus.BAD_REQUEST);
                     }
                     AppOption ao = appController.getSourceOptionByName(source, appOptionName);
                     if (ao == null) {
-                        return new ResponseEntity("{ \"error\": \"Option '" + appOptionName + "' is not supported by source '" + sourceName + "'.\"}", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("{ \"error\": \"Option '" +
+                                appOptionName +
+                                "' is not supported by source '" +
+                                sourceName +
+                                "'.\"}",
+                                HttpStatus.BAD_REQUEST);
                     }
                     streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 };
@@ -198,12 +234,12 @@ public class StreamController {
                 }
 
                 InsertSensorGenerator generator = new InsertSensorGenerator();
-                AggregateProcess aggregateProcess = (AggregateProcess) decode;
-                InsertSensorRequest request = generator.generate((PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess());
+                AggregateProcess aggregateProcess = (AggregateProcess) decodedProcessDescription;
+                PhysicalSystem process = (PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess();
+                InsertSensorRequest request = generator.generate(process);
                 // encode request
                 XmlObject xbRequest = encoderHelper.encode(request);
                 String insertSensor = xbRequest.xmlText();
-                // TODO: get SensorID and OfferingID?
                 ResponseEntity<String> responseDocument = null;
                 URI sosEndpoint = new URI(properties.getSosendpoint());
                 try {
@@ -217,17 +253,28 @@ public class StreamController {
                     logAndThrowException(sosEndpoint, e);
                 }
                 if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+                    // TODO check for sensor already inserted error!
                     logAndThrowException(sosEndpoint, new RuntimeException("HttpResponseCode != 2xx."));
                 }
                 Object decodedResponse = decoderHelper.decode(responseDocument.getBody());
                 String offering = "";
                 String sensor = "";
-                if (decodedResponse instanceof InsertSensorResponse) {
+                if (decodedResponse instanceof CompositeOwsException) {
+                    // SOS error message returned
+                    CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
+                    if (compositeOwsException.getCause() instanceof CodedException &&
+                            ((CodedException) compositeOwsException.getCause()).getLocator().equalsIgnoreCase("offeringIdentifier")) {
+                        offering = compositeOwsException.getCause().getMessage().split("'")[1];
+                        sensor = process.getIdentifier();
+                    }
+                }
+                if (decodedResponse instanceof InsertSensorResponse ) {
                     InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
                     offering = isr.getAssignedOffering();
                     sensor = isr.getAssignedProcedure();
                     LOG.info(getSensorInsertedLog(offering, sensor));
-                } else {
+                    isr.close();
+                } else if (offering.isEmpty() || sensor.isEmpty()){
                     String msg = String.format(
                             "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
                             sosEndpoint,
@@ -237,9 +284,12 @@ public class StreamController {
                 }
 
                 // parse processor:
-                String commonAppProperties = " --sensormlurl=" + properties.getBaseurl() + "/api/streams/" + "s"+streamName
-                        + " --offering=" + offering
-                        + " --sensor=" + sensor;
+                String commonAppProperties = " --sensormlurl=" +
+                        properties.getBaseurl() +
+                        "/api/streams/" +
+                        "s" + streamName +
+                        " --offering=" + offering +
+                        " --sensor=" + sensor;
                 streamDefinition += "| csv-processor" + commonAppProperties + " ";
                 // parse sink:
                 streamDefinition += "| db-sink" + commonAppProperties
@@ -254,57 +304,60 @@ public class StreamController {
                 createdStream = futureStream.get(15, TimeUnit.SECONDS);
 
                 if (createdStream != null) {
-                    streamNameURLs.add(streamName, streamXML);
+                    processDescriptionStore.addProcessDescription(streamName, processDescription);
                     // InserObservation:
 
                     return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
-                    return new ResponseEntity("{\"error\": \"A stream with the name '" + streamName + " already exists.'\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CONFLICT);
+                    return new ResponseEntity<>("{\"error\": \"A stream with the name '" +
+                            streamName +
+                            " already exists.'\"}",
+                            CONTENT_TYPE_APPLICATION_JSON,
+                            HttpStatus.CONFLICT);
                 }
             } else {
-                return new ResponseEntity("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
+                        + "aggregateProcess sensorML description.\"}",
+                        CONTENT_TYPE_APPLICATION_JSON,
+                        HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+            LOG.error("Exception thrown:", e);
+            return new ResponseEntity<>(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
         }
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Streams> getStreams() {
-        Streams result = service.getStreams();
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{streamId}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<Stream> getStream(
+    @GetMapping(value = "/{streamId}", produces = "application/json")
+    public ResponseEntity<?> getStream(
             @PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{ \"error\": \"stream with name '" + streamId + "' not found.\"}",
+                    CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{streamId}", produces = "application/xml", method = RequestMethod.GET)
-    public ResponseEntity<Stream> getStreamSensorMLURL(
-            @PathVariable String streamId) {
+    @GetMapping(value = "/{streamId}", produces = "application/xml")
+    public ResponseEntity<?> getStreamProcessDescription(@PathVariable String streamId) {
         Stream result = service.getStream(streamId);
         if (result == null) {
-            return new ResponseEntity("{ \"error\": \"stream with name '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{ \"error\": \"stream with name '" + streamId + "' not found.\"}",
+                    HttpStatus.NOT_FOUND);
         }
-        if (streamNameURLs.hasStreamNameUrl(streamId)) {
-            String SensormlURL = streamNameURLs.getSensormlURL(streamId);
-            if (SensormlURL != null) {
-                return new ResponseEntity(SensormlURL, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
+        if (processDescriptionStore.hasProcessDescrptionForStream(streamId)) {
+            String sensorMLProcessDescription = processDescriptionStore.getProcessDescriptionForStream(streamId);
+            if (sensorMLProcessDescription != null) {
+                return new ResponseEntity<>(sensorMLProcessDescription, CONTENT_TYPE_APPLICATION_XML, HttpStatus.OK);
             } else {
-                return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("{\"error\": \"no sensorML process decription found for stream '"
+                        + streamId + "'.\"}", HttpStatus.NOT_FOUND);
             }
         } else {
-            return new ResponseEntity("{\"error\": \"no sensorML process decription found for stream '" + streamId + "'.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\": \"no sensorML process decription found for stream '" + streamId
+                    + "'.\"}", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -315,7 +368,7 @@ public class StreamController {
      * @return succes or error message
      */
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{streamId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{streamId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
         String result = service.deleteStream(streamId);
@@ -323,22 +376,26 @@ public class StreamController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-    public ResponseEntity<Stream> putStream(
+    @PutMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateStreamStatus(
             @PathVariable String streamId,
-            @RequestBody StreamStatus requestStatus) {
+            @RequestBody StreamStatus newStreamStatus) {
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         } else {
             String status = stream.getStatus();
             if (status.equals("deploying")) {
-                return new ResponseEntity("{\"Accepted\": \"The Stream '" + streamId + "' is currently 'deploying' and thus, the resource' status will not be changed.\"}", HttpStatus.ACCEPTED);
+                return new ResponseEntity<>("{\"Accepted\": \"The Stream '" + streamId +
+                        "' is currently 'deploying' and thus, the resource' status will not be changed.\"}",
+                        HttpStatus.ACCEPTED);
             }
-            if (requestStatus.getStatus() == null) {
-                return new ResponseEntity("{\"error\":\"Request is missing required field 'status'.\"}", HttpStatus.BAD_REQUEST);
+            if (newStreamStatus.getStatus() == null) {
+                return new ResponseEntity<>("{\"error\":\"Request is missing required field 'status'.\"}",
+                        HttpStatus.BAD_REQUEST);
             }
-            switch (requestStatus.getStatus()) {
+            switch (newStreamStatus.getStatus()) {
                 case "deployed":
                     Stream deployedStream = service.deployStream(streamId);
                     return new ResponseEntity<>(deployedStream, HttpStatus.NO_CONTENT);
@@ -346,13 +403,15 @@ public class StreamController {
                     Stream undeployedStream = service.undeployStream(streamId);
                     return new ResponseEntity<>(undeployedStream, HttpStatus.NO_CONTENT);
                 default:
-                    return new ResponseEntity("{\"error\":\"The requested status '" + requestStatus.getStatus() + "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("{\"error\":\"The requested status '" + newStreamStatus.getStatus() +
+                            "' is not supported. Supported status are: 'deployed' and 'undeployed'.\"}",
+                            HttpStatus.BAD_REQUEST);
             }
         }
     }
 
     private void logAndThrowException(URI sensormlUrl, Exception e) throws RuntimeException {
-        String msg = String.format("Error while retrieving file from sensorml-url ('%s') :"
+        String msg = String.format("Error while inserting sensor in SOS instance ('%s') :"
                 + " %s (set loglevel to 'TRACE' for stacktrace)",
                 sensormlUrl.toString(),
                 e.getMessage());

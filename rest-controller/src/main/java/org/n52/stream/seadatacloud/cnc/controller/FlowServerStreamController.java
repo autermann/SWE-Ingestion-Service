@@ -30,7 +30,6 @@ package org.n52.stream.seadatacloud.cnc.controller;
 
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +50,7 @@ public class FlowServerStreamController {
 
     public final String APPLICATION_JSON = "application/json";
     public final String APPLICATION_XML = "application/xml";
-    
+
     @Autowired
     private CnCServiceConfiguration properties;
 
@@ -62,10 +61,16 @@ public class FlowServerStreamController {
     @RequestMapping(value = "", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public ResponseEntity<String> getApi() {
         String BASE_URL = properties.getBaseurl();
-        String sources = "{\"name\": \"sources\", \"description\":\"List of registered sources.\", \"href\": \"" +BASE_URL+ "/api/sources\"}";
-        String processors = "{\"name\": \"processors\", \"description\":\"List of registered processors.\", \"href\": \"" +BASE_URL+ "/api/processors\"}";
-        String sinks = "{\"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \"" +BASE_URL+ "/api/sinks\"}";
-        String streams = "{\"name\": \"streams\", \"description\":\"List of registered streams.\", \"href\": \"" +BASE_URL+ "/api/streams\"}";
+        String sources = "{\"name\": \"sources\", \"description\":\"List of registered sources.\", \"href\": \""
+                + BASE_URL+ "/api/sources\"}";
+        String processors = "{\"name\": \"processors\", \"description\":\"List of registered processors.\", "
+                + "\"href\": \""
+                + BASE_URL
+                + "/api/processors\"}";
+        String sinks = "{\"name\": \"sinks\", \"description\":\"List of registered sinks.\", \"href\": \""
+                + BASE_URL + "/api/sinks\"}";
+        String streams = "{\"name\": \"streams\", \"description\":\"List of registered streams.\", \"href\": \""
+                + BASE_URL + "/api/streams\"}";
         String resources = "{ \"resources\" : [" + sources + "," + processors + "," + sinks + "," + streams + "] }";
         return new ResponseEntity<>(resources, HttpStatus.ACCEPTED);
     }

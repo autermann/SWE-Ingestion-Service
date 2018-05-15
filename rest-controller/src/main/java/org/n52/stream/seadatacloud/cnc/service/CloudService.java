@@ -28,7 +28,6 @@
  */
 package org.n52.stream.seadatacloud.cnc.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +38,7 @@ import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.model.Processors;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
@@ -49,7 +49,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -70,26 +73,11 @@ public class CloudService {
     public Sources getSources() {
         Sources sources = new Sources();
         try {
-            URL url = new URL(properties.getDataflowhost() + "/apps?type=source");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-
-            sources = objectMapper.readValue(response, Sources.class);
-
-        } catch (Exception e) {
-            System.out.println(e);
+            sources = objectMapper.readValue(executeRequest(HttpMethod.GET, "/apps?type=source").toString(),
+                    Sources.class);
+        } catch (IOException e) {
             LOG.error(e.getMessage());
+            LOG.debug("Exception thrown: ", e);
         }
         return sources;
     }
@@ -97,26 +85,11 @@ public class CloudService {
     public Processors getProcessors() {
         Processors processors = null;
         try {
-            URL url = new URL(properties.getDataflowhost() + "/apps?type=processor");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-
-            processors = objectMapper.readValue(response, Processors.class);
-
-        } catch (Exception e) {
-            System.out.println(e);
+            processors = objectMapper.readValue(executeRequest(HttpMethod.GET, "/apps?type=processor").toString(),
+                    Processors.class);
+        } catch (IOException e) {
             LOG.error(e.getMessage());
+            LOG.debug("Exception thrown: ", e);
         }
         return processors;
     }
@@ -124,26 +97,11 @@ public class CloudService {
     public Sinks getSinks() {
         Sinks sinks = null;
         try {
-            URL url = new URL(properties.getDataflowhost() + "/apps?type=sink");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-
-            sinks = objectMapper.readValue(response, Sinks.class);
-
-        } catch (Exception e) {
-            System.out.println(e);
+            sinks = objectMapper.readValue(executeRequest(HttpMethod.GET, "/apps?type=sink").toString(),
+                    Sinks.class);
+        } catch (IOException e) {
             LOG.error(e.getMessage());
+            LOG.debug("Exception thrown: ", e);
         }
         return sinks;
     }
@@ -171,9 +129,6 @@ public class CloudService {
             conn.disconnect();
             response = res.toString() + "success.";
 
-        } catch (IOException e) {
-            response = e.getMessage();
-            LOG.error(e.getMessage());
         } catch (Exception e) {
             response = e.getMessage();
             LOG.error(e.getMessage());
@@ -201,6 +156,7 @@ public class CloudService {
                     Scanner scanner = new Scanner(inputStream);
                     scanner.useDelimiter("\\Z");
                     String response = scanner.next();
+                    scanner.close();
                     LOG.error(response);
                 }
                 inputStream = conn.getInputStream();
@@ -217,9 +173,9 @@ public class CloudService {
                 String response = res.toString();
                 stream = objectMapper.readValue(response, Stream.class);
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
                 LOG.error(e.getMessage());
+                LOG.debug("Exception thrown: ", e);
             }
 
             completableFuture.complete(stream);
@@ -233,26 +189,12 @@ public class CloudService {
     public Stream undeployStream(String streamName) {
         Stream stream = null;
         try {
-            URL url = new URL(properties.getDataflowhost() + "/streams/deployments/" + streamName);
-
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestMethod("DELETE");
-            conn.setDoOutput(true);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-            stream = objectMapper.readValue(response, Stream.class);
-        } catch (Exception e) {
+            stream = objectMapper.readValue(
+                    executeRequest(HttpMethod.DELETE, "/streams/deployments/" + streamName).toString(),
+                    Stream.class);
+        } catch (IOException e) {
             LOG.error(e.getMessage());
+            LOG.debug("Exception thrown: ", e);
         }
         return stream;
     }
@@ -279,87 +221,73 @@ public class CloudService {
             conn.disconnect();
             String response = res.toString();
             stream = objectMapper.readValue(response, Stream.class);
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error(e.getMessage());
+            LOG.debug("Exception thrown: ", e);
         }
         return stream;
     }
 
     public String deleteStream(String streamName) {
-        String response = "";
-        try {
-            URL url = new URL(properties.getDataflowhost() + "/streams/definitions/" + streamName);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("DELETE");
-            conn.setDoOutput(true);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            response = res.toString();
-        } catch (Exception e) {
-            response = e.getMessage();
-        }
-        return response;
+        return executeRequest(HttpMethod.DELETE, "/streams/definitions/" + streamName).toString();
     }
 
     public Streams getStreams() {
         Streams streams = new Streams();
+        StringBuffer serviceResponse = executeRequest(HttpMethod.GET, "/streams/definitions?size=100");
         try {
-            URL url = new URL(properties.getDataflowhost() + "/streams/definitions?size=100");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-
-            streams = objectMapper.readValue(response, Streams.class);
-
-        } catch (Exception e) {
-            System.out.println(e);
+            streams = objectMapper.readValue(serviceResponse.toString(), Streams.class);
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+            LOG.debug("Exception thrown:", e);
         }
         return streams;
     }
 
+    // TODO return Optional or null
     public Stream getStream(String streamId) {
         Stream stream = null;
+        String getRequest = "/streams/definitions/" + streamId;
         try {
-            URL url = new URL(properties.getDataflowhost() + "/streams/definitions/" + streamId);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setDoOutput(true);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
-            }
-            in.close();
-            conn.disconnect();
-            String response = res.toString();
-
-            stream = objectMapper.readValue(response, Stream.class);
-
-        } catch (Exception e) {
-            return null;
+            StringBuffer response = executeRequest(HttpMethod.GET, getRequest);
+            // TODO what happens if the stream is not found!? should not throw an exception but null
+            stream = objectMapper.readValue(response.toString(), Stream.class);
+        } catch (IOException e) {
+            LOG.error("Error while retrieving stream with id '{}'.", streamId);
+            LOG.debug("Exception thrown:", e);
         }
         return stream;
+    }
+
+    private StringBuffer executeRequest(HttpMethod method, String pathAndQueryString) {
+        BufferedReader in = null;
+        StringBuffer serviceResponse = new StringBuffer();
+        try {
+            URL url = new URL(properties.getDataflowhost() + pathAndQueryString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestMethod(method.toString());
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                serviceResponse.append(line);
+                serviceResponse.append("\n");
+            }
+            conn.disconnect();
+        } catch (IOException e) {
+            LOG.error("Exception thrown while connecting to dataflow server.");
+            LOG.debug("Exception thrown: ", e);
+            serviceResponse.append(e.getMessage());
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                LOG.error("Could not close stream: ", e);
+            }
+        }
+        return serviceResponse;
     }
 
 }

@@ -41,11 +41,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StreamStatus {
-    
-    String status;
 
-    public StreamStatus() {
-    }
+    private String status;
 
     public String getStatus() {
         return status;
@@ -54,5 +51,5 @@ public class StreamStatus {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
 }

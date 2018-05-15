@@ -40,26 +40,19 @@ public class DataRecordDefinitions {
     private HashMap<String, String> dataRecordDefinitions;
 
     public DataRecordDefinitions() {
-        this.dataRecordDefinitions = new HashMap();
+        dataRecordDefinitions = new HashMap<>();
     }
 
     public boolean hasDataRecordDefinition(String dataRecordDefinition) {
-        return this.dataRecordDefinitions.containsKey(dataRecordDefinition);
+        return dataRecordDefinitions.containsKey(dataRecordDefinition);
     }
 
-    /**
-     *
-     * @param dataRecordDefinition
-     * @return
-     */
     public String getSourceType(String dataRecordDefinition) {
-        return this.dataRecordDefinitions.get(dataRecordDefinition);
+        return dataRecordDefinitions.get(dataRecordDefinition);
     }
 
-    ;
-    
     public void add(String dataRecordDefinition, String appName) {
-        this.dataRecordDefinitions.put(dataRecordDefinition, appName);
+        dataRecordDefinitions.put(dataRecordDefinition, appName);
     }
 
 }

@@ -28,9 +28,12 @@
  */
 package org.n52.stream.seadatacloud.cnc.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.n52.stream.seadatacloud.cnc.decoder.AppOptionsDecoder;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *
@@ -39,18 +42,15 @@ import org.n52.stream.seadatacloud.cnc.decoder.AppOptionsDecoder;
 @JsonDeserialize(using = AppOptionsDecoder.class)
 public class AppOptions implements BaseEntity {
 
-    ArrayList<AppOption> appOptions;
+    List<AppOption> appOptions = new LinkedList<>();
 
-    public AppOptions() {
-    }
-
-    public ArrayList<AppOption> getAppOptions() {
+    public List<AppOption> getAppOptions() {
         return appOptions;
     }
 
-    public void setAppOptions(ArrayList<AppOption> appOptions) {
+    public void setAppOptions(List<AppOption> appOptions) {
         this.appOptions = appOptions;
     }
-    
-    
+
+
 }

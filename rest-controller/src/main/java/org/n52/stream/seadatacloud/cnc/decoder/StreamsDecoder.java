@@ -53,7 +53,7 @@ public class StreamsDecoder extends BaseDeserializer<Streams> {
         JsonNode node = jp.readValueAsTree();
 
         JsonNode embedded = node.get("_embedded");
-        List<Stream> streamList = new ArrayList();
+        List<Stream> streamList = new ArrayList<>();
         if (embedded == null) {
             results.setStreams(streamList);
             return results;

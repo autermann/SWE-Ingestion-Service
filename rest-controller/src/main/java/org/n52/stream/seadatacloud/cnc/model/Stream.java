@@ -34,12 +34,9 @@ package org.n52.stream.seadatacloud.cnc.model;
  */
 public class Stream {
 
-    public String name;
-    public String status;
-    public String definition;
-
-    public Stream() {
-    }
+    private String name;
+    private String status;
+    private String definition;
 
     public String getName() {
         return name;
@@ -64,5 +61,5 @@ public class Stream {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
-    
+
 }
