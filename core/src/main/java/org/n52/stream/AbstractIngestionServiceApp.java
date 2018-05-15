@@ -28,8 +28,17 @@
  */
 package org.n52.stream;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 /**
  * Abstract class that provides some methods
@@ -48,7 +57,7 @@ public abstract class AbstractIngestionServiceApp {
      * @param msg
      *            The message to log and throw
      * @throws IllegalArgumentException
-     */
+     */;
     protected IllegalArgumentException logErrorAndCreateException(String msg)
             throws IllegalArgumentException {
         LOG.error(msg);
@@ -72,5 +81,25 @@ public abstract class AbstractIngestionServiceApp {
                     String.format("setting '%s' not set correct. Received value: '%s'.", settingName, setting));
         }
         LOG.trace("'{}': '{}'", settingName, setting);
+    }
+    
+    protected JsonNode toJson(String json) {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.readTree(json);
+        } catch (IOException e) {
+            LOG.error(String.format("Error while parsing JSON string: %s", json), e);
+        }
+        return null;
+    }
+    
+    protected String getJsonString(Serializable s) {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.writeValueAsString(s);
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while createing JSON string", e);
+        }
+        return "";
     }
 }
