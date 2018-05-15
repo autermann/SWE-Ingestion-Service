@@ -33,9 +33,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>
-                {"time": "%date{ISO8601}", "thread": "%thread", "level": "%level", "class": "%logger{36}", "message": "%message"}\n
-            </pattern>
+            <pattern> %date %level [%thread] [%file:%line] %msg%n</pattern>
         </encoder>
     </appender>
     
@@ -50,7 +48,7 @@
                         "thread": "%thread",
                         "level": "%level",
                         "class": "%logger{0}",
-                        "message": "%message",
+                        "rawtext": "%message",
                         "statistics": "#asJson{%message}"
                     }
                  </pattern>

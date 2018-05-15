@@ -33,9 +33,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>
-                {"time": "%date{ISO8601}", "thread": "%thread", "level": "%level", "class": "%logger{36}", "message": "%message"}\n
-            </pattern>
+            <pattern> %date %level [%thread] [%file:%line] %msg%n</pattern>
         </encoder>
     </appender>
     
@@ -49,8 +47,8 @@
                         "time": "%date{ISO8601}",
                         "thread": "%thread",
                         "level": "%level",
-                        "class": "%logger{36}",
-                        "message": "%message",
+                        "class": "%logger{0}",
+                        "rawtext": "%message",
                         "statistics": "#asJson{%message}"
                     }
                  </pattern>
@@ -59,6 +57,8 @@
             </providers>
         </encoder>
     </appender>
+
+    <logger name="org.hibernate" level="ERROR" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
