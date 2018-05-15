@@ -25,3 +25,4 @@ nbdist/
 etc/processors/
 etc/sinks/
 etc/sources/
+etc/elasticsearch/data/
