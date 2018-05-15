@@ -31,6 +31,7 @@ package org.n52.stream.seadatacloud.cnc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -51,6 +52,7 @@ public class CnCServiceSecurityConfiguration extends WebSecurityConfigurerAdapte
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
+            .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated().and().httpBasic().authenticationEntryPoint(cncAuthEntryPoint);
 //        .anyRequest().hasIpAddress(allowedIp);
     }
@@ -60,7 +62,9 @@ public class CnCServiceSecurityConfiguration extends WebSecurityConfigurerAdapte
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE").allowedOrigins("*")
+                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedOrigins("*")
+                        .allowCredentials(true)
                         .allowedHeaders("*");
             }
         };
