@@ -30,15 +30,25 @@ package org.n52.stream;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
+import org.n52.janmayen.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
+import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Abstract class that provides some methods
@@ -93,13 +103,38 @@ public abstract class AbstractIngestionServiceApp {
         return null;
     }
     
+    @VisibleForTesting
+    protected JsonNode getJson(Serializable s) {
+        return toJson(getJsonString(s));
+    }
+    
+    @VisibleForTesting
     protected String getJsonString(Serializable s) {
+        
+        JacksonAnnotationIntrospector ignore = new JacksonAnnotationIntrospector() {
+            @Override
+            protected TypeResolverBuilder<?> _findTypeResolver(
+                    MapperConfig<?> mc, Annotated a, JavaType jt) {
+                if (!a.hasAnnotation(JsonTypeInfo.class)) {
+                    return super._findTypeResolver(mc, a, jt);
+                }
+                return StdTypeResolverBuilder.noTypeInfoBuilder();
+            }
+        };
         ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        om.setAnnotationIntrospector(ignore);
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+       
         try {
             return om.writeValueAsString(s);
         } catch (JsonProcessingException e) {
             LOG.error("Error while createing JSON string", e);
         }
         return "";
+    }
+    
+    protected JsonNodeFactory nodeFactory() {
+        return Json.nodeFactory();
     }
 }

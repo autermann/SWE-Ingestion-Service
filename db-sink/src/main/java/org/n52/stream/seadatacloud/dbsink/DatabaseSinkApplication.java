@@ -38,6 +38,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.n52.janmayen.Json;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.data.Data;
@@ -64,6 +65,9 @@ import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -227,20 +231,28 @@ public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
             for (Timeseries<?> t : message.getTimeseries()) {
                if (t.hasMeasurements()) {
                    for (Measurement<?> m : t.getMeasurements()) {
-                       StringBuilder sb = new StringBuilder("{");
-                       sb.append("\"IngestObservation\":{");
-                       sb.append("\"persisted\":").append(persisted).append(",");
-                       sb.append("\"procedure\":\"").append(t.getSensor()).append("\",");
-                       sb.append("\"phenomenon\":\"").append(t.getPhenomenon()).append("\",");
-                       sb.append("\"feature\":\"").append(t.getFeature().getId()).append("\",");
-                       sb.append("\"phenomenontime\":\"").append(m.getPhenomenonTime()).append("\"");
-                       sb.append("}}");
-                       list.add(sb.toString());
+                       ObjectNode o = nodeFactory().objectNode();
+                       o.put("persisted", persisted);
+                       o.put("procedure", t.getSensor());
+                       o.put("phenomenon", t.getPhenomenon());
+                       o.put("feature", t.getFeature().getId());
+                       if (m.getPhenomenonTime() != null) {
+                           o.put("phenomenontime", m.getPhenomenonTime().toString());
+                       } else {
+                           o.set("phenomenontime", null);
+                       }
+                       ObjectNode n = nodeFactory().objectNode();
+                       n.set("IngestObservation", o);
+                       list.add(n.toString());
                    }
                }
             }
         }
         return list;
+    }
+    
+    protected JsonNodeFactory nodeFactory() {
+        return Json.nodeFactory();
     }
 
 }

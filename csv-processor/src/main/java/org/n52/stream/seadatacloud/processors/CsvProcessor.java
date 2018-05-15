@@ -69,6 +69,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.springframework.cloud.stream.messaging.Processor;
@@ -387,11 +388,18 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     @VisibleForTesting
     public String getDataMessageLog(DataMessage processedDataset) {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("\"DataMessage\":").append(getJsonString(processedDataset)).append(",");
-        sb.append("\"number\":").append(processedMsgCount).append(",");
-        sb.append("\"of\":").append(msgCount);
-        sb.append("}");
-        return sb.toString();
+        ObjectNode n = nodeFactory().objectNode();
+        n.set("DataMessage", getJson(processedDataset));
+        n.put("number", processedMsgCount);
+        n.put("of", msgCount);
+        return n.toString();
+//        
+//        
+//        StringBuilder sb = new StringBuilder("{");
+//        sb.append("\"DataMessage\":").append(getJson(processedDataset)).append(",");
+//        sb.append("\"number\":").append(processedMsgCount).append(",");
+//        sb.append("\"of\":").append(msgCount);
+//        sb.append("}");
+//        return sb.toString();
     }
 }

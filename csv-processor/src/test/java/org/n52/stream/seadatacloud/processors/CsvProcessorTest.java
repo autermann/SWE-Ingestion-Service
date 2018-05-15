@@ -39,7 +39,6 @@ import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
-import org.n52.stream.seadatacloud.dbsink.DatabaseSinkApplication;
 
 /**
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>

@@ -111,8 +111,6 @@ public class DatabaseSinkApplicationTest {
             verifyOutput(encoder, message);
         }
         
-//        System.out.println(getDataMessageLog(message));
-        
 //        assertThat(logs.get(0).equals("{\"Procedure\":\"sensor1\",\"Phenomenon\":\"phenomenon1\",\"Feature\":\"featuer1\",\"Observations\":1}"), is(true));
 //        assertThat(logs.get(1).equals("{\"Procedure\":\"sensor2\",\"Phenomenon\":\"phenomenon2\",\"Feature\":\"featuer2\",\"Observations\":2}"), is(true));
     }
@@ -139,13 +137,13 @@ public class DatabaseSinkApplicationTest {
         });
     }
     
-    private String getDataMessageLog(DataMessage processedDataset) {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("\"DataMessage\":").append(dsa.getJsonString(processedDataset)).append(",");
-        sb.append("\"number\":").append(123).append(",");
-        sb.append("\"of\":").append(120);
-        sb.append("}");
-        return sb.toString();
-    }
+//    private String getDataMessageLog(DataMessage processedDataset) {
+//        StringBuilder sb = new StringBuilder("{");
+//        sb.append("\"DataMessage\":").append(dsa.getJsonString(processedDataset)).append(",");
+//        sb.append("\"number\":").append(123).append(",");
+//        sb.append("\"of\":").append(120);
+//        sb.append("}");
+//        return sb.toString();
+//    }
 
 }

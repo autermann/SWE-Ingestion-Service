@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.xmlbeans.XmlObject;
+import org.n52.janmayen.Json;
 import org.n52.shetland.ogc.ows.exception.CodedException;
 import org.n52.shetland.ogc.ows.exception.CompositeOwsException;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
@@ -87,6 +88,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  *
@@ -421,12 +425,17 @@ public class StreamController {
     }
 
     private String getSensorInsertedLog(String offering, String sensor) {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("\"InsertSensor\":").append("{");
-        sb.append("\"SOS\":\"").append(properties.getSosendpoint()).append("\",");
-        sb.append("\"sensor\":\"").append(sensor).append("\",");
-        sb.append("\"offering\":\"").append(offering).append("\"");
-        sb.append("}}");
-        return  sb.toString();
+        ObjectNode o = nodeFactory().objectNode();
+        o.put("SOS", properties.getSosendpoint());
+        o.put("sensor", sensor);
+        o.put("offering", offering);
+        ObjectNode n = nodeFactory().objectNode();
+        
+        n.set("InsertSensor", o);
+        return n.toString();
+    }
+    
+    protected JsonNodeFactory nodeFactory() {
+        return Json.nodeFactory();
     }
 }
