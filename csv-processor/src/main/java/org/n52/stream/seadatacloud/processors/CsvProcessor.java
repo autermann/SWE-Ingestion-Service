@@ -68,6 +68,9 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -88,6 +91,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     private static final String DEFINITION_RESULT_TIME = "http://www.opengis.net/def/property/OGC/0/ResultTime";
 
     private int msgCount = 0;
+    private int processedMsgCount = 0;
 
     @Autowired
     private AppConfiguration properties;
@@ -125,6 +129,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         checkAndStoreEncoding(dataInterface);
         storeTokenAssignments(dataInterface);
         fillTemplateDataMessage();
+        LOG.info("CsvProcessor initialized for procedure: {}", properties.getSensor());
     }
 
     private void fillTemplateDataMessage() throws IllegalArgumentException {
@@ -249,17 +254,17 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
     public DataMessage process(Message<String> mqttMessage) {
+        msgCount++;
         if (mqttMessage == null) {
             throw logErrorAndCreateException("NO MQTT message received! Input is 'null'.");
         }
         String mqttMessagePayload = mqttMessage.getPayload();
-        msgCount++;
         if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
             throw logErrorAndCreateException("Empty MQTT payload received.");
         }
         DataMessage processedDataset = processMqttPayload(mqttMessagePayload);
-        LOG.info("Processed dataset #{}", msgCount);
-        LOG.trace("DataMessage: \n{}", processedDataset);
+        processedMsgCount++;
+        LOG.info(getDataMessageLog(processedDataset));
         return processedDataset;
     }
 
@@ -380,4 +385,13 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         return tokens;
     }
 
+    @VisibleForTesting
+    public String getDataMessageLog(DataMessage processedDataset) {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("\"DataMessage\":").append(getJsonString(processedDataset)).append(",");
+        sb.append("\"number\":").append(processedMsgCount).append(",");
+        sb.append("\"of\":").append(msgCount);
+        sb.append("}");
+        return sb.toString();
+    }
 }

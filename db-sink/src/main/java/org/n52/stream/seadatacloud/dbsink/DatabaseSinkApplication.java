@@ -209,30 +209,32 @@ public class DatabaseSinkApplication extends AbstractIngestionServiceApp {
     }
 
     private void logSuccessfulInsertion(DataMessage message) {
-        for (String s : getObservationLogStatements(message)) {
+        for (String s : getObservationLogStatements(message, true)) {
             LOG.info("{}", s);
         }
     }
 
     private void logFailedInsertion(DataMessage message) {
-        for (String s : getObservationLogStatements(message)) {
+        for (String s : getObservationLogStatements(message, false)) {
             LOG.error("{}", s);
         }
     }
     
     @VisibleForTesting
-    public List<String> getObservationLogStatements(DataMessage message) {
+    public List<String> getObservationLogStatements(DataMessage message, boolean persisted) {
         List<String> list = new LinkedList<>();
         if (message != null && message.getTimeseries() != null) {
             for (Timeseries<?> t : message.getTimeseries()) {
                if (t.hasMeasurements()) {
                    for (Measurement<?> m : t.getMeasurements()) {
                        StringBuilder sb = new StringBuilder("{");
+                       sb.append("\"IngestObservation\":{");
+                       sb.append("\"persisted\":").append(persisted).append(",");
                        sb.append("\"procedure\":\"").append(t.getSensor()).append("\",");
                        sb.append("\"phenomenon\":\"").append(t.getPhenomenon()).append("\",");
                        sb.append("\"feature\":\"").append(t.getFeature().getId()).append("\",");
                        sb.append("\"phenomenontime\":\"").append(m.getPhenomenonTime()).append("\"");
-                       sb.append("}");
+                       sb.append("}}");
                        list.add(sb.toString());
                    }
                }

@@ -43,7 +43,6 @@ import org.n52.stream.core.DataMessage;
 import org.n52.stream.core.Feature;
 import org.n52.stream.core.Measurement;
 import org.n52.stream.core.Timeseries;
-import org.n52.stream.seadatacloud.dbsink.DatabaseSinkApplication;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -56,10 +55,8 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.read.ListAppender;
-import net.logstash.logback.argument.StructuredArguments;
 import net.logstash.logback.composite.JsonProvider;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
-import net.logstash.logback.marker.Markers;
 
 public class DatabaseSinkApplicationTest {
     
@@ -107,12 +104,14 @@ public class DatabaseSinkApplicationTest {
     public void test() throws IOException {
         LoggingEventCompositeJsonEncoder encoder = getEncoder("test");
         List<JsonProvider<ILoggingEvent>> providers = encoder.getProviders().getProviders();
-        List<String> logs = dsa.getObservationLogStatements(message);
+        List<String> logs = dsa.getObservationLogStatements(message, true);
         
         assertThat(logs.size(), is(3));
         for (String message : logs) {
             verifyOutput(encoder, message);
         }
+        
+//        System.out.println(getDataMessageLog(message));
         
 //        assertThat(logs.get(0).equals("{\"Procedure\":\"sensor1\",\"Phenomenon\":\"phenomenon1\",\"Feature\":\"featuer1\",\"Observations\":1}"), is(true));
 //        assertThat(logs.get(1).equals("{\"Procedure\":\"sensor2\",\"Phenomenon\":\"phenomenon2\",\"Feature\":\"featuer2\",\"Observations\":2}"), is(true));
@@ -138,6 +137,15 @@ public class DatabaseSinkApplicationTest {
     private Map<String, Object> parseJson(final String text) throws IOException {
         return jsonFactory.createParser(text).readValueAs(new TypeReference<Map<String, Object>>() {
         });
+    }
+    
+    private String getDataMessageLog(DataMessage processedDataset) {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("\"DataMessage\":").append(dsa.getJsonString(processedDataset)).append(",");
+        sb.append("\"number\":").append(123).append(",");
+        sb.append("\"of\":").append(120);
+        sb.append("}");
+        return sb.toString();
     }
 
 }

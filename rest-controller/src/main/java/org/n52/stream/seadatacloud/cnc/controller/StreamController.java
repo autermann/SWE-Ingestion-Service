@@ -226,6 +226,7 @@ public class StreamController {
                     InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
                     offering = isr.getAssignedOffering();
                     sensor = isr.getAssignedProcedure();
+                    LOG.info(getSensorInsertedLog(offering, sensor));
                 } else {
                     String msg = String.format(
                             "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
@@ -358,5 +359,15 @@ public class StreamController {
         LOG.error(msg);
         LOG.trace("Exception thrown: ", e);
         throw new RuntimeException(e);
+    }
+
+    private String getSensorInsertedLog(String offering, String sensor) {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("\"InsertSensor\":").append("{");
+        sb.append("\"SOS\":\"").append(properties.getSosendpoint()).append("\",");
+        sb.append("\"sensor\":\"").append(sensor).append("\",");
+        sb.append("\"offering\":\"").append(offering).append("\"");
+        sb.append("}}");
+        return  sb.toString();
     }
 }
