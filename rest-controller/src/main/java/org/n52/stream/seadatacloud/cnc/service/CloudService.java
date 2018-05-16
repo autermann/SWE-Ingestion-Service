@@ -71,7 +71,7 @@ public class CloudService {
     private CnCServiceConfiguration properties;
 
     public Sources getSources() {
-        Sources sources = new Sources();
+        Sources sources = null;
         try {
             sources = objectMapper.readValue(executeRequest(HttpMethod.GET, "/apps?type=source").toString(),
                     Sources.class);
@@ -172,19 +172,16 @@ public class CloudService {
                 conn.disconnect();
                 String response = res.toString();
                 stream = objectMapper.readValue(response, Stream.class);
-
             } catch (IOException e) {
                 LOG.error(e.getMessage());
                 LOG.debug("Exception thrown: ", e);
             }
-
             completableFuture.complete(stream);
             return stream;
         });
 
         return completableFuture;
     }
-
 
     public Stream undeployStream(String streamName) {
         Stream stream = null;
@@ -244,7 +241,6 @@ public class CloudService {
         return streams;
     }
 
-    // TODO return Optional or null
     public Stream getStream(String streamId) {
         Stream stream = null;
         String getRequest = "/streams/definitions/" + streamId;

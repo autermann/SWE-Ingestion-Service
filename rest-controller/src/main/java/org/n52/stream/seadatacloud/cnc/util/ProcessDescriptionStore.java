@@ -28,6 +28,8 @@
  */
 package org.n52.stream.seadatacloud.cnc.util;
 
+import java.io.Serializable;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import org.springframework.stereotype.Component;
 
@@ -35,24 +37,30 @@ import org.springframework.stereotype.Component;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @Component
-public class ProcessDescriptionStore {
+public class ProcessDescriptionStore implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
-    private HashMap<String, String> streamIdProcessDescriptionMap;
+    private HashMap<String, SimpleEntry<String, String>> streamIdProcessDescriptionMap;
 
     public ProcessDescriptionStore() {
         streamIdProcessDescriptionMap = new HashMap<>();
     }
 
-    public boolean hasProcessDescrptionForStream(String streamName) {
+    public boolean hasProcessDescriptionForStream(String streamName) {
         return streamIdProcessDescriptionMap.containsKey(streamName);
     }
 
     public String getProcessDescriptionForStream(String streamName) {
-        return streamIdProcessDescriptionMap.get(streamName);
+        return streamIdProcessDescriptionMap.get(streamName).getKey();
     }
 
-    public void addProcessDescription(String streamName, String processDescription) {
-        streamIdProcessDescriptionMap.put(streamName, processDescription);
+    public void addProcessDescription(String streamName, String processDescription, String streamDefinition) {
+        streamIdProcessDescriptionMap.put(streamName, new SimpleEntry<String,String>(processDescription, streamDefinition));
+    }
+    
+    public HashMap<String,SimpleEntry<String,String>> getHashMap() {
+        return this.streamIdProcessDescriptionMap;
     }
 
 }

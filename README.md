@@ -675,7 +675,7 @@ On success, the response status code is 204 - `no content` and the stream is run
     * 200 - OK
     * 404 - NOT FOUND: "Stream with name `streamName` is not found." / "sensorML process description for stream `streamName` not found."
 
-  * POST [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName) with `Content-Type` header `application/xml` and request body containing a `AggregateProcess` description creates a  new undeployed stream.
+  * POST [http://localhost:8082/cnc/api/streams](http://localhost:8082/cnc/api/streams) with `Content-Type` header `application/xml` and request body containing a `AggregateProcess` description creates a  new undeployed stream.
  
     RequestBody payload example:
     

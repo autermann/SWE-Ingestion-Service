@@ -28,10 +28,10 @@
  */
 package org.n52.stream.seadatacloud.cnc;
 
-import javax.annotation.PostConstruct;
-
-import org.n52.stream.seadatacloud.cnc.exception.AppRegisterException;
-import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
+import org.n52.stream.seadatacloud.cnc.controller.StreamController;
+import org.n52.stream.seadatacloud.cnc.service.CloudService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -51,20 +51,16 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class CnCService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StreamController.class);
+    
     @Autowired
-    public DataRecordDefinitions dataRecordDefinitions;
-
+    CloudService service;
+    
     public static void main(String[] args) {
         new SpringApplicationBuilder(CnCService.class)
                 .properties("server.port", "server.servlet.contextPath",
                         "spring.security.user.name", "spring.security.user.password")
                 .run(args);
-    }
-
-    @PostConstruct
-    protected void init() throws AppRegisterException {
-        dataRecordDefinitions = new DataRecordDefinitions();
-        dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
     }
 
 }
