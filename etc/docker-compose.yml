@@ -169,6 +169,8 @@ services:
         do
           sleep 1;
         done;
+        wget -qO- 'http://dataflow:9393/apps/source/ftp-source' --post-data='uri=file:///tmp/apps/sources/spring-cloud-starter-stream-source-ftp-2.0.0.BUILD-SNAPSHOT.jar&force=true';
+        echo 'FTP Spurce app imported'"
         wget -qO- 'http://dataflow:9393/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
         echo 'MQTT Source Rabbit app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
