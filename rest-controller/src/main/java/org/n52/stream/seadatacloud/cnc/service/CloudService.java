@@ -205,7 +205,10 @@ public class CloudService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
-            conn.getOutputStream().write("".getBytes());
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\"deployer.*.local.javaOpts\"").append(":");
+            sb.append("\"-DSTREAM_ID=").append(streamName).append("\"}");
+            conn.getOutputStream().write(sb.toString().getBytes());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
