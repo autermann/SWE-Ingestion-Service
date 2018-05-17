@@ -60,13 +60,14 @@ services:
 ################################################################################
 
   dataflow:
-    image: springcloud/spring-cloud-dataflow-server-local:1.4.0.RELEASE
+    image: springcloud/spring-cloud-dataflow-server-local:1.5.0.RELEASE
     ports:
       - 9004:9393
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
       - spring.cloud.config.enabled=false
       - server.contextPath=/dataflow
+#      - spring.datasource.url=jdbc:h2:file:/usr/share/dataflow/db
     volumes:
       - "${PWD}/dataflow/apps/:/tmp/apps/"
     depends_on:
