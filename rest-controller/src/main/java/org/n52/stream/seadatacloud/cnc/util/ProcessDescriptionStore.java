@@ -59,7 +59,7 @@ public class ProcessDescriptionStore implements Serializable {
         streamIdProcessDescriptionMap.put(streamName, new SimpleEntry<String,String>(processDescription, streamDefinition));
     }
     
-    public HashMap<String,SimpleEntry<String,String>> getHashMap() {
+    public HashMap<String,SimpleEntry<String,String>> getDescriptions() {
         return this.streamIdProcessDescriptionMap;
     }
 

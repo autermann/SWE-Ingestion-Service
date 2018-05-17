@@ -99,7 +99,7 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
-import org.n52.stream.seadatacloud.cnc.model.Sources;
+import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 
 /**
  *
@@ -134,8 +134,9 @@ public class StreamController {
     @Autowired
     private DataRecordDefinitions dataRecordDefinitions;
 
-    @Autowired
     private ProcessDescriptionStore processDescriptionStore;
+    
+    private static final String processDescriptionStoreFileName = "pds.dat";
 
     @PostConstruct
     public void init() {
@@ -143,33 +144,32 @@ public class StreamController {
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
 
         LOG.info("loading stored streams from file...");
-        try {
-            FileInputStream f = new FileInputStream(new File("pds.txt"));
-            ObjectInputStream o = new ObjectInputStream(f);
-            processDescriptionStore = (ProcessDescriptionStore) o.readObject();
-            LOG.info("...finished loading processDescriptionStore.");
-            // TODO: iterate streams: create & deploy:
-            HashMap<String, AbstractMap.SimpleEntry<String, String>> map = processDescriptionStore.getHashMap();
-            Sources sources = null;
-            do {
-                sources = service.getSources();
-                Thread.sleep(5000);
-            } while (sources == null || sources.getSources().isEmpty());
-            for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
-                String streamName = entry.getKey();
-                SimpleEntry<String, String> processType = entry.getValue();
-                String streamDefinition = processType.getValue();
-
-                Future<Stream> futureStream = service.createStream(streamName, streamDefinition, true);
-                Stream createdStream = futureStream.get(120, TimeUnit.SECONDS);
-                if (createdStream == null) {
-                    LOG.error("Recreating stream '"
-                            + streamName
-                            + "' failed.");
+        File file = new File(processDescriptionStoreFileName);
+        if (file.exists()) {
+            try {
+                FileInputStream f = new FileInputStream(file);
+                ObjectInputStream o = new ObjectInputStream(f);
+                processDescriptionStore = (ProcessDescriptionStore) o.readObject();
+                LOG.info("...finished loading processDescriptionStore.");
+                // TODO: iterate streams: create & deploy:
+                HashMap<String, AbstractMap.SimpleEntry<String, String>> map = processDescriptionStore.getDescriptions();
+                ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList();
+                for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
+                    String streamName = entry.getKey();
+                    SimpleEntry<String, String> processType = entry.getValue();
+                    String streamDefinition = processType.getValue();
+                    restartStreamThreads.add(new RestartStreamThread(streamName, streamDefinition, service));
                 }
+                // TODO: app Registration hier checken.
+                // TODO: ThreadPool mit ExecutorService.
+                for (RestartStreamThread rst : restartStreamThreads) {
+                    rst.start();
+                }
+            } catch (Exception e) {
+                LOG.error("Loading stored streams failed: " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOG.error("Loading stored streams failed: " + e.getMessage());
+        } else {
+            processDescriptionStore = new ProcessDescriptionStore();
         }
     }
 
@@ -339,7 +339,7 @@ public class StreamController {
                     // InserObservation:
 
                     // store latest updates processDescriptionStore into file:
-                    FileOutputStream f = new FileOutputStream(new File("pds.txt"));
+                    FileOutputStream f = new FileOutputStream(new File(processDescriptionStoreFileName));
                     ObjectOutputStream o = new ObjectOutputStream(f);
                     o.writeObject(processDescriptionStore);
                     o.close();
