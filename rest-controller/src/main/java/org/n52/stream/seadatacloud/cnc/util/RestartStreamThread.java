@@ -45,7 +45,6 @@ import org.n52.stream.seadatacloud.cnc.model.Stream;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -67,25 +66,6 @@ public class RestartStreamThread extends Thread {
 
     @Override
     public void run() {
-        Sources sources = null;
-        Processors processors = null;
-        Sinks sinks = null;
-        boolean appRegistered = false;
-        do {
-            try {
-                Thread.sleep(5000);
-                sources = service.getSources();
-                processors = service.getProcessors();
-                sinks = service.getSinks();
-            } catch (Exception e) {
-            }
-            appRegistered = (sources != null)
-                    && (!sources.getSources().isEmpty())
-                    && (processors != null)
-                    && (!processors.getProcessors().isEmpty())
-                    && (sinks != null)
-                    && (!sinks.getSinks().isEmpty());
-        } while (!appRegistered);
         try {
             Future<Stream> futureStream = service.createStream(streamName, streamDefinition, true);
             Stream createdStream = futureStream.get(120, TimeUnit.SECONDS);

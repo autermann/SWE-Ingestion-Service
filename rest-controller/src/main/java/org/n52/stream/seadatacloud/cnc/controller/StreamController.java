@@ -99,6 +99,9 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
+import org.n52.stream.seadatacloud.cnc.model.Processors;
+import org.n52.stream.seadatacloud.cnc.model.Sinks;
+import org.n52.stream.seadatacloud.cnc.model.Sources;
 import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 
 /**
@@ -135,7 +138,7 @@ public class StreamController {
     private DataRecordDefinitions dataRecordDefinitions;
 
     private ProcessDescriptionStore processDescriptionStore;
-    
+
     private static final String processDescriptionStoreFileName = "pds.dat";
 
     @PostConstruct
@@ -160,13 +163,31 @@ public class StreamController {
                     String streamDefinition = processType.getValue();
                     restartStreamThreads.add(new RestartStreamThread(streamName, streamDefinition, service));
                 }
-                // TODO: app Registration hier checken.
+                Sources sources = null;
+                Processors processors = null;
+                Sinks sinks = null;
+                boolean appRegistered = false;
+                do {
+                    try {
+                        Thread.sleep(5000);
+                        sources = service.getSources();
+                        processors = service.getProcessors();
+                        sinks = service.getSinks();
+                    } catch (Exception e) {
+                    }
+                    appRegistered = (sources != null)
+                            && (!sources.getSources().isEmpty())
+                            && (processors != null)
+                            && (!processors.getProcessors().isEmpty())
+                            && (sinks != null)
+                            && (!sinks.getSinks().isEmpty());
+                } while (!appRegistered);
+
                 // TODO: ThreadPool mit ExecutorService.
                 for (RestartStreamThread rst : restartStreamThreads) {
                     rst.start();
                 }
-            } catch (Exception e) {
-                LOG.error("Loading stored streams failed: " + e.getMessage());
+            } catch (Exception e){
             }
         } else {
             processDescriptionStore = new ProcessDescriptionStore();
