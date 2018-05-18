@@ -33,7 +33,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern> %date %level [%thread] ${STREAM_ID} [%file:%line] %msg%n</pattern>
+            <pattern> %date %level [%thread] [%file:%line] %msg%n</pattern>
         </encoder>
     </appender>
     
@@ -48,9 +48,7 @@
                         "thread": "%thread",
                         "level": "%level",
                         "class": "%logger{0}",
-                        "streamName": "${STREAM_ID}",
-                        "rawtext": "%message",
-                        "statistics": "#asJson{%message}"
+                        "message": "%message"
                     }
                  </pattern>
                 </pattern>
