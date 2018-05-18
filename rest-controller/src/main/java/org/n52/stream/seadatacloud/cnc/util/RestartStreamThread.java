@@ -26,21 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
- /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.stream.seadatacloud.cnc.util;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import org.n52.stream.seadatacloud.cnc.model.Processors;
-import org.n52.stream.seadatacloud.cnc.model.Sinks;
-import org.n52.stream.seadatacloud.cnc.model.Sources;
 import org.n52.stream.seadatacloud.cnc.model.Stream;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.slf4j.Logger;
@@ -81,6 +70,5 @@ public class RestartStreamThread extends Thread {
                     + e + " : "
                     + e.getMessage());
         }
-
     }
 }
