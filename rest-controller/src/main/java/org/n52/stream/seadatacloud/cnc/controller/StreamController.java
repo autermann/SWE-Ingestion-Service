@@ -433,6 +433,24 @@ public class StreamController {
         String result = service.deleteStream(streamId);
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
     }
+    
+    @CrossOrigin(origins = "*")
+    @PutMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateStream(
+            @PathVariable String streamName,
+            @RequestBody byte[] requestBody) {
+        // 1. delete stream 'streamId'
+        Stream stream = service.getStream(streamName);
+        if (stream == null) {
+            return new ResponseEntity("{\"error\":\"Stream '"+streamName+"' not found.\"}", HttpStatus.NOT_FOUND);
+        }
+        service.deleteStream(streamName);
+        
+        // 2. create Stream from requestBody with name 'streamName'
+        this.createStream(requestBody);
+        
+        return new ResponseEntity(HttpStatus.I_AM_A_TEAPOT);
+    }
 
     @CrossOrigin(origins = "*")
     @PutMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_JSON_VALUE,
