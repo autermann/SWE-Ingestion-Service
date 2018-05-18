@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
+import org.n52.shetland.ogc.OGCConstants;
 import org.n52.shetland.ogc.gml.AbstractFeature;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.om.features.SfConstants;
@@ -238,6 +239,9 @@ public class InsertSensorGenerator {
                     if (feature != null && feature instanceof AbstractSamplingFeature
                             && !((AbstractSamplingFeature) feature).isSetGeometry()) {
                         ((AbstractSamplingFeature) feature).setGeometry(createGeometry(app.getPosition()));
+                        if (!((AbstractSamplingFeature) feature).isSetFeatureType() || ((AbstractSamplingFeature) feature).getFeatureType().equals(OGCConstants.UNKNOWN)) {
+                            ((AbstractSamplingFeature) feature).setFeatureType(getFeatureTypeByGeometry(((AbstractSamplingFeature) feature).getGeometry()));
+                        }
                     }
                 }
             }
