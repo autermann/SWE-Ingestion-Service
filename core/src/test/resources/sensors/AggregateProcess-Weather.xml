@@ -81,6 +81,10 @@
                   </sml:IdentifierList>
                </sml:identification>
                <sml:featuresOfInterest>
+                   <sml:FeatureList>
+                     <sml:feature xlink:href="Marine Institute" xlink:title="Marine Intitute Ireland" />
+                   </sml:FeatureList>
+                  <!-- 
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
                      <swe:label>Marine Institute</swe:label>
                      <sml:feature>
@@ -97,6 +101,7 @@
                         </sams:SF_SpatialSamplingFeature>
                     </sml:feature>
                   </sml:FeatureList>
+                   -->
                </sml:featuresOfInterest>
                <sml:outputs>
                   <sml:OutputList>
@@ -257,6 +262,10 @@
                   </sml:IdentifierList>
                </sml:identification>
                <sml:featuresOfInterest>
+                  <sml:FeatureList>
+                     <sml:feature xlink:href="Marine Institute" xlink:title="Marine Intitute Ireland" />
+                   </sml:FeatureList>
+                  <!-- 
                   <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
                      <swe:label>Marine Institute</swe:label>
                      <sml:feature>
@@ -266,13 +275,14 @@
                             <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
                             <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
                             <sams:shape>
-                                <gml:Point gml:id="p-airmar-rinville-1">
+                                <gml:Point gml:id="point-sf-airmar-rinville-1">
                                     <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.247642 -8.977098</gml:pos>
                                 </gml:Point>
                             </sams:shape>
                         </sams:SF_SpatialSamplingFeature>
                     </sml:feature>
                   </sml:FeatureList>
+                   -->
                </sml:featuresOfInterest>
                <sml:outputs>
                   <sml:OutputList>

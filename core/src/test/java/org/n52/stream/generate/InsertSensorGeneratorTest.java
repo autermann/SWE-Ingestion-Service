@@ -69,7 +69,7 @@ public class InsertSensorGeneratorTest extends AbstractCodingTest {
 
         DecoderHelper helper = new DecoderHelper();
         helper.setDecoderRepository(decoderRepository);
-        Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess.xml");
+        Path path = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess-Weather.xml");
         decode = helper.decode(path);
         generator = new InsertSensorGenerator();
     }
@@ -126,14 +126,14 @@ public class InsertSensorGeneratorTest extends AbstractCodingTest {
 
     private void checkObservedProperties(InsertSensorRequest request) {
         Assert.isTrue(request.isSetObservableProperty(), "Should have ObservableProperties");
-        Assert.isTrue(request.getObservableProperty().size() == 2, "ObservableProperties size should be 2");
-        Assert.isTrue(
-                request.getObservableProperty()
-                        .contains("http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/"),
-                "ObservableProperties contains http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/");
-        Assert.isTrue(
-                request.getObservableProperty().contains("http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/"),
-                "ObservableProperties contains http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/");
+        Assert.isTrue(request.getObservableProperty().size() == 5, "ObservableProperties size should be 5");
+//        Assert.isTrue(
+//                request.getObservableProperty()
+//                        .contains("http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/"),
+//                "ObservableProperties contains http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/");
+//        Assert.isTrue(
+//                request.getObservableProperty().contains("http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/"),
+//                "ObservableProperties contains http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/");
     }
 
     private void checkMetadata(InsertSensorRequest request) {
@@ -141,7 +141,7 @@ public class InsertSensorGeneratorTest extends AbstractCodingTest {
         SosInsertionMetadata metadata = request.getMetadata();
         Assert.isTrue(metadata.getObservationTypes() != null, "Should have ObservationType");
         Assert.isTrue(metadata.getObservationTypes().size() == 1, "ObservationType size should be 1");
-        Assert.isTrue(metadata.getObservationTypes().iterator().next().equals(OmConstants.OBS_TYPE_COUNT_OBSERVATION), "ObservationType should be OM_CountObservation");
+        Assert.isTrue(metadata.getObservationTypes().iterator().next().equals(OmConstants.OBS_TYPE_MEASUREMENT), "ObservationType should be OM_Measurement");
         Assert.isTrue(metadata.getFeatureOfInterestTypes() != null, "Should have FeatureType");
         Assert.isTrue(metadata.getFeatureOfInterestTypes().iterator().next().equals(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT), "FeatureType should be SF_SamplingPoint");
     }
