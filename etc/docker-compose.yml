@@ -169,6 +169,13 @@ services:
         do
           sleep 1;
         done;
+        ## https://github.com/spring-cloud-stream-app-starters/ftp/tree/master/spring-cloud-starter-stream-source-ftp
+        wget -qO- 'http://dataflow:9393/apps/source/ftp-source' --post-data='uri=file:///tmp/apps/sources/ftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'FTP Source app imported'
+        ## https://github.com/spring-cloud-stream-app-starters/sftp/tree/master/spring-cloud-starter-stream-source-sftp
+        wget -qO- 'http://dataflow:9393/apps/source/sftp-source' --post-data='uri=file:///tmp/apps/sources/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'SFTP Source app imported'
+        ## https://github.com/spring-cloud-stream-app-starters/mqtt/tree/master/spring-cloud-starter-stream-source-mqtt
         wget -qO- 'http://dataflow:9393/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
         echo 'MQTT Source Rabbit app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
@@ -176,7 +183,9 @@ services:
         wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
-        echo 'LogSink app imported'"
+        echo 'LogSink app imported'
+        wget -qO- 'http://dataflow:9393/apps/sink/ftp-sink' --post-data='uri=file:///tmp/apps/sinks/ftp-sink-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'FTP Sink app imported'"
     networks:
       network:
         ipv4_address: 172.52.0.106
