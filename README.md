@@ -1084,10 +1084,8 @@ On success, the response status code is 204 - `no content` and the stream is run
 * PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/xml` changes the registered Stream 'streamName' according to the request body.
   Example Payload cf. POST on ```cnc/api/streams```
 
-  
-
 ## Bugs and Feedback **TODO: fix this**
-Developer feedback goes a long way towards making this adapter even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open a issue on this github repository.
+Developer feedback goes a long way towards making this SWE-Ingestion-Service even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open an issue on this github repository.
 
 ## Funding
 **TODO: this**
