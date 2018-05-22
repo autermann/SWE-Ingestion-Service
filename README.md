@@ -1066,7 +1066,7 @@ On success, the response status code is 204 - `no content` and the stream is run
 	* 404 - BAD REQUEST: "The xml request body is no valid aggregateProcess sensorML description."
 	* 409 - CONFLICT: "A stream with name `streamName` already exists."
   
-* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/json` changes the deploy-status of the registered Stream 'streamName' according to the requests body.
+* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/json` changes the deploy-status of the registered Stream 'streamName' according to the request body.
   Example Payload:
   ```
   {
@@ -1080,6 +1080,11 @@ On success, the response status code is 204 - `no content` and the stream is run
 	* 400 - BAD REQUEST: "Request is missing required field `status`."
 	* 400 - BAD REQUEST: "The requested status `statusValue` is not supported. Supported status are: 'deployed' and 'undeployed'."
     * 404 - NOT FOUND: "Stream {streamName} not found."
+
+* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/xml` changes the registered Stream 'streamName' according to the request body.
+  Example Payload cf. POST on ```cnc/api/streams```
+
+  
 
 ## Bugs and Feedback **TODO: fix this**
 Developer feedback goes a long way towards making this adapter even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open a issue on this github repository.
