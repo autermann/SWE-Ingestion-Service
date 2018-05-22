@@ -32,7 +32,7 @@ package org.n52.stream.seadatacloud.cnc.model;
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class AppOption implements BaseEntity {
+public class AppOption {
 
     String name;
     String type;

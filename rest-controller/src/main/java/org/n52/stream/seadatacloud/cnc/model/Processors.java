@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Maurin Radtke <m.radtke@52north.org>
  */
-public class Processors implements BaseEntity {
+public class Processors {
 
     public List<Processor> processors = new LinkedList<>();
 
