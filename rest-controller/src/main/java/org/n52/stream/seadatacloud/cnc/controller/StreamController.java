@@ -28,10 +28,19 @@
  */
 package org.n52.stream.seadatacloud.cnc.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -56,13 +65,17 @@ import org.n52.shetland.ogc.swe.simpleType.SweText;
 import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.model.AppOption;
+import org.n52.stream.seadatacloud.cnc.model.Processors;
+import org.n52.stream.seadatacloud.cnc.model.Sinks;
 import org.n52.stream.seadatacloud.cnc.model.Source;
+import org.n52.stream.seadatacloud.cnc.model.Sources;
 import org.n52.stream.seadatacloud.cnc.model.Stream;
 import org.n52.stream.seadatacloud.cnc.model.StreamStatus;
 import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
 import org.n52.stream.seadatacloud.cnc.util.ProcessDescriptionStore;
+import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
 import org.slf4j.Logger;
@@ -90,19 +103,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
-import java.util.Map;
-import org.n52.stream.seadatacloud.cnc.model.Processors;
-import org.n52.stream.seadatacloud.cnc.model.Sinks;
-import org.n52.stream.seadatacloud.cnc.model.Sources;
-import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 
 /**
  *
@@ -149,14 +149,12 @@ public class StreamController {
         LOG.info("loading stored streams from file...");
         File file = new File(processDescriptionStoreFileName);
         if (file.exists()) {
-            try {
-                FileInputStream f = new FileInputStream(file);
-                ObjectInputStream o = new ObjectInputStream(f);
+            try (ObjectInputStream o = new ObjectInputStream(new FileInputStream(file))) {
                 processDescriptionStore = (ProcessDescriptionStore) o.readObject();
                 LOG.info("...finished loading processDescriptionStore.");
                 // TODO: iterate streams: create & deploy:
                 HashMap<String, AbstractMap.SimpleEntry<String, String>> map = processDescriptionStore.getDescriptions();
-                ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList();
+                ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList<>();
                 for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
                     String streamName = entry.getKey();
                     SimpleEntry<String, String> processType = entry.getValue();
@@ -175,12 +173,12 @@ public class StreamController {
                         sinks = service.getSinks();
                     } catch (Exception e) {
                     }
-                    appRegistered = (sources != null)
-                            && (!sources.getSources().isEmpty())
-                            && (processors != null)
-                            && (!processors.getProcessors().isEmpty())
-                            && (sinks != null)
-                            && (!sinks.getSinks().isEmpty());
+                    appRegistered = sources != null
+                            && !sources.getSources().isEmpty()
+                            && processors != null
+                            && !processors.getProcessors().isEmpty()
+                            && sinks != null
+                            && !sinks.getSinks().isEmpty();
                 } while (!appRegistered);
 
                 // TODO: ThreadPool mit ExecutorService.
@@ -445,7 +443,7 @@ public class StreamController {
         // 1. delete stream 'streamId'
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
         String streamStatus = stream.getStatus();
         service.deleteStream(streamId);
@@ -456,7 +454,7 @@ public class StreamController {
         // 3. set stream Status to status of previous stream
         StreamStatus newStreamStatus = new StreamStatus();
         newStreamStatus.setStatus(streamStatus);
-        ResponseEntity result = this.updateStreamStatus(streamId, newStreamStatus);
+        ResponseEntity<?> result = this.updateStreamStatus(streamId, newStreamStatus);
         return result;
     }
 

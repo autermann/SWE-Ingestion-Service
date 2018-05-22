@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @JsonDeserialize(using = AppOptionsDecoder.class)
-public class AppOptions implements BaseEntity {
+public class AppOptions {
 
     List<AppOption> appOptions = new LinkedList<>();
 

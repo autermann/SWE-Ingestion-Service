@@ -52,7 +52,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Abstract class that provides some methods
- * 
+ *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
  *
@@ -63,7 +63,7 @@ public abstract class AbstractIngestionServiceApp {
 
     /**
      * Log and throw {@link IllegalArgumentException} for messae
-     * 
+     *
      * @param msg
      *            The message to log and throw
      * @throws IllegalArgumentException
@@ -76,7 +76,7 @@ public abstract class AbstractIngestionServiceApp {
 
     /**
      * Check the setting for null and emtpy
-     * 
+     *
      * @param settingName
      *            the setting name
      * @param setting
@@ -92,7 +92,7 @@ public abstract class AbstractIngestionServiceApp {
         }
         LOG.trace("'{}': '{}'", settingName, setting);
     }
-    
+
     protected JsonNode toJson(String json) {
         ObjectMapper om = new ObjectMapper();
         try {
@@ -102,16 +102,19 @@ public abstract class AbstractIngestionServiceApp {
         }
         return null;
     }
-    
+
     @VisibleForTesting
     protected JsonNode getJson(Serializable s) {
         return toJson(getJsonString(s));
     }
-    
+
     @VisibleForTesting
     protected String getJsonString(Serializable s) {
-        
+
         JacksonAnnotationIntrospector ignore = new JacksonAnnotationIntrospector() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected TypeResolverBuilder<?> _findTypeResolver(
                     MapperConfig<?> mc, Annotated a, JavaType jt) {
@@ -125,7 +128,7 @@ public abstract class AbstractIngestionServiceApp {
         om.registerModule(new JavaTimeModule());
         om.setAnnotationIntrospector(ignore);
         om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-       
+
         try {
             return om.writeValueAsString(s);
         } catch (JsonProcessingException e) {
@@ -133,7 +136,7 @@ public abstract class AbstractIngestionServiceApp {
         }
         return "";
     }
-    
+
     protected JsonNodeFactory nodeFactory() {
         return Json.nodeFactory();
     }
