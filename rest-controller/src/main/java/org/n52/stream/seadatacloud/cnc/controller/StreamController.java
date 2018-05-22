@@ -149,14 +149,12 @@ public class StreamController {
         LOG.info("loading stored streams from file...");
         File file = new File(processDescriptionStoreFileName);
         if (file.exists()) {
-            try {
-                FileInputStream f = new FileInputStream(file);
-                ObjectInputStream o = new ObjectInputStream(f);
+            try (ObjectInputStream o = new ObjectInputStream(new FileInputStream(file))) {
                 processDescriptionStore = (ProcessDescriptionStore) o.readObject();
                 LOG.info("...finished loading processDescriptionStore.");
                 // TODO: iterate streams: create & deploy:
                 HashMap<String, AbstractMap.SimpleEntry<String, String>> map = processDescriptionStore.getDescriptions();
-                ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList();
+                ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList<>();
                 for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
                     String streamName = entry.getKey();
                     SimpleEntry<String, String> processType = entry.getValue();
@@ -445,18 +443,18 @@ public class StreamController {
         // 1. delete stream 'streamId'
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
         String streamStatus = stream.getStatus();
         service.deleteStream(streamId);
 
         // 2. create Stream from requestBody with name 'streamName'
-        ResponseEntity result = this.createStream(requestBody, streamId);
+        ResponseEntity<?> result = createStream(requestBody, streamId);
 
         // 3. set stream Status to status of previous stream
         StreamStatus newStreamStatus = new StreamStatus();
         newStreamStatus.setStatus(streamStatus);
-        result = this.updateStreamStatus(streamId, newStreamStatus);
+        result = updateStreamStatus(streamId, newStreamStatus);
         return result;
     }
 
