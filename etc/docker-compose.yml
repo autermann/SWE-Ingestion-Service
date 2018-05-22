@@ -171,10 +171,28 @@ services:
         do
           sleep 1;
         done;
-        ## https://github.com/spring-cloud-stream-app-starters/ftp/tree/master/spring-cloud-starter-stream-source-ftp
+        #######################################################################
+        #
+        # FTP Source
+        #
+        # Doku: https://github.com/spring-cloud-stream-app-starters/ftp/tree/master/spring-cloud-starter-stream-source-ftp
+        # Cmds to build:
+        #   git clone https://github.com/spring-cloud-stream-app-starters/ftp.git &&\
+        #   cd ftp && git checkout 1.3.x &&  ./mvnw clean install -PgenerateApps &&\
+        #   cd apps/ftp-source-rabbit && ./mvnw clean package
+        #
         wget -qO- 'http://dataflow:9393/apps/source/ftp-source' --post-data='uri=file:///tmp/apps/sources/ftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
         echo 'FTP Source app imported'
-        ## https://github.com/spring-cloud-stream-app-starters/sftp/tree/master/spring-cloud-starter-stream-source-sftp
+        #######################################################################
+        #
+        # SFTP Source
+        #
+        # Doku: https://github.com/spring-cloud-stream-app-starters/sftp/tree/master/spring-cloud-starter-stream-source-sftp
+        # Cmds to build:
+        #   git clone https://github.com/spring-cloud-stream-app-starters/sftp.git &&\
+        #   cd sftp && git checkout 1.3.x &&  ./mvnw clean install -PgenerateApps &&\
+        #   cd apps/sftp-source-rabbit && ./mvnw clean package
+        #
         wget -qO- 'http://dataflow:9393/apps/source/sftp-source' --post-data='uri=file:///tmp/apps/sources/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
         echo 'SFTP Source app imported'
         ## https://github.com/spring-cloud-stream-app-starters/mqtt/tree/master/spring-cloud-starter-stream-source-mqtt
