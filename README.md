@@ -31,7 +31,7 @@ TODO: ...
 ## How to Run
 
   1. Execute `docker-compose --file etc/docker-compose.yml up`.
-  
+
 #### Creating and starting a Stream:
 
 1. Create a Stream: Send an aggregateProcess to the CnCService via a POST request (see [API section](#streams) for detailed description). On success, your response payload contains name, status, and definition of the created stream, such as:
@@ -44,16 +44,16 @@ TODO: ...
    }
 	```
     The `"name"`-field value contains the `streamId` of the created stream. Use this value in order to start the streaming process of the stream as described in the next step.
-    
+
 2. Deploy/Start (or Undeploy/Pause) the stream: Send a PUT request to the CnCService at the resource of the stream (see [API section](#streams) for detailed description), e.g.:
- /cnc/api/streams/sb68a63d8-cc63-4ce3-9212-09b7a1f47740 
-  
+ /cnc/api/streams/sb68a63d8-cc63-4ce3-9212-09b7a1f47740
+
  	with the status "deployed" (or "undeployed") to start (or pause) the stream process, e.g.:
  	```
   	{
     	"status": "deployed"
   	}
-	``` 
+	```
 On success, the response status code is 204 - `no content` and the stream is running.
 
 ## API:
@@ -298,7 +298,7 @@ On success, the response status code is 204 - `no content` and the stream is run
 	}
     ```
     possible Responses:
-    
+
     * 200 - OK
     * 404 - NOT FOUND: The Stream with name `streamName` is not found.
 
@@ -335,17 +335,17 @@ On success, the response status code is 204 - `no content` and the stream is run
         Public License for more details.
 
     -->
-    <sml:AggregateProcess gml:id="sdc" 
-        xmlns:swe="http://www.opengis.net/swe/2.0" 
-        xmlns:sml="http://www.opengis.net/sensorml/2.0" 
+    <sml:AggregateProcess gml:id="sdc"
+        xmlns:swe="http://www.opengis.net/swe/2.0"
+        xmlns:sml="http://www.opengis.net/sensorml/2.0"
         xmlns:gml="http://www.opengis.net/gml/3.2"
         xmlns:om="http://www.opengis.net/om/2.0"
         xmlns:sams="http://www.opengis.net/samplingSpatial/2.0"
         xmlns:sf="http://www.opengis.net/sampling/2.0"
-        xmlns:xlink="http://www.w3.org/1999/xlink" 
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xmlns:gco="http://www.isotc211.org/2005/gco" 
-        xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:gco="http://www.isotc211.org/2005/gco"
+        xmlns:gmd="http://www.isotc211.org/2005/gmd"
         xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorML/2.0/sensorML.xsd http://www.opengis.net/samplingSpatial/2.0 http://schemas.opengis.net/samplingSpatial/2.0/spatialSamplingFeature.xsd">
         <sml:components>
             <sml:ComponentList>
@@ -676,9 +676,9 @@ On success, the response status code is 204 - `no content` and the stream is run
     * 404 - NOT FOUND: "Stream with name `streamName` is not found." / "sensorML process description for stream `streamName` not found."
 
   * POST [http://localhost:8082/cnc/api/streams](http://localhost:8082/cnc/api/streams) with `Content-Type` header `application/xml` and request body containing a `AggregateProcess` description creates a  new undeployed stream.
- 
+
     RequestBody payload example:
-    
+
     ```
     <?xml version="1.0" encoding="UTF-8"?>
     <!--
@@ -711,17 +711,17 @@ On success, the response status code is 204 - `no content` and the stream is run
         Public License for more details.
 
     -->
-    <sml:AggregateProcess gml:id="sdc" 
-        xmlns:swe="http://www.opengis.net/swe/2.0" 
-        xmlns:sml="http://www.opengis.net/sensorml/2.0" 
+    <sml:AggregateProcess gml:id="sdc"
+        xmlns:swe="http://www.opengis.net/swe/2.0"
+        xmlns:sml="http://www.opengis.net/sensorml/2.0"
         xmlns:gml="http://www.opengis.net/gml/3.2"
         xmlns:om="http://www.opengis.net/om/2.0"
         xmlns:sams="http://www.opengis.net/samplingSpatial/2.0"
         xmlns:sf="http://www.opengis.net/sampling/2.0"
-        xmlns:xlink="http://www.w3.org/1999/xlink" 
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xmlns:gco="http://www.isotc211.org/2005/gco" 
-        xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:gco="http://www.isotc211.org/2005/gco"
+        xmlns:gmd="http://www.isotc211.org/2005/gmd"
         xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorML/2.0/sensorML.xsd http://www.opengis.net/samplingSpatial/2.0 http://schemas.opengis.net/samplingSpatial/2.0/spatialSamplingFeature.xsd">
         <sml:components>
             <sml:ComponentList>
@@ -1050,8 +1050,8 @@ On success, the response status code is 204 - `no content` and the stream is run
 
 	possible Responses:
 
- 	* 201 - Created with json response of the created Stream, e.g. 
-    
+ 	* 201 - Created with json response of the created Stream, e.g.
+
       ```
          {
              "name": "sb68a63d8-cc63-4ce3-9212-09b7a1f47740",
@@ -1065,8 +1065,8 @@ On success, the response status code is 204 - `no content` and the stream is run
 	* 404 - NOT FOUND: "DataRecord definition `dataRecordDefinition` is supposed to be supported by Source `sourceName`, but Source `sourceName` not found."
 	* 404 - BAD REQUEST: "The xml request body is no valid aggregateProcess sensorML description."
 	* 409 - CONFLICT: "A stream with name `streamName` already exists."
-  
-* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/json` changes the deploy-status of the registered Stream 'streamName' according to the requests body.
+
+* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/json` changes the deploy-status of the registered Stream 'streamName' according to the request body.
   Example Payload:
   ```
   {
@@ -1074,12 +1074,16 @@ On success, the response status code is 204 - `no content` and the stream is run
   }
   ```
   possible Responses:
-  
+
     * 200 - OK: The Streams status has been changed to the requested status.
 	* 202 - ACCEPTED: "The Stream {streamName} is currently `deploying` and thus, the resource status will not be changed."
 	* 400 - BAD REQUEST: "Request is missing required field `status`."
 	* 400 - BAD REQUEST: "The requested status `statusValue` is not supported. Supported status are: 'deployed' and 'undeployed'."
     * 404 - NOT FOUND: "Stream {streamName} not found."
+
+* PUT [http://localhost:8082/cnc/api/streams/{streamName}](http://localhost:8082/cnc/api/streams/{streamName}) with `Content-Type` header `application/xml` changes the registered Stream 'streamName' according to the request body.
+  Example Payload cf. POST on ```cnc/api/streams```
+
 
 ## Bugs and Feedback **TODO: fix this**
 Developer feedback goes a long way towards making this adapter even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open a issue on this github repository.
