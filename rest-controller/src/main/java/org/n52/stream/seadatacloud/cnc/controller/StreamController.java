@@ -456,7 +456,7 @@ public class StreamController {
         // 3. set stream Status to status of previous stream
         StreamStatus newStreamStatus = new StreamStatus();
         newStreamStatus.setStatus(streamStatus);
-        this.updateStreamStatus(streamId, newStreamStatus);
+        result = this.updateStreamStatus(streamId, newStreamStatus);
         return result;
     }
 
