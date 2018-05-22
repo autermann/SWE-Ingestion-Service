@@ -187,7 +187,7 @@ public class StreamController {
                 for (RestartStreamThread rst : restartStreamThreads) {
                     rst.start();
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
             }
         } else {
             processDescriptionStore = new ProcessDescriptionStore();
@@ -201,12 +201,8 @@ public class StreamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
-    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
+    private ResponseEntity<?> createStream(byte[] requestBody, String streamName) {
         try {
-            String streamName = UUID.randomUUID().toString();
             String processDescription = new String(requestBody);
 
             Object decodedProcessDescription = decoderHelper.decode(processDescription);
@@ -339,7 +335,7 @@ public class StreamController {
                 String commonAppProperties = " --sensormlurl="
                         + properties.getBaseurl()
                         + "/api/streams/"
-                        + "s" + streamName
+                        + streamName
                         + " --offering=" + offering
                         + " --sensor=" + sensor;
                 streamDefinition += "| csv-processor" + commonAppProperties + " ";
@@ -350,7 +346,6 @@ public class StreamController {
                         + " --password=" + properties.getDatasource().getPassword() + " ";
 
                 Stream createdStream = null;
-                streamName = "s" + streamName;
                 Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
 
                 createdStream = futureStream.get(15, TimeUnit.SECONDS);
@@ -384,6 +379,14 @@ public class StreamController {
             LOG.error("Exception thrown:", e);
             return new ResponseEntity<>(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
+        String streamName = "s" + UUID.randomUUID().toString();
+        return this.createStream(requestBody, streamName);
     }
 
     @CrossOrigin(origins = "*")
@@ -433,23 +436,28 @@ public class StreamController {
         String result = service.deleteStream(streamId);
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
     }
-    
+
     @CrossOrigin(origins = "*")
-    @PutMapping(value = "/{streamId}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{streamId}", consumes = "application/xml")
     public ResponseEntity<?> updateStream(
-            @PathVariable String streamName,
+            @PathVariable String streamId,
             @RequestBody byte[] requestBody) {
         // 1. delete stream 'streamId'
-        Stream stream = service.getStream(streamName);
+        Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity("{\"error\":\"Stream '"+streamName+"' not found.\"}", HttpStatus.NOT_FOUND);
+            return new ResponseEntity("{\"error\":\"Stream '" + streamId + "' not found.\"}", HttpStatus.NOT_FOUND);
         }
-        service.deleteStream(streamName);
-        
+        String streamStatus = stream.getStatus();
+        service.deleteStream(streamId);
+
         // 2. create Stream from requestBody with name 'streamName'
-        this.createStream(requestBody);
-        
-        return new ResponseEntity(HttpStatus.I_AM_A_TEAPOT);
+        ResponseEntity result = this.createStream(requestBody, streamId);
+
+        // 3. set stream Status to status of previous stream
+        StreamStatus newStreamStatus = new StreamStatus();
+        newStreamStatus.setStatus(streamStatus);
+        this.updateStreamStatus(streamId, newStreamStatus);
+        return result;
     }
 
     @CrossOrigin(origins = "*")
