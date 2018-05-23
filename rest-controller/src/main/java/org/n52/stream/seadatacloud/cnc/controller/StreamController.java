@@ -449,12 +449,12 @@ public class StreamController {
         service.deleteStream(streamId);
 
         // 2. create Stream from requestBody with name 'streamName'
-        ResponseEntity<?> result = createStream(requestBody, streamId);
+        this.createStream(requestBody, streamId);
 
         // 3. set stream Status to status of previous stream
         StreamStatus newStreamStatus = new StreamStatus();
         newStreamStatus.setStatus(streamStatus);
-        result = updateStreamStatus(streamId, newStreamStatus);
+        ResponseEntity<?> result = this.updateStreamStatus(streamId, newStreamStatus);
         return result;
     }
 
