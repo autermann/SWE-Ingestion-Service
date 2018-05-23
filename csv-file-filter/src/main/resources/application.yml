@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: csv-file-filter
+
+  cloud:
+    stream:
+      bindings:
+        input:
+          group: haliho
+          destination: demo
+        output:
+          group: haliho
+          destination: log
+
+server:
+  port: 8083
+
+org.n52.stream:
+  number-of-header-lines: 42
+  number-of-footer-lines: 52
+  comment-line-start-char: #
+
+logging:
+  level:
+    org.n52.stream.seadatacloud.processors: TRACE

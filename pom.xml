@@ -50,6 +50,7 @@
         <module>csv-processor</module>
         <module>rest-controller</module>
         <module>core</module>
+        <module>csv-file-filter</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

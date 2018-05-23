@@ -200,12 +200,12 @@ services:
         echo 'MQTT Source Rabbit app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
         echo 'CsvProcessor app imported'
+        wget -qO- 'http://dataflow:9393/apps/processor/csv-file-filter' --post-data='uri=file:///tmp/apps/processors/csv-file-filter-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'CsvFileFilter app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
-        echo 'LogSink app imported'
-        wget -qO- 'http://dataflow:9393/apps/sink/ftp-sink' --post-data='uri=file:///tmp/apps/sinks/ftp-sink-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
-        echo 'FTP Sink app imported'"
+        echo 'LogSink app imported'"
     networks:
       network:
         ipv4_address: 172.52.0.106
