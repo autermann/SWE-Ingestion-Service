@@ -28,10 +28,6 @@
  */
 package org.n52.stream.seadatacloud.processors;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -52,7 +48,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import org.springframework.messaging.support.GenericMessage;
 
 /**
  * CsvFileFilter<br>
@@ -70,7 +66,7 @@ import com.google.common.collect.Lists;
  * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @SpringBootApplication
-@ComponentScan("org.n52.stream")
+//@ComponentScan("org.n52.stream")
 @ComponentScan("org.n52.stream.util")
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(AppConfiguration.class)
@@ -78,6 +74,8 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
 
     private int msgCount = 0;
     private int processedMsgCount = 0;
+    private int propertiesHeaderLines;
+    private int propertiesFooterLines;
 
     @Autowired
     private AppConfiguration properties;
@@ -96,7 +94,9 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
         LOG.info("Init CsvFileFilter processor...");
         checkSetting("comment-line-start-char", properties.getCommentLineStartChar());
         checkSetting("number-of-header-lines", properties.getNumberOfHeaderLines()+"");
+        propertiesHeaderLines = properties.getNumberOfHeaderLines();
         checkSetting("number-of-footer-lines", properties.getNumberOfFooterLines()+"");
+        propertiesFooterLines = properties.getNumberOfFooterLines();
         LOG.info("CsvFileFilter initialized");
     }
 
@@ -106,45 +106,23 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
      * TODO change to single file processing and forward the START and END message
      * TODO forward the correlation-id header
      */
-    public List<String> process(Message<byte[]> csvFileMessage) {
+    public Message<String> process(Message<String> csvFileLineMessage) {
         msgCount++;
-        if (csvFileMessage == null) {
-            throw logErrorAndCreateException("NO CSV file message received! Input is 'null'.");
+        if (csvFileLineMessage == null) {
+            throw logErrorAndCreateException("NO CSV file line message received! Input is 'null'.");
         }
-        byte[] csvFileContent = csvFileMessage.getPayload();
-        if (csvFileContent == null || csvFileContent.length == 0) {
-            throw logErrorAndCreateException("Empty CSV file payload received.");
+        String plainLine = csvFileLineMessage.getPayload();
+        if (plainLine == null || plainLine.isEmpty()) {
+            throw logErrorAndCreateException("Empty CSV file line payload received.");
         }
-        String decodedCsvFileContent;
-        try {
-            decodedCsvFileContent = new String(csvFileContent,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logErrorAndCreateException("Encoding UTF-8 not supported. Decoding CSV file failed.");
-            return null;
+        // remove header lines:
+        int sequenceNumber = csvFileLineMessage.getHeaders().get("sequenceNumber", Integer.class);
+        if (sequenceNumber <= propertiesHeaderLines) {
+            return null; // FIXME: How not to forward headerline?
         }
-        List<String> processCsvFilePayload = processCsvFilePayload(decodedCsvFileContent);
         processedMsgCount++;
-        LOG.info(getDataMessageLog(null));
-        return processCsvFilePayload;
-    }
-
-    private List<String> processCsvFilePayload(String csvFileContent) {
-        LOG.trace("Start processing CSV file");
-        List<String> csvLines = Lists.newArrayList(csvFileContent.split("\\R"));
-        if (csvLines.isEmpty()) {
-            return Collections.emptyList();
-        }
-        // Remove header and footer lines
-        csvLines = csvLines.subList(
-                properties.getNumberOfHeaderLines(),
-                csvLines.size()-properties.getNumberOfFooterLines());
-        List<String> finalLines = new LinkedList<>();
-        csvLines.parallelStream().forEach(line -> {
-            if (!line.startsWith(properties.getCommentLineStartChar())) {
-                finalLines.add(line);
-            }
-        });
-        return csvLines;
+        Message<String> filtered = new GenericMessage<>(csvFileLineMessage.getPayload(), csvFileLineMessage.getHeaders());
+        return filtered;
     }
 
     @VisibleForTesting

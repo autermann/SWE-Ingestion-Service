@@ -62,5 +62,12 @@ public class ProcessDescriptionStore implements Serializable {
     public HashMap<String,SimpleEntry<String,String>> getDescriptions() {
         return this.streamIdProcessDescriptionMap;
     }
+    
+    public void deleteProcessDescription(String streamName){
+        SimpleEntry<String,String> processDescription = streamIdProcessDescriptionMap.get(streamName);
+        if (processDescription != null) {
+            streamIdProcessDescriptionMap.remove(streamName);
+        }
+    }
 
 }
