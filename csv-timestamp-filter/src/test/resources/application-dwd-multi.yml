@@ -1,6 +1,6 @@
 spring:
   application:
-    name: csv-file-filter
+    name: csv-timestamp-filter
 
   cloud:
     stream:
@@ -16,9 +16,12 @@ server:
   port: 8083
 
 org.n52.stream:
-  number-of-header-lines: 42
-  number-of-footer-lines: 52
-  comment-line-start-char: "#"
+  last-seen-timestamp:
+  column-separator: ";"
+  date-column-index: 0
+  time-column-index: 1
+  date-column-format: "dd.MM.yy"
+  time-column-format: "HH:mm"
 
 logging:
   level:
