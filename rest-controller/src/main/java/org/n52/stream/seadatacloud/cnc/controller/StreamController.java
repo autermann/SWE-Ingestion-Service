@@ -105,7 +105,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
+import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
 
 /**
  *
@@ -148,6 +150,7 @@ public class StreamController {
     public void init() {
         dataRecordDefinitions = new DataRecordDefinitions();
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+        dataRecordDefinitions.add("https://52north.org/swe-ingestion/ftp", "ftp-source");
 
         LOG.info("loading stored streams from file...");
         File file = new File(processDescriptionStoreFileName);
@@ -175,7 +178,7 @@ public class StreamController {
                         processors = service.getProcessors();
                         sinks = service.getSinks();
                     } catch (Exception e) {
-                    }
+                    } // TODO: check for every single app?!
                     appRegistered = sources != null
                             && !sources.getSources().isEmpty()
                             && processors != null
@@ -284,7 +287,16 @@ public class StreamController {
 
                 InsertSensorGenerator generator = new InsertSensorGenerator();
                 AggregateProcess aggregateProcess = (AggregateProcess) decodedProcessDescription;
-                PhysicalSystem process = (PhysicalSystem) aggregateProcess.getComponents().get(1).getProcess();
+                // doing: get process-component from components:
+                List<SmlComponent> componentsList = aggregateProcess.getComponents();
+                PhysicalSystem process = null;
+                for (SmlComponent smlComponent : componentsList) {
+                    if (smlComponent.getProcess() instanceof PhysicalSystem) {
+                        process = (PhysicalSystem) smlComponent.getProcess();
+                        break;
+                    }
+                }
+                // -end
                 InsertSensorRequest request = generator.generate(process);
                 // encode request
                 XmlObject xbRequest = encoderHelper.encode(request);
@@ -378,7 +390,11 @@ public class StreamController {
             }
         } catch (Exception e) {
             LOG.error("Exception thrown:", e);
-            return new ResponseEntity<>(e.getMessage(), CONTENT_TYPE_APPLICATION_JSON, HttpStatus.BAD_REQUEST);
+            LOG.error("Exception thrown:", e.getMessage());
+            return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
+                        + "aggregateProcess sensorML description."+e.getMessage()+"\"}",
+                        CONTENT_TYPE_APPLICATION_JSON,
+                        HttpStatus.BAD_REQUEST);
         }
     }
 

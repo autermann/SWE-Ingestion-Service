@@ -38,6 +38,9 @@
 #                                                                              #
 #   Start via PROJECT_ROOT:$ docker-compose --file etc/docker-compose.yml up   #
 #                                                                              #
+#   Stop & Start via PROJECT_ROOT:                                             #
+#    $ docker-compose --file etc/docker-compose.yml down && mvn clean install  #
+#      && docker-compose --file etc/docker-compose.yml up                      #
 ################################################################################
 
 
