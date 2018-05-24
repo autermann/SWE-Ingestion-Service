@@ -103,6 +103,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  *
@@ -431,7 +434,26 @@ public class StreamController {
     @DeleteMapping(value = "/{streamId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteStream(
             @PathVariable String streamId) {
+        FileOutputStream f = null;
+        Stream stream = service.getStream(streamId);
+        if (stream == null) {
+            return new ResponseEntity<>("{\"error\":\"Stream '"+streamId+"' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+        }
         String result = service.deleteStream(streamId);
+        processDescriptionStore.deleteProcessDescription(streamId);
+        // store latest updates processDescriptionStore into file:
+        try {
+            f = new FileOutputStream(new File(processDescriptionStoreFileName));
+            ObjectOutputStream o = new ObjectOutputStream(f);
+            o.writeObject(processDescriptionStore);
+            o.close();
+            f.close();
+            return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
+        } catch (FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(StreamController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(StreamController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
     }
 

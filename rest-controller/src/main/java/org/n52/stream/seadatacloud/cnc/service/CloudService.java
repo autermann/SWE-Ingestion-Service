@@ -249,7 +249,6 @@ public class CloudService {
         String getRequest = "/streams/definitions/" + streamId;
         try {
             StringBuffer response = executeRequest(HttpMethod.GET, getRequest);
-            // TODO what happens if the stream is not found!? should not throw an exception but null
             stream = objectMapper.readValue(response.toString(), Stream.class);
         } catch (IOException e) {
             LOG.error("Error while retrieving stream with id '{}'.", streamId);
