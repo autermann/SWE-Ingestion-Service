@@ -28,6 +28,8 @@
  */
 package org.n52.stream.seadatacloud.cnc.controller;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -289,13 +291,10 @@ public class StreamController {
                 AggregateProcess aggregateProcess = (AggregateProcess) decodedProcessDescription;
                 // doing: get process-component from components:
                 List<SmlComponent> componentsList = aggregateProcess.getComponents();
-                PhysicalSystem process = null;
-                for (SmlComponent smlComponent : componentsList) {
-                    if (smlComponent.getProcess() instanceof PhysicalSystem) {
-                        process = (PhysicalSystem) smlComponent.getProcess();
-                        break;
-                    }
-                }
+                PhysicalSystem process =
+                        componentsList.get(componentsList.size() - 1).getProcess() instanceof PhysicalSystem
+                                ? (PhysicalSystem) componentsList.get(componentsList.size() - 1).getProcess()
+                                : null;
                 // -end
                 InsertSensorRequest request = generator.generate(process);
                 // encode request
