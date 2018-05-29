@@ -29,6 +29,7 @@
 package org.n52.stream.seadatacloud.processors;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
@@ -73,6 +74,7 @@ public class CsvDwdTimestampFilterMultiFileTest extends AbstractCsvTimestampFilt
         }
 
         for (Future<Integer> future : results) {
+            assertThat(future, notNullValue());
             assertThat(future.get(), is(25));
         }
     }
