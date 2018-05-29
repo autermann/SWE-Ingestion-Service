@@ -93,6 +93,11 @@
                                                             <swe:uom code="W/m²" />
                                                         </swe:Quantity>
                                                     </swe:field>
+                                                    <swe:field name="direct_solar_radiation_last_24_hours">
+                                                        <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_24_hours">
+                                                            <swe:uom code="W/m²" />
+                                                        </swe:Quantity>
+                                                    </swe:field>
                                                     <swe:field name="direct_solar_radiation_last_hour">
                                                         <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_hour">
                                                             <swe:uom code="W/m²" />
@@ -273,7 +278,7 @@
                                             <swe:encoding>
                                                 <!-- Abhängig vom EncodingTypen den Processor wählen.-->
                                                 <!-- Es gibt \{TextEncoding} auch: {XmlEncoding, BinaryEncoding}-->
-                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n"/>
+                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n" decimalSeparator=","/>
                                             </swe:encoding>
                                             <swe:values/>
                                         </swe:DataStream>
@@ -371,6 +376,11 @@
                                                             <swe:uom code="W/m²" />
                                                         </swe:Quantity>
                                                     </swe:field>
+                                                    <swe:field name="direct_solar_radiation_last_24_hours">
+                                                        <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_24_hours">
+                                                            <swe:uom code="W/m²" />
+                                                        </swe:Quantity>
+                                                    </swe:field>
                                                     <swe:field name="direct_solar_radiation_last_hour">
                                                         <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_hour">
                                                             <swe:uom code="W/m²" />
@@ -551,7 +561,7 @@
                                             <swe:encoding>
                                                 <!-- Abhängig vom EncodingTypen den Processor wählen.-->
                                                 <!-- Es gibt \{TextEncoding} auch: {XmlEncoding, BinaryEncoding}-->
-                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n"/>
+                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n" decimalSeparator=","/>
                                             </swe:encoding>
                                             <swe:values/>
                                         </swe:DataStream>
@@ -604,6 +614,11 @@
                                                             <swe:uom code="W/m²" />
                                                         </swe:Quantity>
                                                     </swe:field>
+                                                    <swe:field name="direct_solar_radiation_last_24_hours">
+                                                        <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_24_hours">
+                                                            <swe:uom code="W/m²" />
+                                                        </swe:Quantity>
+                                                    </swe:field>
                                                     <swe:field name="direct_solar_radiation_last_hour">
                                                         <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_hour">
                                                             <swe:uom code="W/m²" />
@@ -784,7 +799,7 @@
                                             <swe:encoding>
                                                 <!-- Abhängig vom EncodingTypen den Processor wählen.-->
                                                 <!-- Es gibt \{TextEncoding} auch: {XmlEncoding, BinaryEncoding}-->
-                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n"/>
+                                                <swe:TextEncoding tokenSeparator=";" blockSeparator="\n" decimalSeparator=","/>
                                             </swe:encoding>
                                             <swe:values/>
                                         </swe:DataStream>
@@ -813,7 +828,7 @@
                                 <swe:Text definition="https://52north.org/swe-ingestion/csv-timestamp-filter#time-column-format">
                                     <swe:label>Format of time</swe:label>
                                     <swe:description>The format of the time in UTC</swe:description>
-                                    <swe:value>hh:mm</swe:value>
+                                    <swe:value>HH:mm</swe:value>
                                 </swe:Text>
                             </sml:parameter>
                         </sml:ParameterList>

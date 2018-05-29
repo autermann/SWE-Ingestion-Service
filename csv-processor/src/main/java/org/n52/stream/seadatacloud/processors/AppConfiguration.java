@@ -55,14 +55,53 @@ public class AppConfiguration {
     private String sensor = "sensor-default-value";
 
     /**
-     * component index desc 
+     * component index desc
      */
     private int componentindex = 0;
-    
+
     /**
      * feature of interest identifier
      */
     private String featureofinterestid = "";
+
+    /**
+     * no data values: identifies values that can be ignored
+     */
+    private String nodatavalue = "---";
+
+    /**
+     * The index of the date column.
+     * Same as <code>timeColumnIndex</code> if datetime column.
+     */
+    private int dateColumnIndex = -1;
+
+    /**
+     * The index of the time column.
+     * Same as <code>dateColumnIndex</code> if datetime column.
+     */
+    private int timeColumnIndex = -1;
+
+    /**
+     * The format of the date column.
+     * Same as <code>timeColumnFormat</code> if datetime column.
+     * If full ISO 8601, no format definition is required.
+     */
+    private String dateColumnFormat = "";
+
+    /**
+     * The format of the time column.
+     * Same as <code>dateColumnFormat/code> if datetime column.
+     * If full ISO 8601, no format definition is required.
+     */
+    private String timeColumnFormat = "";
+
+    public String getNodatavalue() {
+        return nodatavalue;
+    }
+
+    public void setNodatavalue(String nodatavalue) {
+        this.nodatavalue = nodatavalue;
+    }
 
     public String getFeatureofinterestid() {
         return featureofinterestid;
@@ -71,7 +110,7 @@ public class AppConfiguration {
     public void setFeatureofinterestid(String featureofinterestid) {
         this.featureofinterestid = featureofinterestid;
     }
-    
+
     public int getComponentindex() {
         return componentindex;
     }
@@ -79,7 +118,7 @@ public class AppConfiguration {
     public void setComponentindex(int componentindex) {
         this.componentindex = componentindex;
     }
-    
+
     public String getSensormlurl() {
         return sensormlurl;
     }
@@ -102,6 +141,38 @@ public class AppConfiguration {
 
     public void setSensor(String sensor) {
         this.sensor = sensor;
+    }
+
+    public int getDateColumnIndex() {
+        return dateColumnIndex;
+    }
+
+    public void setDateColumnIndex(Integer dateColumnIndex) {
+        this.dateColumnIndex = dateColumnIndex;
+    }
+
+    public int getTimeColumnIndex() {
+        return timeColumnIndex;
+    }
+
+    public void setTimeColumnIndex(Integer timeColumnIndex) {
+        this.timeColumnIndex = timeColumnIndex;
+    }
+
+    public String getDateColumnFormat() {
+        return dateColumnFormat;
+    }
+
+    public void setDateColumnFormat(String dateColumnFormat) {
+        this.dateColumnFormat = dateColumnFormat;
+    }
+
+    public String getTimeColumnFormat() {
+        return timeColumnFormat;
+    }
+
+    public void setTimeColumnFormat(String timeColumnFormat) {
+        this.timeColumnFormat = timeColumnFormat;
     }
 
 }

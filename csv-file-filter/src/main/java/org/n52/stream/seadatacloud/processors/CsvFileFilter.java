@@ -29,6 +29,10 @@
 package org.n52.stream.seadatacloud.processors;
 
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.n52.stream.AbstractIngestionServiceApp;
@@ -45,11 +49,10 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.support.GenericMessage;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import java.nio.charset.Charset;
-import org.springframework.messaging.support.GenericMessage;
 
 /**
  * CsvFileFilter<br>
@@ -79,16 +82,18 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
 
     @Autowired
     private AppConfiguration properties;
+    private static Map<String, Integer> counterMap;
 
     private static final Logger LOG = LoggerFactory.
             getLogger(CsvFileFilter.class);
+    private static final Object FILE_NAME = "file_name";
 
     public static void main(String[] args) {
         SpringApplication.run(CsvFileFilter.class, args);
     }
 
     /**
-     * Init the processor by checking the properties and finalize the 
+     * Init the processor by checking the properties and finalize the
      * custom configuration
      */
     @PostConstruct
@@ -97,6 +102,7 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
         checkSetting("number-of-header-lines",
                 properties.getNumberOfHeaderLines()+"");
         propertiesHeaderLines = properties.getNumberOfHeaderLines();
+        counterMap = Collections.synchronizedMap(new HashMap<>());
         LOG.info("CsvFileFilter initialized");
     }
 
@@ -112,17 +118,30 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
             throw logErrorAndCreateException(
                     "NO CSV file line message received! Input is 'null'.");
         }
-//        
-//        if (csvFileLineMessage.getPayload() == null || 
-//                csvFileLineMessage.getPayload() == 0) {
-//            throw logErrorAndCreateException(
-//                    "Empty CSV file line payload received.");
-//        }
+        if (csvFileLineMessage.getHeaders() == null || !csvFileLineMessage.getHeaders().containsKey(FILE_NAME)) {
+            throw logErrorAndCreateException("Missing CSV file name header.");
+        }
+        String fileName = csvFileLineMessage.getHeaders().get(FILE_NAME, String.class);
         String plainLine = csvFileLineMessage.getPayload().toString();
         LOG.trace("Payload received: '{}'", plainLine);
-        // remove header lines:
-        int sequenceNumber = csvFileLineMessage.getHeaders().get(
-                "sequenceNumber", Integer.class);
+        if (csvFileLineMessage.getHeaders().containsKey("file_marker")) {
+            String markerValue = csvFileLineMessage.getHeaders().get("file_marker", String.class);
+            switch(markerValue) {
+                case "START":
+                    // if start => init counter for skipping header lines
+                    counterMap.put(fileName,0);
+                    break;
+                case "END":
+                    // end end => remove file from map
+                    counterMap.remove(fileName);
+                    break;
+            }
+            return new GenericMessage<>(markerValue,
+                    csvFileLineMessage.getHeaders());
+        }
+        int sequenceNumber = counterMap.get(fileName);
+        counterMap.put(fileName, ++sequenceNumber);
+        // ignore header lines:
         if (sequenceNumber <= propertiesHeaderLines) {
             return null;
         }

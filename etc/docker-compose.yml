@@ -248,7 +248,6 @@ services:
       - ELASTIC_PASSWORD=changeme
     volumes:
       - "${PWD}/etc/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
-      - "${PWD}/etc/elasticsearch/data:/usr/share/elasticsearch/data"
     ports:
       - 9300:9300
       - 9200:9200

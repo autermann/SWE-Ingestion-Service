@@ -65,8 +65,11 @@ import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
+import org.n52.shetland.ogc.sensorML.v20.Parameter;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
+import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
+import org.n52.shetland.ogc.sensorML.v20.SmlFeatureOfInterest;
 import org.n52.shetland.ogc.sos.Sos2Constants;
 import org.n52.shetland.ogc.sos.SosCapabilities;
 import org.n52.shetland.ogc.sos.SosConstants;
@@ -77,9 +80,15 @@ import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityResponse;
 import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityResponse.DataAvailability;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.shetland.ogc.sos.response.InsertSensorResponse;
+import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
 import org.n52.shetland.ogc.swe.SweDataRecord;
+import org.n52.shetland.ogc.swe.SweDataStream;
 import org.n52.shetland.ogc.swe.SweField;
+import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
+import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
+import org.n52.shetland.ogc.swe.simpleType.SweCount;
 import org.n52.shetland.ogc.swe.simpleType.SweText;
+import org.n52.shetland.ogc.swe.simpleType.SweTime;
 import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.kibana.KibanaController;
@@ -125,19 +134,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import org.n52.shetland.ogc.sensorML.v20.Parameter;
-import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
-import org.n52.shetland.ogc.sensorML.v20.SmlFeatureOfInterest;
-import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
-import org.n52.shetland.ogc.swe.SweDataStream;
-import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
-import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
-import org.n52.shetland.ogc.swe.simpleType.SweCount;
-import org.n52.shetland.ogc.swe.simpleType.SweTime;
 
 /**
  *
@@ -387,12 +383,13 @@ public class StreamController {
                         PhysicalSystem ps = (PhysicalSystem) smlComponent.getProcess();
                         if (ps.getSmlFeatureOfInterest() != null) {
                             if (ps.getSmlFeatureOfInterest() instanceof SmlFeatureOfInterest) {
-                                SmlFeatureOfInterest featureOfInterest = (SmlFeatureOfInterest) ps.getSmlFeatureOfInterest();
+                                SmlFeatureOfInterest featureOfInterest = ps.getSmlFeatureOfInterest();
                                 featureOfInterestId = featureOfInterest.getFeaturesOfInterest().iterator().next();
                             }
                         }
                     }
                 }
+                String timestampDefinitions = "";
                 if (sourceName.equals("ftp-source")) {
                     SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
                     List<Parameter> parameters = csvFileFilter.getSweParameters();
@@ -421,21 +418,21 @@ public class StreamController {
                             if (csvTimestampFilter.getDefinition().endsWith("date-column-format")) {
                                 // case date:
                                 String dateColumnFormat = csvTimestampFilter.getValue();
-                                streamDefinition += " --date-column-format=" + dateColumnFormat;
+                                timestampDefinitions += " --date-column-format=" + dateColumnFormat;
                             } else if (csvTimestampFilter.getDefinition().endsWith("time-column-format")) {
                                 // case time:
                                 String timeColumnFormat = csvTimestampFilter.getValue();
-                                streamDefinition += " --time-column-format=" + timeColumnFormat;
+                                timestampDefinitions += " --time-column-format=" + timeColumnFormat;
                             } else if (csvTimestampFilter.getDefinition().endsWith("datetime-column-format")) {
                                 // case datetime:
                                 String datetimeColumnFormat = csvTimestampFilter.getValue();
-                                streamDefinition += " --date-column-format=" + datetimeColumnFormat
+                                timestampDefinitions += " --date-column-format=" + datetimeColumnFormat
                                         + " --time-column-format=" + datetimeColumnFormat;
                             }
                         }
                     }
                     if (hasTimestampFilter) {
-                        streamDefinition += " ";
+                        timestampDefinitions += " ";
                     } else {
                         return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description. AggregateProcess of '" + sdrDefinition + "' requires either date-column-format and time-column-format or datetime-column-format parameters, but found none of them.\"}", HttpStatus.BAD_REQUEST);
                     }
@@ -453,13 +450,13 @@ public class StreamController {
                             if (sweFieldDefinition.contains("PhenomenonTime#")) {
                                 switch (sweFieldDefinition.substring(sweFieldDefinition.lastIndexOf('#') + 1)) {
                                     case "date":
-                                        streamDefinition += " --date-column-index=" + i;
+                                        timestampDefinitions += " --date-column-index=" + i;
                                         break;
                                     case "time":
-                                        streamDefinition += " --time-column-index=" + i;
+                                        timestampDefinitions += " --time-column-index=" + i;
                                         break;
                                     case "datetime":
-                                        streamDefinition += " --date-column-index=" + i
+                                        timestampDefinitions += " --date-column-index=" + i
                                                 + " --time-column-index=" + i;
                                         break;
                                     default:
@@ -471,7 +468,7 @@ public class StreamController {
                     SweAbstractEncoding encoding = dataStream.getEncoding();
                     if (encoding instanceof SweTextEncoding) {
                         SweTextEncoding textEncoding = (SweTextEncoding) encoding;
-                        streamDefinition += " --column-seperator=" + textEncoding.getTokenSeparator();
+                        streamDefinition += timestampDefinitions + " --column-seperator=" + textEncoding.getTokenSeparator();
                     }
 
                 } else if (sourceName.equals("mqtt-source-rabbit")) {
@@ -485,7 +482,8 @@ public class StreamController {
 
                 streamDefinition += " | csv-processor" + commonAppProperties
                         + " --componentidentifier=" + componentIdentifier
-                        + " --featureofinterestid=" + "\"" + featureOfInterestId + "\"";
+                        + " --featureofinterestid=" + "\"" + featureOfInterestId + "\""
+                        + timestampDefinitions;
 
                 // parse sink:
                 streamDefinition += " | db-sink" + commonAppProperties
@@ -629,7 +627,7 @@ public class StreamController {
         // 3. set stream Status to status of previous stream
         StreamStatus newStreamStatus = new StreamStatus();
         newStreamStatus.setStatus(streamStatus);
-        ResponseEntity<?> result = this.updateStreamStatus(streamId, newStreamStatus);
+        ResponseEntity<?> result = updateStreamStatus(streamId, newStreamStatus);
         return result;
     }
 

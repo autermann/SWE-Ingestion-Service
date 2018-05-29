@@ -29,14 +29,17 @@
 package org.n52.stream.seadatacloud.processors;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -66,14 +69,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-
-import org.springframework.cloud.stream.messaging.Processor;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  *
@@ -110,7 +112,15 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private Feature feature;
 
+    private boolean isNoDataValueSet;
+
+    private String noDataValue = null;
+
     private static final Logger LOG = LoggerFactory.getLogger(CsvProcessor.class);
+
+    private DateTimeFormatter formatter;
+
+    private boolean isReplaceDecimalSeparator = false;
 
     public static void main(String[] args) {
         SpringApplication.run(CsvProcessor.class, args);
@@ -127,6 +137,13 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         checkSetting("sensor", properties.getSensor());
         checkSetting("sensorml-url", properties.getSensormlurl());
         checkSetting("componentidentifier", properties.getComponentindex());
+        checkSetting("date-column-index", properties.getDateColumnIndex() + "");
+        checkSetting("time-column-index", properties.getTimeColumnIndex() + "");
+        if (!isDateTimeColumnIndex()) {
+            checkSetting("date-column-format", properties.getDateColumnFormat());
+            checkSetting("time-column-format", properties.getTimeColumnFormat());
+        }
+        formatter = initDateTimeFormatter();
         if (properties.getFeatureofinterestid() == null
                 || properties.getFeatureofinterestid().isEmpty()) {
             throw logErrorAndCreateException("No Feature Of Interest Identifier received.");
@@ -135,12 +152,37 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         } else {
             feature = new Feature().setId(properties.getFeatureofinterestid());
         }
+        if (properties.getNodatavalue() != null && !properties.getNodatavalue().isEmpty()) {
+            isNoDataValueSet = true;
+            noDataValue = properties.getNodatavalue();
+        }
         AbstractProcessV20 process = checkAndExtractProcess();
         SmlDataInterface dataInterface = checkAndExtractDataInterface(process);
         checkAndStoreEncoding(dataInterface);
+        if (!textEncoding.getDecimalSeparator().equals(".")) {
+            isReplaceDecimalSeparator = true;
+        }
         storeTokenAssignments(dataInterface);
+        if (properties.getDateColumnIndex() == -1){
+            Integer extractedIndex = extractTimestampIndex();
+            properties.setDateColumnIndex(extractedIndex);
+            properties.setTimeColumnIndex(extractedIndex);
+        }
         fillTemplateDataMessage();
         LOG.info("CsvProcessor initialized for procedure: {}", properties.getSensor());
+    }
+
+    private Integer extractTimestampIndex() {
+        int phenTimeIndex = tokenAssigments.getFieldIndexByIdentifier(DEFINITION_PHENOMENON_TIME);
+        if (phenTimeIndex != -1) {
+            return phenTimeIndex;
+        }
+
+        int resultTimeIndex = tokenAssigments.getFieldIndexByIdentifier(DEFINITION_RESULT_TIME);
+        if (resultTimeIndex != -1) {
+            return resultTimeIndex;
+        }
+        throw logErrorAndCreateException("No field with result or phenomenon time found => cancel processing");
     }
 
     private void fillTemplateDataMessage() throws IllegalArgumentException {
@@ -235,16 +277,16 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         return dataInterface;
     }
 
-    private void extractFeature(AbstractProcessV20 process) throws IllegalArgumentException {
-        if (!process.isSetSmlFeatureOfInterest()) {
-            throw logErrorAndCreateException("Element <featureofinterest> of first component is NOT set!");
-        }
-        Set<String> featuresOfInterest = process.getSmlFeatureOfInterest().getFeaturesOfInterest();
-        if (featuresOfInterest.isEmpty() || featuresOfInterest.size() > 1) {
-            throw logErrorAndCreateException("Only ONE Element <featureofinterest> of first component supported!");
-        }
-        feature = new Feature().withId(featuresOfInterest.iterator().next());
-    }
+//    private void extractFeature(AbstractProcessV20 process) throws IllegalArgumentException {
+//        if (!process.isSetSmlFeatureOfInterest()) {
+//            throw logErrorAndCreateException("Element <featureofinterest> of first component is NOT set!");
+//        }
+//        Set<String> featuresOfInterest = process.getSmlFeatureOfInterest().getFeaturesOfInterest();
+//        if (featuresOfInterest.isEmpty() || featuresOfInterest.size() > 1) {
+//            throw logErrorAndCreateException("Only ONE Element <featureofinterest> of first component supported!");
+//        }
+//        feature = new Feature().withId(featuresOfInterest.iterator().next());
+//    }
 
     private AbstractProcessV20 checkAndExtractProcess() throws IllegalArgumentException {
         if (!processDescription.isSetComponents() || processDescription.getComponents().isEmpty()) {
@@ -266,25 +308,24 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public DataMessage process(Message<String> mqttMessage) {
+    public DataMessage process(Message<String> csvMessage) {
         msgCount++;
-        if (mqttMessage == null) {
-            throw logErrorAndCreateException("NO MQTT message received! Input is 'null'.");
+        if (csvMessage == null) {
+            throw logErrorAndCreateException("NO CSV message received! Input is 'null'.");
         }
-        String mqttMessagePayload = mqttMessage.getPayload();
-        if (mqttMessagePayload == null || mqttMessagePayload.isEmpty()) {
-            throw logErrorAndCreateException("Empty MQTT payload received.");
+        String messagePayload = csvMessage.getPayload();
+        if (messagePayload == null || messagePayload.isEmpty()) {
+            throw logErrorAndCreateException("Empty CSV payload received.");
         }
-        DataMessage processedDataset = processMqttPayload(mqttMessagePayload);
+        DataMessage processedDataset = processPayload(messagePayload);
         processedMsgCount++;
         LOG.info(getDataMessageLog(processedDataset));
         return processedDataset;
     }
 
-    // Example payload: 2018-04-04T08:34:14.945Z;WL-ECO-FLNTU-4476;2018-04-04T08:34:14.945Z;695;44;700;56;554
-    private DataMessage processMqttPayload(String mqttMessagePayload) {
-        LOG.trace("MQTT-Payload received: {}", mqttMessagePayload);
-        List<String> payloadBlocks = tokenize(mqttMessagePayload, textEncoding.getBlockSeparator());
+    private DataMessage processPayload(String messagePayload) {
+        LOG.trace("Message-Payload received: {}", messagePayload);
+        List<String> payloadBlocks = tokenize(messagePayload, textEncoding.getBlockSeparator());
         if (payloadBlocks.isEmpty()) {
             return null;
         }
@@ -294,8 +335,8 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
             if (tokens.isEmpty()) {
                 continue;
             }
-            OffsetDateTime resultTime = null;
-            OffsetDateTime phenTime = null;
+            OffsetDateTime resultTime = getCsvTimestamp(block);
+            OffsetDateTime phenTime = resultTime;
             List<Measurement<?>> measurements = new LinkedList<>();
             if (tokens.size() != tokenAssigments.getFields().size()) {
                 throw logErrorAndCreateException(
@@ -308,12 +349,12 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                     continue;
                 }
                 String definition = tokenSpecification.getDefinition();
-                if (definition.equals(DEFINITION_RESULT_TIME)) {
-                    resultTime = OffsetDateTime.parse(token);
-                } else if (definition.equals(DEFINITION_PHENOMENON_TIME)) {
-                    phenTime = OffsetDateTime.parse(token);
+                if (!definition.contains(DEFINITION_RESULT_TIME) &&
+                        !definition.contains(DEFINITION_PHENOMENON_TIME) &&
+                         isNoDataValueSet && !noDataValue.equalsIgnoreCase(token) || !isNoDataValueSet) {
+                        processDataValue(dataMessage, measurements, token, tokenSpecification, definition);
                 } else {
-                    processDataValue(dataMessage, measurements, token, tokenSpecification, definition);
+                    continue;
                 }
             }
             setTimestamps(resultTime, phenTime, measurements);
@@ -341,6 +382,42 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         measurements.add(measurementsItem);
     }
 
+    private OffsetDateTime getCsvTimestamp(String csvLine) {
+        String datetime = null;
+        String[] split = csvLine.split(textEncoding.getTokenSeparator());
+        if (isDateTimeColumnIndex()) {
+            datetime = split[properties.getDateColumnIndex()];
+        } else {
+            StringBuilder time = new StringBuilder();
+            time.append(split[properties.getDateColumnIndex()]);
+            time.append(" ");
+            time.append(split[properties.getTimeColumnIndex()]);
+            datetime = time.toString();
+        }
+        return LocalDateTime.parse(datetime, formatter).atOffset(ZoneOffset.UTC);
+    }
+
+    private DateTimeFormatter initDateTimeFormatter() {
+        if (!isDateTimeColumnIndex()) {
+            StringBuilder pattern = new StringBuilder();
+            pattern.append(properties.getDateColumnFormat());
+            pattern.append(" ");
+            pattern.append(properties.getTimeColumnFormat());
+            return DateTimeFormatter.ofPattern(pattern.toString());
+        } else if (isDateColumnFormat()) {
+            return DateTimeFormatter.ofPattern(properties.getDateColumnFormat());
+        }
+        return DateTimeFormatter.ISO_DATE_TIME;
+    }
+
+    private boolean isDateTimeColumnIndex() {
+        return properties.getDateColumnIndex() == properties.getTimeColumnIndex();
+    }
+
+    private boolean isDateColumnFormat() {
+        return properties.getDateColumnFormat() != null && !properties.getDateColumnFormat().isEmpty();
+    }
+
     private Measurement<?> createMeasurement(String token, SweDataComponentType sweType)
             throws NumberFormatException, IllegalArgumentException {
         Measurement<?> measurementsItem = null;
@@ -358,6 +435,9 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                 break;
             case Quantity:
                 Measurement<BigDecimal> bigDecimalMeasurement = new Measurement<>();
+                if (isReplaceDecimalSeparator) {
+                    token = token.replaceAll(textEncoding.getDecimalSeparator(), ".");
+                }
                 bigDecimalMeasurement.setValue(new BigDecimal(token));
                 measurementsItem = bigDecimalMeasurement;
                 break;
@@ -386,9 +466,9 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         }
     }
 
-    private List<String> tokenize(String mqttMessagePayload, String delimeter) {
+    private List<String> tokenize(String messagePayload, String delimeter) {
         List<String> tokens = new LinkedList<>();
-        StringTokenizer tokenizer = new StringTokenizer(mqttMessagePayload, delimeter);
+        StringTokenizer tokenizer = new StringTokenizer(messagePayload, delimeter);
         while (tokenizer.hasMoreTokens()) {
             tokens.add(tokenizer.nextToken());
         }
@@ -405,8 +485,8 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         n.put("number", processedMsgCount);
         n.put("of", msgCount);
         return n.toString();
-//        
-//        
+//
+//
 //        StringBuilder sb = new StringBuilder("{");
 //        sb.append("\"DataMessage\":").append(getJson(processedDataset)).append(",");
 //        sb.append("\"number\":").append(processedMsgCount).append(",");
