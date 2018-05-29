@@ -40,6 +40,7 @@ public class CnCServiceConfiguration {
     private String sosendpoint = "http://sos:8080/52n-sos-webapp/service";
     private String dataflowhost = "http://dataflow:9393";
     private String baseurl = "http://cnc:8082/cnc";
+    private String kibana = "http://kibana:8082/api";
     private Datasource datasource = new Datasource();
     
     public String getSosendpoint() {
@@ -74,6 +75,14 @@ public class CnCServiceConfiguration {
         this.baseurl = baseurl;
     }
     
+    public String getKibana() {
+        return kibana;
+    }
+
+    public void setKibana(String kibana) {
+        this.kibana = kibana;
+    }
+
     public class Datasource {
         
         private String url = "jdbc:postgresql://database:5432/sos";

@@ -33,6 +33,7 @@ import javax.annotation.PostConstruct;
 import org.apache.xmlbeans.XmlObject;
 import org.n52.janmayen.http.MediaTypes;
 import org.n52.shetland.ogc.ows.service.OwsOperationKey;
+import org.n52.shetland.ogc.ows.service.OwsServiceRequest;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.svalbard.encode.AbstractXmlEncoder;
 import org.n52.svalbard.encode.Encoder;
@@ -72,7 +73,7 @@ public class EncoderHelper {
      * @throws EncodingException
      *             If an error occurs during encoding.
      */
-    public XmlObject encode(InsertSensorRequest request)
+    public XmlObject encode(OwsServiceRequest request)
             throws EncodingException {
         Encoder<XmlObject, Object> encoder = getEncoder(request);
         if (encoder != null) {
@@ -103,7 +104,7 @@ public class EncoderHelper {
         this.encoderRepository = encoderRepository;
     }
 
-    private Encoder<XmlObject, Object> getEncoder(InsertSensorRequest request) {
+    private Encoder<XmlObject, Object> getEncoder(OwsServiceRequest request) {
         OwsOperationKey key =
                 new OwsOperationKey(request.getService(), request.getVersion(), request.getOperationName());
         return encoderRepository.getEncoder(new OperationRequestEncoderKey(key, MediaTypes.APPLICATION_XML));
