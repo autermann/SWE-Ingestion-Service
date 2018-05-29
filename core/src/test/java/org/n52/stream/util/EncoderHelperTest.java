@@ -51,6 +51,7 @@ public class EncoderHelperTest extends AbstractCodingTest {
     private EncoderHelper helper;
     private InsertSensorRequest request;
     private InsertSensorRequest requestWeather;
+    private InsertSensorRequest requestDwd;
 
     @Before
     public void setUp() throws DecodingException, IOException, XmlException {
@@ -60,6 +61,8 @@ public class EncoderHelperTest extends AbstractCodingTest {
         request = new InsertSensorGenerator().generate((PhysicalSystem) ((AggregateProcess) decoderHelper.decode(path)).getComponents().get(1).getProcess());
         Path pathWeather = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess-Weather.xml");
         requestWeather = new InsertSensorGenerator().generate((PhysicalSystem) ((AggregateProcess) decoderHelper.decode(pathWeather)).getComponents().get(1).getProcess());
+        Path pathDwd = Paths.get(ResourceUtils.getFile(this.getClass().getResource("/")).getPath(), "sensors", "AggregateProcess-dwd.xml");
+        requestDwd = new InsertSensorGenerator().generate((PhysicalSystem) ((AggregateProcess) decoderHelper.decode(pathDwd)).getComponents().get(2).getProcess());
         helper = new EncoderHelper();
         helper.setEncoderRepository(initEncoderRepository());
     }
@@ -90,6 +93,21 @@ public class EncoderHelperTest extends AbstractCodingTest {
     public void encodeToString2() throws EncodingException, IOException, XmlException {
         Assert.isTrue(requestWeather != null, "Request should not null");
         String encode = helper.encodeToString(requestWeather);
+        Assert.isTrue(encode != null, "Should not null");
+        Assert.isTrue(!encode.isEmpty(), "Should not empty");
+    }
+    
+    @Test
+    public void encode3() throws EncodingException, IOException, XmlException {
+        Assert.isTrue(requestDwd != null, "Request should not null");
+        XmlObject encode = helper.encode(requestDwd);
+        Assert.isTrue(encode != null, "Should not null");
+    }
+
+    @Test
+    public void encodeToString3() throws EncodingException, IOException, XmlException {
+        Assert.isTrue(requestDwd != null, "Request should not null");
+        String encode = helper.encodeToString(requestDwd);
         Assert.isTrue(encode != null, "Should not null");
         Assert.isTrue(!encode.isEmpty(), "Should not empty");
     }

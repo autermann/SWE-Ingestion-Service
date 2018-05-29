@@ -30,20 +30,27 @@ package org.n52.stream.seadatacloud.cnc.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 
@@ -51,12 +58,23 @@ import org.apache.xmlbeans.XmlObject;
 import org.n52.janmayen.Json;
 import org.n52.shetland.ogc.ows.exception.CodedException;
 import org.n52.shetland.ogc.ows.exception.CompositeOwsException;
+import org.n52.shetland.ogc.ows.service.GetCapabilitiesRequest;
+import org.n52.shetland.ogc.ows.service.GetCapabilitiesResponse;
+import org.n52.shetland.ogc.ows.service.OwsServiceRequest;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
+import org.n52.shetland.ogc.sos.Sos2Constants;
+import org.n52.shetland.ogc.sos.SosCapabilities;
+import org.n52.shetland.ogc.sos.SosConstants;
+import org.n52.shetland.ogc.sos.SosObservationOffering;
+import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityConstants;
+import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityRequest;
+import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityResponse;
+import org.n52.shetland.ogc.sos.gda.GetDataAvailabilityResponse.DataAvailability;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.shetland.ogc.sos.response.InsertSensorResponse;
 import org.n52.shetland.ogc.swe.SweDataRecord;
@@ -64,6 +82,7 @@ import org.n52.shetland.ogc.swe.SweField;
 import org.n52.shetland.ogc.swe.simpleType.SweText;
 import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
+import org.n52.stream.seadatacloud.cnc.kibana.KibanaController;
 import org.n52.stream.seadatacloud.cnc.model.AppOption;
 import org.n52.stream.seadatacloud.cnc.model.Processors;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
@@ -78,6 +97,9 @@ import org.n52.stream.seadatacloud.cnc.util.ProcessDescriptionStore;
 import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
+import org.n52.svalbard.decode.exception.DecodingException;
+import org.n52.svalbard.decode.exception.XmlDecodingException;
+import org.n52.svalbard.encode.exception.EncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,17 +172,26 @@ public class StreamController {
     @Autowired
     private DataRecordDefinitions dataRecordDefinitions;
 
+    @Autowired
+    private KibanaController kibanaController;
+
     private ProcessDescriptionStore processDescriptionStore;
+
+    private String kibanaIndex;
+
+    private InsertSensorGenerator generator;
 
     private static final String processDescriptionStoreFileName = "pds.dat";
 
     @PostConstruct
     public void init() {
+        generator = new InsertSensorGenerator();
         dataRecordDefinitions = new DataRecordDefinitions();
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/ftp", "ftp-source");
 
         LOG.info("loading stored streams from file...");
+        Set<String> streamNames = new HashSet<>();
         File file = new File(processDescriptionStoreFileName);
         if (file.exists()) {
             try (ObjectInputStream o = new ObjectInputStream(new FileInputStream(file))) {
@@ -171,6 +202,7 @@ public class StreamController {
                 ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList<>();
                 for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
                     String streamName = entry.getKey();
+                    streamNames.add(streamName);
                     SimpleEntry<String, String> processType = entry.getValue();
                     String streamDefinition = processType.getValue();
                     restartStreamThreads.add(new RestartStreamThread(streamName, streamDefinition, service));
@@ -203,6 +235,20 @@ public class StreamController {
             }
         } else {
             processDescriptionStore = new ProcessDescriptionStore();
+        }
+        boolean kibanaInitialized = false;
+        do {
+            try {
+                Thread.sleep(5000);
+                kibanaInitialized = kibanaController.isInitialized();
+            } catch (Exception e) {
+            }
+        } while (!kibanaInitialized);
+        kibanaIndex = kibanaController.getOrCreateIndex();
+        if (!streamNames.isEmpty()) {
+            for (String streamName : streamNames) {
+                kibanaController.checkOrCreateVisualization(kibanaIndex, streamName);
+            }
         }
     }
 
@@ -292,56 +338,45 @@ public class StreamController {
                     streamDefinition = sourceName + " ";
                 }
 
-                InsertSensorGenerator generator = new InsertSensorGenerator();
-                AggregateProcess aggregateProcess = (AggregateProcess) decodedProcessDescription;
-                List<SmlComponent> componentsList = aggregateProcess.getComponents();
-                PhysicalSystem process = (PhysicalSystem) componentsList.get(componentsList.size() - 1).getProcess();
-
-                InsertSensorRequest request = generator.generate(process);
-                // encode request
-                XmlObject xbRequest = encoderHelper.encode(request);
-                String insertSensor = xbRequest.xmlText();
-                ResponseEntity<String> responseDocument = null;
-                URI sosEndpoint = new URI(properties.getSosendpoint());
-                try {
-                    RestTemplate sosClient = new RestTemplate();
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
-                    headers.setContentType(MediaType.APPLICATION_XML);
-                    HttpEntity<String> entity = new HttpEntity<>(insertSensor, headers);
-                    responseDocument = sosClient.exchange(sosEndpoint, HttpMethod.POST, entity, String.class);
-                } catch (RestClientException e) {
-                    logAndThrowException(sosEndpoint, e);
-                }
-                if (!responseDocument.getStatusCode().is2xxSuccessful()) {
-                    // TODO check for sensor already inserted error!
-                    logAndThrowException(sosEndpoint, new RuntimeException("HttpResponseCode != 2xx."));
-                }
-                Object decodedResponse = decoderHelper.decode(responseDocument.getBody());
-                String offering = "";
-                String sensor = "";
-                if (decodedResponse instanceof CompositeOwsException) {
-                    // SOS error message returned
-                    CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
-                    if (compositeOwsException.getCause() instanceof CodedException
-                            && ((CodedException) compositeOwsException.getCause()).getLocator().equalsIgnoreCase("offeringIdentifier")) {
-                        offering = compositeOwsException.getCause().getMessage().split("'")[1];
-                        sensor = process.getIdentifier();
+                PhysicalSystem process = getProcess((AggregateProcess) decodedProcessDescription);
+                String sensor = process.getIdentifier();
+                // check capabilites if sensor is occurs in contents section
+                String offering = checkCapabilities(sensor);
+                // if sensor occurs in contents section, offering is not empty
+                String lastSeenDateTime = "";
+                if (offering != null && !offering.isEmpty()) {
+                    //get last seen timestamp via GetDataAvailability
+                    Object gdaResponse = executeRequest(generateGDARequest(sensor));
+                    if (gdaResponse instanceof GetDataAvailabilityResponse) {
+                        lastSeenDateTime = getDateTime((GetDataAvailabilityResponse) gdaResponse);
                     }
-                }
-                if (decodedResponse instanceof InsertSensorResponse) {
-                    InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
-                    offering = isr.getAssignedOffering();
-                    sensor = isr.getAssignedProcedure();
-                    LOG.info(getSensorInsertedLog(offering, sensor));
-                    isr.close();
-                } else if (offering.isEmpty() || sensor.isEmpty()) {
-                    String msg = String.format(
-                            "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
-                            sosEndpoint,
-                            decodedResponse.getClass());
-                    LOG.error(msg);
-                    throw new IllegalArgumentException(msg);
+                } else {
+                    // if sensor is not inserted, insert sensor
+                    InsertSensorRequest request = generateInsertSensor(process);
+                    Object decodedResponse = executeRequest(request);
+                    if (decodedResponse instanceof CompositeOwsException) {
+                        // SOS error message returned
+                        CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
+                        if (compositeOwsException.getCause() instanceof CodedException
+                                && ((CodedException) compositeOwsException.getCause()).getLocator().equalsIgnoreCase("offeringIdentifier")) {
+                            offering = compositeOwsException.getCause().getMessage().split("'")[1];
+                            sensor = process.getIdentifier();
+                        }
+                    }
+                    if (decodedResponse instanceof InsertSensorResponse) {
+                        InsertSensorResponse isr = (InsertSensorResponse) decodedResponse;
+                        offering = isr.getAssignedOffering();
+                        sensor = isr.getAssignedProcedure();
+                        LOG.info(getSensorInsertedLog(offering, sensor));
+                        isr.close();
+                    } else if (offering.isEmpty() || sensor.isEmpty()) {
+                        String msg = String.format(
+                                "XML document received from '%s' isn't sml2.0:InsertSensorResponse! Received: %s",
+                                properties.getSosendpoint(),
+                                decodedResponse.getClass());
+                        LOG.error(msg);
+                        throw new IllegalArgumentException(msg);
+                    }
                 }
 
                 Integer componentIdentifier = 0;
@@ -376,6 +411,10 @@ public class StreamController {
                         if (sweComponent instanceof SweText) {
                             if (!hasTimestampFilter) {
                                 streamDefinition += "| csv-timestamp-filter";
+                                if (lastSeenDateTime != null
+                                        && !lastSeenDateTime.isEmpty()) {
+                                        streamDefinition += " --last-seen-timestamp=" + lastSeenDateTime;
+                                }
                                 hasTimestampFilter = true;
                             }
                             SweText csvTimestampFilter = (SweText) sweComponent;
@@ -446,8 +485,8 @@ public class StreamController {
 
                 streamDefinition += " | csv-processor" + commonAppProperties
                         + " --componentidentifier=" + componentIdentifier
-                        + " --featureofinterestid=" + featureOfInterestId;
-                
+                        + " --featureofinterestid=" + "\"" + featureOfInterestId + "\"";
+
                 // parse sink:
                 streamDefinition += " | db-sink" + commonAppProperties
                         + " --url=" + properties.getDatasource().getUrl()
@@ -470,6 +509,8 @@ public class StreamController {
                     o.close();
                     f.close();
 
+                    kibanaController.checkOrCreateVisualization(kibanaIndex, streamName);
+
                     return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
                 } else {
                     return new ResponseEntity<>("{\"error\": \"A stream with the name '"
@@ -488,7 +529,7 @@ public class StreamController {
             LOG.error("Exception thrown:", e);
             LOG.error("Exception thrown:", e.getMessage());
             return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
-                    + "aggregateProcess sensorML description." + e.getMessage() + "\"}",
+                    + "aggregateProcess sensorML description. " + e.getMessage() + "\"}",
                     CONTENT_TYPE_APPLICATION_JSON,
                     HttpStatus.BAD_REQUEST);
         }
@@ -555,9 +596,8 @@ public class StreamController {
         String result = service.deleteStream(streamId);
         processDescriptionStore.deleteProcessDescription(streamId);
         // store latest updates processDescriptionStore into file:
-        try {
+        try (ObjectOutputStream o = new ObjectOutputStream(f)) {
             f = new FileOutputStream(new File(processDescriptionStoreFileName));
-            ObjectOutputStream o = new ObjectOutputStream(f);
             o.writeObject(processDescriptionStore);
             o.close();
             f.close();
@@ -628,8 +668,19 @@ public class StreamController {
         }
     }
 
+    private void logAndThrowException(URI sensormlUrl, OwsServiceRequest request, Exception e) throws RuntimeException {
+        String msg = String.format("Error while requesting SOS instance ('%s') with operation ('%s'):"
+                + " %s (set loglevel to 'TRACE' for stacktrace)",
+                sensormlUrl.toString(),
+                request.getOperationName(),
+                e.getMessage());
+        LOG.error(msg);
+        LOG.trace("Exception thrown: ", e);
+        throw new RuntimeException(e);
+    }
+
     private void logAndThrowException(URI sensormlUrl, Exception e) throws RuntimeException {
-        String msg = String.format("Error while inserting sensor in SOS instance ('%s') :"
+        String msg = String.format("Error while requesting SOS instance ('%s') with operation ('%s'):"
                 + " %s (set loglevel to 'TRACE' for stacktrace)",
                 sensormlUrl.toString(),
                 e.getMessage());
@@ -647,6 +698,83 @@ public class StreamController {
 
         n.set("InsertSensor", o);
         return n.toString();
+    }
+
+    private String checkCapabilities(String sensor)
+            throws XmlDecodingException,
+            DecodingException,
+            EncodingException,
+            URISyntaxException {
+        GetCapabilitiesRequest request = new GetCapabilitiesRequest();
+        request.setService(Sos2Constants.SOS).setVersion(Sos2Constants.SERVICEVERSION);
+        List<String> sections = new LinkedList<>();
+        sections.add(SosConstants.CapabilitiesSections.Contents.name());
+        request.setSections(sections);
+        Object response = executeRequest(request);
+        if (response instanceof GetCapabilitiesResponse
+                && ((GetCapabilitiesResponse) response).getCapabilities() instanceof SosCapabilities) {
+            SosCapabilities capabilities = (SosCapabilities) ((GetCapabilitiesResponse) response).getCapabilities();
+            if (capabilities.getContents().isPresent() && !capabilities.getContents().get().isEmpty()) {
+                for (SosObservationOffering obsOff : capabilities.getContents().get()) {
+                    if (obsOff.getProcedures().contains(sensor)) {
+                        return obsOff.getOffering().getIdentifier();
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+    private PhysicalSystem getProcess(AggregateProcess aggregateProcess) {
+        List<SmlComponent> componentsList = aggregateProcess.getComponents();
+        return componentsList.get(componentsList.size() - 1).getProcess() instanceof PhysicalSystem
+                ? (PhysicalSystem) componentsList.get(componentsList.size() - 1).getProcess()
+                : null;
+    }
+
+    private GetDataAvailabilityRequest generateGDARequest(String sensor) {
+        GetDataAvailabilityRequest request = new GetDataAvailabilityRequest();
+        request.setService(Sos2Constants.SOS).setVersion(Sos2Constants.SERVICEVERSION);
+        request.setResponseFormat(GetDataAvailabilityConstants.NS_GDA);
+        request.addProcedure(sensor);
+        return request;
+    }
+
+    private String getDateTime(GetDataAvailabilityResponse respoonse) {
+        if (respoonse != null && respoonse.getDataAvailabilities() != null && !respoonse.getDataAvailabilities().isEmpty()) {
+            for (DataAvailability da : respoonse.getDataAvailabilities()) {
+                if (!da.getPhenomenonTime().isReferenced()) {
+                    return da.getPhenomenonTime().getEnd().toString();
+                }
+            }
+        }
+        return null;
+    }
+
+    private InsertSensorRequest generateInsertSensor(PhysicalSystem process) {
+        return generator.generate(process);
+    }
+
+    private Object executeRequest(OwsServiceRequest request) throws XmlDecodingException, DecodingException, EncodingException, URISyntaxException {
+        // encode request
+        XmlObject xbRequest = encoderHelper.encode(request);
+        String insertSensor = xbRequest.xmlText();
+        ResponseEntity<String> responseDocument = null;
+        URI sosEndpoint = new URI(properties.getSosendpoint());
+        try {
+            RestTemplate sosClient = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> entity = new HttpEntity<>(insertSensor, headers);
+            responseDocument = sosClient.exchange(sosEndpoint, HttpMethod.POST, entity, String.class);
+        } catch (RestClientException e) {
+            logAndThrowException(sosEndpoint, request, e);
+        }
+        if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+            logAndThrowException(sosEndpoint, request, new RuntimeException("HttpResponseCode != 2xx."));
+        }
+        return decoderHelper.decode(responseDocument.getBody());
     }
 
     protected JsonNodeFactory nodeFactory() {

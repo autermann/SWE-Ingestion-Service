@@ -17,6 +17,7 @@ org.n52.stream:
   sosendpoint: http://sos:8080/52n-sos-webapp/service
   dataflowhost: http://dataflow:9393
   baseurl: http://cnc:8082/cnc
+  kibana: http://kibana:5601
   datasource:
     url: jdbc:postgresql://database:5432/sos
     username: postgres

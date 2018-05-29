@@ -1,0 +1,1 @@
+{"id":"48fb88e0-6314-11e8-954a-4da398c3eb77","type":"index-pattern","updated_at":"2018-05-29T07:45:40.974Z","version":1,"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}

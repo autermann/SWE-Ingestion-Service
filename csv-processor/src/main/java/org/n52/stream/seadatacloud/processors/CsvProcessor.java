@@ -149,9 +149,9 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         boolean phenTimeSet = false;
         for (SweField field : tokenAssigments.getFields()) {
             SweAbstractDataComponent sweElement = field.getElement();
-            if (!sweElement.isSetDefinition() || sweElement.getDefinition().equalsIgnoreCase(DEFINITION_RESULT_TIME)) {
+            if (!sweElement.isSetDefinition() || sweElement.getDefinition().contains(DEFINITION_RESULT_TIME)) {
                 continue;
-            } else if (sweElement.getDefinition().equalsIgnoreCase(DEFINITION_PHENOMENON_TIME)) {
+            } else if (sweElement.getDefinition().contains(DEFINITION_PHENOMENON_TIME)) {
                 phenTimeSet = true;
             } else {
                 String phenomenon = sweElement.getDefinition();
@@ -174,6 +174,8 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                     case Count:
                         ts = new Timeseries<Integer>();
                         break;
+                    case Time:
+                        continue;
                     default:
                         throw logErrorAndCreateException(
                                 String.format("Not supported swe:field element type found '%s'!",

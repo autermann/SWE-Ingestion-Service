@@ -46,7 +46,7 @@ public class AppConfiguration {
     /**
      * The column separator for the stream.
      */
-    private String columnSeparator;
+    private String columnSeparator = ";";
     /**
      * The index of the date column.
      * Same as {@link AppConfiguration#timeColumnIndex} if datetime column.
@@ -62,13 +62,13 @@ public class AppConfiguration {
      * Same as {@link AppConfiguration#timeColumnFormat} if datetime column.
      * If full ISO 8601, not format definition is required.
      */
-    private String dateColumnFormat;
+    private String dateColumnFormat = "";
     /**
      * The format of the time column.
      * Same as {@link AppConfiguration#dateColumnFormat} if datetime column.
      * If full ISO 8601, not format definition is required.
      */
-    private String timeColumnFormat;
+    private String timeColumnFormat = "";
 
     public String getLastSeenTimestamp() {
         return lastSeenTimestamp;

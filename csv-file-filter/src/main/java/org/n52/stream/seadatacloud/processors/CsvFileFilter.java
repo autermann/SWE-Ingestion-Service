@@ -48,6 +48,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import java.nio.charset.Charset;
 import org.springframework.messaging.support.GenericMessage;
 
 /**
@@ -79,45 +80,56 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
     @Autowired
     private AppConfiguration properties;
 
-    private static final Logger LOG = LoggerFactory.getLogger(CsvFileFilter.class);
+    private static final Logger LOG = LoggerFactory.
+            getLogger(CsvFileFilter.class);
 
     public static void main(String[] args) {
         SpringApplication.run(CsvFileFilter.class, args);
     }
 
     /**
-     * Init the processor by checking the properties and finalize the custom configuration
+     * Init the processor by checking the properties and finalize the 
+     * custom configuration
      */
     @PostConstruct
     public void init() {
         LOG.info("Init CsvFileFilter processor...");
-        checkSetting("number-of-header-lines", properties.getNumberOfHeaderLines()+"");
+        checkSetting("number-of-header-lines",
+                properties.getNumberOfHeaderLines()+"");
         propertiesHeaderLines = properties.getNumberOfHeaderLines();
         LOG.info("CsvFileFilter initialized");
     }
 
-    @StreamListener(Processor.INPUT)
-    @SendTo(Processor.OUTPUT)
     /*
      * TODO change to single file processing and forward the START and END message
      * TODO forward the correlation-id header
      */
-    public Message<String> process(Message<String> csvFileLineMessage) {
+    @StreamListener(Processor.INPUT)
+    @SendTo(Processor.OUTPUT)
+    public Message<String> process(Message<?> csvFileLineMessage) {
         msgCount++;
         if (csvFileLineMessage == null) {
-            throw logErrorAndCreateException("NO CSV file line message received! Input is 'null'.");
+            throw logErrorAndCreateException(
+                    "NO CSV file line message received! Input is 'null'.");
         }
-        String plainLine = csvFileLineMessage.getPayload();
-        if (plainLine == null || plainLine.isEmpty()) {
-            throw logErrorAndCreateException("Empty CSV file line payload received.");
-        }
+//        
+//        if (csvFileLineMessage.getPayload() == null || 
+//                csvFileLineMessage.getPayload() == 0) {
+//            throw logErrorAndCreateException(
+//                    "Empty CSV file line payload received.");
+//        }
+        String plainLine = csvFileLineMessage.getPayload().toString();
+        LOG.trace("Payload received: '{}'", plainLine);
         // remove header lines:
-        int sequenceNumber = csvFileLineMessage.getHeaders().get("sequenceNumber", Integer.class);
+        int sequenceNumber = csvFileLineMessage.getHeaders().get(
+                "sequenceNumber", Integer.class);
         if (sequenceNumber <= propertiesHeaderLines) {
-            return null; // FIXME: How not to forward headerline?
+            return null;
         }
         processedMsgCount++;
-        Message<String> filtered = new GenericMessage<>(csvFileLineMessage.getPayload(), csvFileLineMessage.getHeaders());
+        Message<String> filtered = new GenericMessage<>(
+                plainLine,
+                csvFileLineMessage.getHeaders());
         return filtered;
     }
 

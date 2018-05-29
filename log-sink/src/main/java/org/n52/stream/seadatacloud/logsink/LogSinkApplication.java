@@ -39,7 +39,8 @@ import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.messaging.Message;
 
 /**
- * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike
+ * Hinderk</a>
  * @author Maurin Radtke <m.radtke@52north.org>
  */
 @SpringBootApplication
@@ -48,12 +49,17 @@ public class LogSinkApplication {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogSinkApplication.class);
 
+//    @StreamListener(Sink.INPUT)
+//    public void input(Message<DataMessage> dataMessage){
+//        LOG.info("Received processor output:\n{}", dataMessage.getPayload());
+//    }
+    
     @StreamListener(Sink.INPUT)
-    public void input(Message<DataMessage> dataMessage){
+    public void input(Message<?> dataMessage) {
         LOG.info("Received processor output:\n{}", dataMessage.getPayload());
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         SpringApplication.run(LogSinkApplication.class, args);
     }
 
