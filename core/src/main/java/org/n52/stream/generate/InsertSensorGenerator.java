@@ -52,7 +52,6 @@ import org.n52.shetland.ogc.sos.SosInsertionMetadata;
 import org.n52.shetland.ogc.sos.SosProcedureDescription;
 import org.n52.shetland.ogc.sos.request.InsertSensorRequest;
 import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
-import org.n52.shetland.ogc.swe.SweConstants;
 import org.n52.shetland.ogc.swe.SweConstants.SweCoordinateNames;
 import org.n52.shetland.ogc.swe.SweCoordinate;
 import org.n52.shetland.util.JTSHelper;
@@ -150,7 +149,6 @@ public class InsertSensorGenerator {
      * @return the observation type
      */
     private String getObservationTypeByOutput(SweAbstractDataComponent ioValue) {
-        SweConstants.SweDataComponentType.values();
         switch (ioValue.getDataComponentType()) {
             case Boolean:
                 return OmConstants.OBS_TYPE_TRUTH_OBSERVATION;
