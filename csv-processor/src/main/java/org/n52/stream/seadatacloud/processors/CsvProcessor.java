@@ -78,7 +78,8 @@ import org.springframework.context.annotation.ComponentScan;
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
- * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike
+ * Hinderk</a>
  */
 @SpringBootApplication
 @ComponentScan("org.n52.stream")
@@ -116,7 +117,8 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     }
 
     /**
-     * Init the processor by checking the properties and finalize the custom configuration
+     * Init the processor by checking the properties and finalize the custom
+     * configuration
      */
     @PostConstruct
     public void init() {
@@ -124,8 +126,16 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         checkSetting("offering", properties.getOffering());
         checkSetting("sensor", properties.getSensor());
         checkSetting("sensorml-url", properties.getSensormlurl());
+        checkSetting("componentidentifier", properties.getComponentindex());
+        if (properties.getFeatureofinterestid() == null
+                || properties.getFeatureofinterestid().isEmpty()) {
+            throw logErrorAndCreateException("No Feature Of Interest Identifier received.");
+            // TODO: implement workflow for foiId contained in csv data
+            //extractFeature(process);
+        } else {
+            feature = new Feature().setId(properties.getFeatureofinterestid());
+        }
         AbstractProcessV20 process = checkAndExtractProcess();
-        extractFeature(process);
         SmlDataInterface dataInterface = checkAndExtractDataInterface(process);
         checkAndStoreEncoding(dataInterface);
         storeTokenAssignments(dataInterface);
@@ -148,7 +158,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                 Timeseries<?> ts = null;
                 String unit = null;
                 SweDataComponentType sweType = sweElement.getDataComponentType();
-                switch(sweType) {
+                switch (sweType) {
                     case Boolean:
                         ts = new Timeseries<Boolean>();
                         break;
@@ -167,11 +177,11 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                     default:
                         throw logErrorAndCreateException(
                                 String.format("Not supported swe:field element type found '%s'!",
-                                sweType));
+                                        sweType));
                 }
                 ts.withPhenomenon(phenomenon)
-                    .withSensor(properties.getSensor())
-                    .withFeature(feature);
+                        .withSensor(properties.getSensor())
+                        .withFeature(feature);
                 if (unit != null) {
                     ts.setUnit(unit);
                 }
@@ -188,7 +198,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         if (!(elementType instanceof SweDataRecord)) {
             throw logErrorAndCreateException(
                     String.format("Datastream not encoded with DataRecord as ElementType! Found type '%s'.",
-                    elementType.getClass().getName()));
+                            elementType.getClass().getName()));
         }
         tokenAssigments = (SweDataRecord) elementType;
     }
@@ -198,7 +208,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         if (!(encoding instanceof SweTextEncoding)) {
             throw logErrorAndCreateException(
                     String.format("Datastream not encoded with text encoding! Found type: '%s'.",
-                    encoding.getClass().getName()));
+                            encoding.getClass().getName()));
         }
         textEncoding = (SweTextEncoding) encoding;
     }
@@ -208,8 +218,8 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
             throw logErrorAndCreateException("Element <outputs><OutputList><output> of first component is NOT set!");
         }
         List<SmlIo> ioValue = process.getOutputs().stream().
-                filter(p -> p.getIoName().equalsIgnoreCase("streamOutput") &&
-                        p.getIoValue().getClass().getName().equalsIgnoreCase(SmlDataInterface.class.getName())).
+                filter(p -> p.getIoName().equalsIgnoreCase("streamOutput")
+                && p.getIoValue().getClass().getName().equalsIgnoreCase(SmlDataInterface.class.getName())).
                 collect(Collectors.toList());
         if (ioValue.isEmpty() || ioValue.size() > 1 || !(ioValue.get(0).getIoValue() instanceof SmlDataInterface)) {
             throw logErrorAndCreateException(
@@ -238,7 +248,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         if (!processDescription.isSetComponents() || processDescription.getComponents().isEmpty()) {
             throw logErrorAndCreateException("AggregateProcess does not contain any component!");
         }
-        SmlComponent smlComponent = processDescription.getComponents().get(0);
+        SmlComponent smlComponent = processDescription.getComponents().get(properties.getComponentindex());
         if (smlComponent.isReferencedExternally()) {
             throw logErrorAndCreateException("First component is referenced externally but should not!");
         }
@@ -332,7 +342,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     private Measurement<?> createMeasurement(String token, SweDataComponentType sweType)
             throws NumberFormatException, IllegalArgumentException {
         Measurement<?> measurementsItem = null;
-        switch(sweType) {
+        switch (sweType) {
             case Boolean:
                 Measurement<Boolean> booleanMeasurement = new Measurement<>();
                 booleanMeasurement.setValue(Boolean.valueOf(token));
@@ -357,7 +367,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
             default:
                 throw logErrorAndCreateException(
                         String.format("Not supported swe:field element type found '%s'!",
-                        sweType));
+                                sweType));
         }
         return measurementsItem;
     }
@@ -377,7 +387,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     private List<String> tokenize(String mqttMessagePayload, String delimeter) {
         List<String> tokens = new LinkedList<>();
         StringTokenizer tokenizer = new StringTokenizer(mqttMessagePayload, delimeter);
-        while(tokenizer.hasMoreTokens()) {
+        while (tokenizer.hasMoreTokens()) {
             tokens.add(tokenizer.nextToken());
         }
         if (tokens.isEmpty()) {

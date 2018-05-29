@@ -92,6 +92,25 @@ public abstract class AbstractIngestionServiceApp {
         }
         LOG.trace("'{}': '{}'", settingName, setting);
     }
+    
+    /**
+     * Check the setting for null and emtpy
+     *
+     * @param settingName
+     *            the setting name
+     * @param setting
+     *            the setting value
+     * @throws IllegalArgumentException
+     *             If the setting is null or empty
+     */
+    protected void checkSetting(String settingName, Integer setting)
+            throws IllegalArgumentException {
+        if (setting == null) {
+            logErrorAndCreateException(
+                    String.format("required setting '%s' not set. Received value: '%s'.", settingName, setting));
+        }
+        LOG.trace("'{}': '{}'", settingName, setting);
+    }
 
     protected JsonNode toJson(String json) {
         ObjectMapper om = new ObjectMapper();

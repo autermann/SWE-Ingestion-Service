@@ -75,7 +75,6 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
     private int msgCount = 0;
     private int processedMsgCount = 0;
     private int propertiesHeaderLines;
-    private int propertiesFooterLines;
 
     @Autowired
     private AppConfiguration properties;
@@ -92,11 +91,8 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
     @PostConstruct
     public void init() {
         LOG.info("Init CsvFileFilter processor...");
-        checkSetting("comment-line-start-char", properties.getCommentLineStartChar());
         checkSetting("number-of-header-lines", properties.getNumberOfHeaderLines()+"");
         propertiesHeaderLines = properties.getNumberOfHeaderLines();
-        checkSetting("number-of-footer-lines", properties.getNumberOfFooterLines()+"");
-        propertiesFooterLines = properties.getNumberOfFooterLines();
         LOG.info("CsvFileFilter initialized");
     }
 

@@ -107,7 +107,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+import org.n52.shetland.ogc.sensorML.v20.Parameter;
 import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
+import org.n52.shetland.ogc.sensorML.v20.SmlFeatureOfInterest;
+import org.n52.shetland.ogc.swe.SweAbstractDataComponent;
+import org.n52.shetland.ogc.swe.SweDataStream;
+import org.n52.shetland.ogc.swe.encoding.SweAbstractEncoding;
+import org.n52.shetland.ogc.swe.encoding.SweTextEncoding;
+import org.n52.shetland.ogc.swe.simpleType.SweCount;
+import org.n52.shetland.ogc.swe.simpleType.SweTime;
 
 /**
  *
@@ -255,7 +263,6 @@ public class StreamController {
 
                 String streamSourceDefinition = "";
                 String streamDefinition = "";
-
                 for (SweField current : sweFields) {
                     SweText sweText = (SweText) current.getElement();
                     String optionUrl = sweText.getDefinition();
@@ -287,16 +294,9 @@ public class StreamController {
 
                 InsertSensorGenerator generator = new InsertSensorGenerator();
                 AggregateProcess aggregateProcess = (AggregateProcess) decodedProcessDescription;
-                // doing: get process-component from components:
                 List<SmlComponent> componentsList = aggregateProcess.getComponents();
-                PhysicalSystem process = null;
-                for (SmlComponent smlComponent : componentsList) {
-                    if (smlComponent.getProcess() instanceof PhysicalSystem) {
-                        process = (PhysicalSystem) smlComponent.getProcess();
-                        break;
-                    }
-                }
-                // -end
+                PhysicalSystem process = (PhysicalSystem) componentsList.get(componentsList.size() - 1).getProcess();
+
                 InsertSensorRequest request = generator.generate(process);
                 // encode request
                 XmlObject xbRequest = encoderHelper.encode(request);
@@ -344,16 +344,112 @@ public class StreamController {
                     throw new IllegalArgumentException(msg);
                 }
 
-                // parse processor:
+                Integer componentIdentifier = 0;
+                // parse processor(s) and sink(s) according source type:
+                String featureOfInterestId = "";
+                for (SmlComponent smlComponent : al) {
+                    if (smlComponent.getProcess() instanceof PhysicalSystem) {
+                        PhysicalSystem ps = (PhysicalSystem) smlComponent.getProcess();
+                        if (ps.getSmlFeatureOfInterest() != null) {
+                            if (ps.getSmlFeatureOfInterest() instanceof SmlFeatureOfInterest) {
+                                SmlFeatureOfInterest featureOfInterest = (SmlFeatureOfInterest) ps.getSmlFeatureOfInterest();
+                                featureOfInterestId = featureOfInterest.getFeaturesOfInterest().iterator().next();
+                            }
+                        }
+                    }
+                }
+                if (sourceName.equals("ftp-source")) {
+                    SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
+                    List<Parameter> parameters = csvFileFilter.getSweParameters();
+                    for (Parameter p : parameters) {
+                        // get csv-file-filter:
+                        SweAbstractDataComponent sweComponent = p.getParameter();
+                        if (sweComponent instanceof SweCount) {
+                            int headerLineCount = ((SweCount) sweComponent).getValue();
+                            streamDefinition += "| csv-file-filter --number-of-header-lines=" + headerLineCount + " ";
+                        }
+                    }
+                    boolean hasTimestampFilter = false;
+                    for (Parameter p : parameters) {
+                        // get csv-timestamp-filter:
+                        SweAbstractDataComponent sweComponent = p.getParameter();
+                        if (sweComponent instanceof SweText) {
+                            if (!hasTimestampFilter) {
+                                streamDefinition += "| csv-timestamp-filter";
+                                hasTimestampFilter = true;
+                            }
+                            SweText csvTimestampFilter = (SweText) sweComponent;
+                            if (csvTimestampFilter.getDefinition().endsWith("date-column-format")) {
+                                // case date:
+                                String dateColumnFormat = csvTimestampFilter.getValue();
+                                streamDefinition += " --date-column-format=" + dateColumnFormat;
+                            } else if (csvTimestampFilter.getDefinition().endsWith("time-column-format")) {
+                                // case time:
+                                String timeColumnFormat = csvTimestampFilter.getValue();
+                                streamDefinition += " --time-column-format=" + timeColumnFormat;
+                            } else if (csvTimestampFilter.getDefinition().endsWith("datetime-column-format")) {
+                                // case datetime:
+                                String datetimeColumnFormat = csvTimestampFilter.getValue();
+                                streamDefinition += " --date-column-format=" + datetimeColumnFormat
+                                        + " --time-column-format=" + datetimeColumnFormat;
+                            }
+                        }
+                    }
+                    if (hasTimestampFilter) {
+                        streamDefinition += " ";
+                    } else {
+                        return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description. AggregateProcess of '" + sdrDefinition + "' requires either date-column-format and time-column-format or datetime-column-format parameters, but found none of them.\"}", HttpStatus.BAD_REQUEST);
+                    }
+                    List<SmlIo> inputs = csvFileFilter.getInputs();
+                    SmlIo ftpSmlIo = inputs.get(0);
+                    SmlDataInterface dataInterface = (SmlDataInterface) ftpSmlIo.getIoValue();
+                    SweDataStream dataStream = dataInterface.getData();
+                    SweDataRecord dataRecord = (SweDataRecord) dataStream.getElementType();
+                    LinkedList<SweField> recordFields = (LinkedList<SweField>) dataRecord.getFields();
+                    for (int i = 0; i < recordFields.size(); i++) {
+                        SweField sweField = recordFields.get(i);
+                        if (sweField.getElement() instanceof SweTime) {
+                            SweTime timeField = (SweTime) sweField.getElement();
+                            String sweFieldDefinition = timeField.getDefinition();
+                            if (sweFieldDefinition.contains("PhenomenonTime#")) {
+                                switch (sweFieldDefinition.substring(sweFieldDefinition.lastIndexOf('#') + 1)) {
+                                    case "date":
+                                        streamDefinition += " --date-column-index=" + i;
+                                        break;
+                                    case "time":
+                                        streamDefinition += " --time-column-index=" + i;
+                                        break;
+                                    case "datetime":
+                                        streamDefinition += " --date-column-index=" + i
+                                                + " --time-column-index=" + i;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    SweAbstractEncoding encoding = dataStream.getEncoding();
+                    if (encoding instanceof SweTextEncoding) {
+                        SweTextEncoding textEncoding = (SweTextEncoding) encoding;
+                        streamDefinition += " --column-seperator=" + textEncoding.getTokenSeparator();
+                    }
+
+                } else if (sourceName.equals("mqtt-source-rabbit")) {
+                }
                 String commonAppProperties = " --sensormlurl="
                         + properties.getBaseurl()
                         + "/api/streams/"
                         + streamName
                         + " --offering=" + offering
                         + " --sensor=" + sensor;
-                streamDefinition += "| csv-processor" + commonAppProperties + " ";
+
+                streamDefinition += " | csv-processor" + commonAppProperties
+                        + " --componentidentifier=" + componentIdentifier
+                        + " --featureofinterestid=" + featureOfInterestId;
+                
                 // parse sink:
-                streamDefinition += "| db-sink" + commonAppProperties
+                streamDefinition += " | db-sink" + commonAppProperties
                         + " --url=" + properties.getDatasource().getUrl()
                         + " --username=" + properties.getDatasource().getUsername()
                         + " --password=" + properties.getDatasource().getPassword() + " ";
@@ -392,16 +488,17 @@ public class StreamController {
             LOG.error("Exception thrown:", e);
             LOG.error("Exception thrown:", e.getMessage());
             return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
-                        + "aggregateProcess sensorML description."+e.getMessage()+"\"}",
-                        CONTENT_TYPE_APPLICATION_JSON,
-                        HttpStatus.BAD_REQUEST);
+                    + "aggregateProcess sensorML description." + e.getMessage() + "\"}",
+                    CONTENT_TYPE_APPLICATION_JSON,
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
     @CrossOrigin(origins = "*")
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
+    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody
+    ) {
         String streamName = "s" + UUID.randomUUID().toString();
         return this.createStream(requestBody, streamName);
     }
@@ -453,7 +550,7 @@ public class StreamController {
         FileOutputStream f = null;
         Stream stream = service.getStream(streamId);
         if (stream == null) {
-            return new ResponseEntity<>("{\"error\":\"Stream '"+streamId+"' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("{\"error\":\"Stream '" + streamId + "' not found.\"}", CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NOT_FOUND);
         }
         String result = service.deleteStream(streamId);
         processDescriptionStore.deleteProcessDescription(streamId);

@@ -44,16 +44,6 @@ public class AppConfiguration {
      */
     private int numberOfHeaderLines = 0;
 
-    /**
-     * Number of footer lines to skip
-     */
-    private int numberOfFooterLines = 0;
-
-    /**
-     * Comment Line start char
-     */
-    private String commentLineStartChar = "#";
-
     public int getNumberOfHeaderLines() {
         return numberOfHeaderLines;
     }
@@ -61,22 +51,5 @@ public class AppConfiguration {
     public void setNumberOfHeaderLines(int numberOfHeaderLines) {
         this.numberOfHeaderLines = numberOfHeaderLines;
     }
-
-    public int getNumberOfFooterLines() {
-        return numberOfFooterLines;
-    }
-
-    public void setNumberOfFooterLines(int numberOfFooterLines) {
-        this.numberOfFooterLines = numberOfFooterLines;
-    }
-
-    public String getCommentLineStartChar() {
-        return commentLineStartChar;
-    }
-
-    public void setCommentLineStartChar(String commentLineStartChar) {
-        this.commentLineStartChar = commentLineStartChar;
-    }
-
-
+    
 }

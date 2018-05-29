@@ -54,6 +54,32 @@ public class AppConfiguration {
      */
     private String sensor = "sensor-default-value";
 
+    /**
+     * component index desc 
+     */
+    private int componentindex = 0;
+    
+    /**
+     * feature of interest identifier
+     */
+    private String featureofinterestid = "";
+
+    public String getFeatureofinterestid() {
+        return featureofinterestid;
+    }
+
+    public void setFeatureofinterestid(String featureofinterestid) {
+        this.featureofinterestid = featureofinterestid;
+    }
+    
+    public int getComponentindex() {
+        return componentindex;
+    }
+
+    public void setComponentindex(int componentindex) {
+        this.componentindex = componentindex;
+    }
+    
     public String getSensormlurl() {
         return sensormlurl;
     }
