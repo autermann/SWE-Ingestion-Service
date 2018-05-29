@@ -6,7 +6,7 @@
   "description": "",
   "version": 1,
   "kibanaSavedObjectMeta": {
-    "searchSourceJSON": "{\"index\":\"@KibanaIndex\",\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"streamName:@StreamName AND statistics.IngestObservation.persisted=false\"}}"
+    "searchSourceJSON": "{\"index\":\"@KibanaIndex\",\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"streamName:@StreamName AND statistics.IngestObservation.persisted=true\"}}"
   }
   }
 }
