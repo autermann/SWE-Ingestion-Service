@@ -129,6 +129,7 @@ services:
       "--org.n52.stream.sosendpoint=http://sos:8080/52n-sos-webapp/service",
       "--org.n52.stream.dataflowhost=http://dataflow:9393/dataflow",
       "--org.n52.stream.baseurl=http://oceans.dev.52north.org/cnc",
+      "--org.n52.stream.kibana=http://kibana:5601",
       "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
       "--org.n52.stream.datasource.username=postgres",
       "--org.n52.stream.datasource.password=postgres"
