@@ -1050,7 +1050,7 @@ On success, the response status code is 204 - `no content` and the stream is run
 
 	possible Responses:
 
- 	* 201 - Created with json response of the created Stream, e.g.
+* 201 - Created with json response of the created Stream, e.g.
 
       ```
          {
@@ -1087,6 +1087,10 @@ On success, the response status code is 204 - `no content` and the stream is run
 
 ## Bugs and Feedback **TODO: fix this**
 Developer feedback goes a long way towards making this SWE-Ingestion-Service even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open an issue on this github repository.
+
+## Documentation
+
+* [Process description](https://github.com/52North/SWE-Ingestion-Service/blob/dev/docs/ProcessDescription.md)
 
 ## Funding
 **TODO: this**
