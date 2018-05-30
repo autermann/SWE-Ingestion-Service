@@ -904,7 +904,7 @@
                     </sml:identification>
                     <sml:featuresOfInterest>
                         <sml:FeatureList>
-                            <sml:feature xlink:href="Münster-Osnabrück" xlink:title="Airport Münster/Osnabrück (FMO)" />
+                            <sml:feature xlink:href="Muenster-Osnabrueck" xlink:title="Airport Muenster/Osnabrueck (FMO)" />
                         </sml:FeatureList>
                     </sml:featuresOfInterest>
                     <sml:outputs>

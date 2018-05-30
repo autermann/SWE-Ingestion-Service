@@ -166,7 +166,7 @@ services:
       "--org.n52.stream.datasource.username=postgres",
       "--org.n52.stream.datasource.password=postgres",
       "--security.user.name=cnc-user",
-      "--security.user.password=cnc-non-secure-basic-auth-password"
+      "--security.user.password=cnc-secure-basic-auth-password"
     ]
     networks:
       network:
