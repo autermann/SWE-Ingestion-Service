@@ -59,7 +59,7 @@ Description of the elements and attributes of the *swe:AbstractSimpleComponent*s
 Description of the attributes of the *swe:uom* element of the *swe:Quantity*
 
 | name | description |
-| :-------------: | :-------------: | :-------------: |
+| :-------------: | :-------------: |
 | code | the symbol of the unit like *degC*, *%*, *m/s* |
 | xlink:href | link to the definition in a vocabulary |
 | xlink:title| the human readable name of the unit |
