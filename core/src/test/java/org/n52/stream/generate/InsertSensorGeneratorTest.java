@@ -210,7 +210,7 @@ public class InsertSensorGeneratorTest
         Assert.isTrue(request.isSetProcedureDescriptionFormat(), "Should have ProcedureDescriptionFormat");
         Assert.isTrue(request.getProcedureDescriptionFormat().equals(SensorML20Constants.NS_SML_20),
                 "ProcedureDescriptionFormat should be http://www.opengis.net/sensorml/2.0");
-        checkObservedProperties(request, 2);
+        checkObservedProperties(request, 41);
         checkMetadata(request);
     }
 
@@ -240,7 +240,7 @@ public class InsertSensorGeneratorTest
             Assert.isTrue(request.isSetProcedureDescriptionFormat(), "Should have ProcedureDescriptionFormat");
             Assert.isTrue(request.getProcedureDescriptionFormat().equals(SensorML20Constants.NS_SML_20),
                     "ProcedureDescriptionFormat should be http://www.opengis.net/sensorml/2.0");
-            checkObservedProperties(request, 2);
+            checkObservedProperties(request, 41);
             checkMetadata(request);
         }
     }
