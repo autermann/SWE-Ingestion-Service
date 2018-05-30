@@ -43,30 +43,35 @@ public class AppConfiguration {
      * The last timestamp inserted into the database for the stream.
      */
     private String lastSeenTimestamp = "";
+
     /**
      * The column separator for the stream.
      */
     private String columnSeparator = ";";
+
     /**
      * The index of the date column.
      * Same as {@link AppConfiguration#timeColumnIndex} if datetime column.
      */
     private Integer dateColumnIndex;
+
     /**
      * The index of the time column.
      * Same as {@link AppConfiguration#dateColumnIndex} if datetime column.
      */
     private Integer timeColumnIndex;
+
     /**
      * The format of the date column.
      * Same as {@link AppConfiguration#timeColumnFormat} if datetime column.
-     * If full ISO 8601, not format definition is required.
+     * If full ISO 8601, no format definition is required.
      */
     private String dateColumnFormat = "";
+
     /**
      * The format of the time column.
      * Same as {@link AppConfiguration#dateColumnFormat} if datetime column.
-     * If full ISO 8601, not format definition is required.
+     * If full ISO 8601, no format definition is required.
      */
     private String timeColumnFormat = "";
 
@@ -76,10 +81,6 @@ public class AppConfiguration {
 
     public void setLastSeenTimestamp(String lastSeenTimestamp) {
         this.lastSeenTimestamp = lastSeenTimestamp;
-    }
-    
-    public boolean isSetLastSeenTimestamp() {
-        return getLastSeenTimestamp() != null && !getLastSeenTimestamp().isEmpty();
     }
 
     public String getColumnSeparator() {
@@ -97,17 +98,13 @@ public class AppConfiguration {
     public void setDateColumnIndex(Integer dateColumnIndex) {
         this.dateColumnIndex = dateColumnIndex;
     }
-    
+
     public Integer getTimeColumnIndex() {
         return timeColumnIndex;
     }
 
     public void setTimeColumnIndex(Integer timeColumnIndex) {
         this.timeColumnIndex = timeColumnIndex;
-    }
-    
-    public boolean isDateTimeColumnIndex() {
-        return getDateColumnIndex() == getTimeColumnIndex();
     }
 
     public String getDateColumnFormat() {
@@ -118,10 +115,6 @@ public class AppConfiguration {
         this.dateColumnFormat = dateColumnFormat;
     }
 
-    public boolean isDateColumnFormat() {
-        return getDateColumnFormat() != null && !getDateColumnFormat().isEmpty();
-    }
-    
     public String getTimeColumnFormat() {
         return timeColumnFormat;
     }
@@ -130,8 +123,4 @@ public class AppConfiguration {
         this.timeColumnFormat = timeColumnFormat;
     }
 
-    public boolean isTimeColumnFormat() {
-        return getTimeColumnFormat() != null && !getTimeColumnFormat().isEmpty();
-    }
-    
 }

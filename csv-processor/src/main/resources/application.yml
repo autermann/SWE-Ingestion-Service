@@ -20,11 +20,6 @@ spring:
 server:
   port: 8083
 
-org.n52.stream:
-  sensormlurl: http://localhost:9080/AggregateProcess.xml
-  offering: WL-ECO-FLNTU-4476/observations
-  sensor: WL-ECO-FLNTU-4476
-
 logging:
   level:
     org.n52.stream.seadatacloud.processors: TRACE

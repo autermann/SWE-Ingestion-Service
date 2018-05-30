@@ -29,6 +29,10 @@
 package org.n52.stream.seadatacloud.processors;
 
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.n52.stream.AbstractIngestionServiceApp;
@@ -45,10 +49,10 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.support.GenericMessage;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import org.springframework.messaging.support.GenericMessage;
 
 /**
  * CsvFileFilter<br>
@@ -75,53 +79,76 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
     private int msgCount = 0;
     private int processedMsgCount = 0;
     private int propertiesHeaderLines;
-    private int propertiesFooterLines;
 
     @Autowired
     private AppConfiguration properties;
+    private static Map<String, Integer> counterMap;
 
-    private static final Logger LOG = LoggerFactory.getLogger(CsvFileFilter.class);
+    private static final Logger LOG = LoggerFactory.
+            getLogger(CsvFileFilter.class);
+    private static final Object FILE_NAME = "file_name";
 
     public static void main(String[] args) {
         SpringApplication.run(CsvFileFilter.class, args);
     }
 
     /**
-     * Init the processor by checking the properties and finalize the custom configuration
+     * Init the processor by checking the properties and finalize the
+     * custom configuration
      */
     @PostConstruct
     public void init() {
         LOG.info("Init CsvFileFilter processor...");
-        checkSetting("comment-line-start-char", properties.getCommentLineStartChar());
-        checkSetting("number-of-header-lines", properties.getNumberOfHeaderLines()+"");
+        checkSetting("number-of-header-lines",
+                properties.getNumberOfHeaderLines()+"");
         propertiesHeaderLines = properties.getNumberOfHeaderLines();
-        checkSetting("number-of-footer-lines", properties.getNumberOfFooterLines()+"");
-        propertiesFooterLines = properties.getNumberOfFooterLines();
+        counterMap = Collections.synchronizedMap(new HashMap<>());
         LOG.info("CsvFileFilter initialized");
     }
 
-    @StreamListener(Processor.INPUT)
-    @SendTo(Processor.OUTPUT)
     /*
      * TODO change to single file processing and forward the START and END message
      * TODO forward the correlation-id header
      */
-    public Message<String> process(Message<String> csvFileLineMessage) {
+    @StreamListener(Processor.INPUT)
+    @SendTo(Processor.OUTPUT)
+    public Message<String> process(Message<?> csvFileLineMessage) {
         msgCount++;
         if (csvFileLineMessage == null) {
-            throw logErrorAndCreateException("NO CSV file line message received! Input is 'null'.");
+            throw logErrorAndCreateException(
+                    "NO CSV file line message received! Input is 'null'.");
         }
-        String plainLine = csvFileLineMessage.getPayload();
-        if (plainLine == null || plainLine.isEmpty()) {
-            throw logErrorAndCreateException("Empty CSV file line payload received.");
+        if (csvFileLineMessage.getHeaders() == null || !csvFileLineMessage.getHeaders().containsKey(FILE_NAME)) {
+            throw logErrorAndCreateException("Missing CSV file name header.");
         }
-        // remove header lines:
-        int sequenceNumber = csvFileLineMessage.getHeaders().get("sequenceNumber", Integer.class);
+        String fileName = csvFileLineMessage.getHeaders().get(FILE_NAME, String.class);
+        String plainLine = csvFileLineMessage.getPayload().toString();
+        LOG.trace("Payload received: '{}'", plainLine);
+        if (csvFileLineMessage.getHeaders().containsKey("file_marker")) {
+            String markerValue = csvFileLineMessage.getHeaders().get("file_marker", String.class);
+            switch(markerValue) {
+                case "START":
+                    // if start => init counter for skipping header lines
+                    counterMap.put(fileName,0);
+                    break;
+                case "END":
+                    // end end => remove file from map
+                    counterMap.remove(fileName);
+                    break;
+            }
+            return new GenericMessage<>(markerValue,
+                    csvFileLineMessage.getHeaders());
+        }
+        int sequenceNumber = counterMap.get(fileName);
+        counterMap.put(fileName, ++sequenceNumber);
+        // ignore header lines:
         if (sequenceNumber <= propertiesHeaderLines) {
-            return null; // FIXME: How not to forward headerline?
+            return null;
         }
         processedMsgCount++;
-        Message<String> filtered = new GenericMessage<>(csvFileLineMessage.getPayload(), csvFileLineMessage.getHeaders());
+        Message<String> filtered = new GenericMessage<>(
+                plainLine,
+                csvFileLineMessage.getHeaders());
         return filtered;
     }
 

@@ -55,7 +55,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 
 /**
  * START and END would not be forwarded.
- * 
+ *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since
  *
@@ -64,18 +64,18 @@ import org.springframework.messaging.handler.annotation.SendTo;
 @EnableBinding(Processor.class)
 @EnableConfigurationProperties(AppConfiguration.class)
 public class CsvTimestampFilter extends AbstractIngestionServiceApp {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CsvTimestampFilter.class);
     private static final String FILE_NAME = "file_name";
     private static final String START = "START";
     private static final String END = "END";
-    
+
     private final Lock lock = new ReentrantLock();
     private OffsetDateTime globalLastSeenTimestamp;
     private Map<String, OffsetDateTime> fileLastSeenTimestamps = Collections.synchronizedMap(new HashMap<String, OffsetDateTime>());
     private Map<String, OffsetDateTime> fileStartLastSeenTimestamp = Collections.synchronizedMap(new HashMap<String, OffsetDateTime>());
     private DateTimeFormatter formatter;
-    
+
     @Autowired
     private AppConfiguration properties;
 
@@ -90,19 +90,19 @@ public class CsvTimestampFilter extends AbstractIngestionServiceApp {
     public void init() {
         LOG.info("Init CsvFileFilter processor...");
         globalLastSeenTimestamp =
-                properties.isSetLastSeenTimestamp() ? OffsetDateTime.parse(properties.getLastSeenTimestamp())
+                isSetLastSeenTimestamp() ? OffsetDateTime.parse(properties.getLastSeenTimestamp())
                         : OffsetDateTime.MIN;
         checkSetting("column-separator", properties.getColumnSeparator());
         checkSetting("date-column-index", properties.getDateColumnIndex() + "");
         checkSetting("time-column-index", properties.getTimeColumnIndex() + "");
-        if (!properties.isDateTimeColumnIndex()) {
+        if (!isDateTimeColumnIndex()) {
             checkSetting("date-column-format", properties.getDateColumnFormat());
             checkSetting("time-column-format", properties.getTimeColumnFormat());
         }
         formatter = initDateTimeFormatter();
         LOG.info("CsvFileFilter initialized");
     }
-    
+
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
     public Message<String> process(Message<String> csvLineMessage) {
@@ -137,7 +137,7 @@ public class CsvTimestampFilter extends AbstractIngestionServiceApp {
             return false;
         }
     }
-    
+
     private void initFile(String fileName) {
         fileLastSeenTimestamps.put(fileName, getGlobalLastSeenTimestamp().withNano(0));
         fileStartLastSeenTimestamp.put(fileName, getGlobalLastSeenTimestamp().withNano(0));
@@ -154,7 +154,7 @@ public class CsvTimestampFilter extends AbstractIngestionServiceApp {
     private OffsetDateTime getCsvTimestamp(String csvLine) {
         String datetime = null;
         String[] split = csvLine.split(properties.getColumnSeparator());
-        if (properties.isDateTimeColumnIndex()) {
+        if (isDateTimeColumnIndex()) {
             datetime = split[properties.getDateColumnIndex()];
         } else {
             StringBuilder time = new StringBuilder();
@@ -175,20 +175,20 @@ public class CsvTimestampFilter extends AbstractIngestionServiceApp {
     private String getFileName(Message<String> csvLineMessage) {
         return csvLineMessage.getHeaders().get(FILE_NAME, String.class);
     }
-    
+
     private void updateGlobalLastSeenTimestamp(OffsetDateTime lastSeenTimestamp) {
         try {
             lock.lock();
-            this.globalLastSeenTimestamp =
-                    lastSeenTimestamp.isAfter(globalLastSeenTimestamp) 
+            globalLastSeenTimestamp =
+                    lastSeenTimestamp.isAfter(globalLastSeenTimestamp)
                             ? lastSeenTimestamp
                             : globalLastSeenTimestamp;
         } finally {
             lock.unlock();
         }
-       
+
     }
-    
+
     private OffsetDateTime getGlobalLastSeenTimestamp() {
         try {
             lock.lock();
@@ -204,15 +204,27 @@ public class CsvTimestampFilter extends AbstractIngestionServiceApp {
     }
 
     private DateTimeFormatter initDateTimeFormatter() {
-        if (!properties.isDateTimeColumnIndex()) {
+        if (!isDateTimeColumnIndex()) {
             StringBuilder pattern = new StringBuilder();
             pattern.append(properties.getDateColumnFormat());
             pattern.append(" ");
             pattern.append(properties.getTimeColumnFormat());
             return DateTimeFormatter.ofPattern(pattern.toString());
-        } else if (properties.isDateColumnFormat()) {
+        } else if (isDateColumnFormat()) {
             return DateTimeFormatter.ofPattern(properties.getDateColumnFormat());
         }
         return DateTimeFormatter.ISO_DATE_TIME;
+    }
+
+    private boolean isDateColumnFormat() {
+        return properties.getDateColumnFormat() != null && !properties.getDateColumnFormat().isEmpty();
+    }
+
+    private boolean isSetLastSeenTimestamp() {
+        return properties.getLastSeenTimestamp() != null && !properties.getLastSeenTimestamp().isEmpty();
+    }
+
+    private boolean isDateTimeColumnIndex() {
+        return properties.getDateColumnIndex() == properties.getTimeColumnIndex();
     }
 }
