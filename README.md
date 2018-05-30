@@ -6,8 +6,7 @@
 
 The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deploy Data Flow Web application. It utilizes the Spring Cloud DataFlow Server technology and makes use of the Source-Processor-Sink pipelines stream approach.
 
-## Libraries and Licenses
-TODO: ...
+## Libraries and Licenses.
 
 #### Third party libraries and licenses
 
@@ -1092,5 +1091,10 @@ Developer feedback goes a long way towards making this SWE-Ingestion-Service eve
 
 * [Process description](https://github.com/52North/SWE-Ingestion-Service/blob/dev/docs/ProcessDescription.md)
 
-## Funding
-**TODO: this**
+## Credits
+
+The development of the 52°North **SWE Ingestion Service** implementation was supported by several organizations and projects. Among other we would like to thank the following organisations and project
+
+| Project/Logo | Description |
+| :-------------: | :------------- |
+| <a target="_blank" href="https://www.seadatanet.org/About-us/SeaDataCloud/"><img alt="SeaDataCloud" align="middle" width="156" src="https://www.seadatanet.org/var/storage/images/media/seadatanet2-media/about-us/seadatacloud/logo_sdc_layer/8700-1-eng-GB/LOGO_SDC_Layer_opengraphimage.png"/></a> | The development of this version of 52&deg;North smle was supported by the <a target="_blank" href="https://ec.europa.eu/programmes/horizon2020/">Horizon 2020</a> research project <a target="_blank" href="https://www.seadatanet.org/About-us/SeaDataCloud/">SeaDataCloud</a> (co-funded by the European Commission under the grant agreement n&deg;730960) |
