@@ -58,27 +58,30 @@ services:
         ipv4_address: 172.52.0.101
 
 ################################################################################
-
+#
+#     DATAFLOW
+#
+#
   dataflow:
     image: springcloud/spring-cloud-dataflow-server-local:1.5.0.RELEASE
-    ports:
-      - 9004:9393
     environment:
       - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
       - spring.cloud.config.enabled=false
       - server.contextPath=/dataflow
-#      - spring.datasource.url=jdbc:h2:file:/usr/share/dataflow/db
     volumes:
       - "${PWD}/dataflow/apps/:/tmp/apps/"
     depends_on:
       - rabbitmq
-      - database
+      - logstash
     networks:
       network:
         ipv4_address: 172.52.0.102
 
 ################################################################################
-
+#
+#     DATABASE
+#
+#
   database:
     image: mdillon/postgis:9.5-alpine
     environment:
@@ -93,11 +96,12 @@ services:
         ipv4_address: 172.52.0.103
 
 ################################################################################
-
+#
+#     SOS
+#
+#
   sos:
     image: tomcat:9-jre8-alpine
-    ports:
-      - 9001:8080
     volumes:
       - "${PWD}/sos/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
@@ -113,13 +117,15 @@ services:
         ipv4_address: 172.52.0.104
 
 ################################################################################
-
+#
+#     C&C
+#
+#
   cnc:
     image: openjdk:8-jdk-alpine
     volumes:
       - "${PWD}/cnc/rest-controller-0.0.1-SNAPSHOT.jar:/tmp/service.jar"
-    ports:
-      - 9002:8082
+      - "${PWD}/etc/cnc/pds.dat:/tmp/pds.dat"
     command: [
       "java",
       "-jar",
@@ -132,16 +138,22 @@ services:
       "--org.n52.stream.kibana=http://kibana:5601",
       "--org.n52.stream.datasource.url=jdbc:postgresql://database:5432/sos",
       "--org.n52.stream.datasource.username=postgres",
-      "--org.n52.stream.datasource.password=postgres"
+      "--org.n52.stream.datasource.password=postgres",
+      "--security.user.name=cnc-user",
+      "--security.user.password=cnc-non-secure-basic-auth-password"
     ]
     depends_on:
       - dataflow
+      - logstash
     networks:
       network:
         ipv4_address: 172.52.0.105
 
 ################################################################################
-
+#
+#     APP_IMPORT
+#
+#
   app-import:
     image: alpine:3.7
     depends_on:
@@ -152,6 +164,8 @@ services:
         do
           sleep 1;
         done;
+        wget -qO- 'http://dataflow:9393/dataflow/apps/source/ftp-source' --post-data='uri=file:///tmp/apps/sources/ftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'FTP Source app imported'
         wget -qO- 'http://dataflow:9393/dataflow/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
         echo 'MQTT Source Rabbit app imported'
         wget -qO- 'http://dataflow:9393/dataflow/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
@@ -160,16 +174,21 @@ services:
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/dataflow/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'LogSink app imported'"
+        wget -qO- 'http://dataflow:9393/dataflow/apps/processor/csv-file-filter' --post-data='uri=file:///tmp/apps/processors/csv-file-filter-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'CsvFileFilter app imported'
+        wget -qO- 'http://dataflow:9393/dataflow/apps/processor/csv-timestamp-filter' --post-data='uri=file:///tmp/apps/processors/csv-timestamp-filter-0.0.1-SNAPSHOT.jar&force=true';
+        echo 'CsvTimestampFilter app imported'
     networks:
       network:
         ipv4_address: 172.52.0.106
 
 ################################################################################
-
+#
+#     SMLE
+#
+#
   smle:
     image: nginx:alpine
-    ports:
-      - 9003:80
     depends_on:
       - cnc
     volumes:
@@ -180,7 +199,10 @@ services:
         ipv4_address: 172.52.0.107
 
 ################################################################################
-
+#
+#     ELASTICSEARCH
+#
+#
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
     environment:
@@ -188,27 +210,30 @@ services:
     volumes:
       - "${PWD}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
       - "${PWD}/elasticsearch/data:/usr/share/elasticsearch/data"
-    ports:
-      - 9300:9300
-      - 9200:9200
     networks:
       network:
         ipv4_address: 172.52.0.108
 
 ################################################################################
-
+#
+#     KIBANA
+#
+#
   kibana :
     image: docker.elastic.co/kibana/kibana-oss:6.2.4
     volumes:
       - "${PWD}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml"
     networks:
       network:
-        ipv4_address: 172.52.0.109 
+        ipv4_address: 172.52.0.109
     depends_on:
       - elasticsearch
 
 ################################################################################
-
+#
+#     LOGSTASH
+#
+#
   logstash :
     image: docker.elastic.co/logstash/logstash-oss:6.2.4
     volumes:
@@ -221,6 +246,10 @@ services:
       - elasticsearch
 
 ################################################################################
+#
+#     LANDINGPAGE
+#
+#
   landingpage:
     image: nginx:latest
     volumes:

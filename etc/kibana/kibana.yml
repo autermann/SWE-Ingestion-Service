@@ -4,6 +4,7 @@
 #
 server.name: kibana
 server.host: "0"
-elasticsearch.url: http://172.52.0.108:9200
+server.basePath: /kibana
+elasticsearch.url: http://elasticsearch:9200
 elasticsearch.username: elastic
 elasticsearch.password: changeme

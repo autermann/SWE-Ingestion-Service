@@ -64,7 +64,10 @@ services:
         ipv4_address: 172.52.0.101
 
 ################################################################################
-
+#
+#     DATAFLOW
+#
+#
   dataflow:
     image: springcloud/spring-cloud-dataflow-server-local:1.5.0.RELEASE
     ports:
@@ -99,7 +102,10 @@ services:
         ipv4_address: 172.52.0.102
 
 ################################################################################
-
+#
+#     DATABASE
+#
+#
   database:
     image: mdillon/postgis:9.5-alpine
     ports:
@@ -115,7 +121,10 @@ services:
         ipv4_address: 172.52.0.103
 
 ################################################################################
-
+#
+#     SOS
+#
+#
   sos:
     image: tomcat:9-jre8-alpine
     ports:
@@ -141,7 +150,10 @@ services:
         ipv4_address: 172.52.0.104
 
 ################################################################################
-
+#
+#     C&C
+#
+#
   cnc:
     image: openjdk:8-jdk-alpine
     volumes:
@@ -168,12 +180,18 @@ services:
       "--security.user.name=cnc-user",
       "--security.user.password=cnc-secure-basic-auth-password"
     ]
+    depends_on:
+      - dataflow
+      - logstash
     networks:
       network:
         ipv4_address: 172.52.0.105
 
 ################################################################################
-
+#
+#     APP_IMPORT
+#
+#
   app-import:
     image: alpine:3.7
     depends_on:
@@ -226,7 +244,10 @@ services:
         ipv4_address: 172.52.0.106
 
 ################################################################################
-
+#
+#     SMLE
+#
+#
   smle:
     image: nginx:alpine
     ports:
@@ -241,7 +262,10 @@ services:
         ipv4_address: 172.52.0.107
 
 ################################################################################
-
+#
+#     ELASTICSEARCH
+#
+#
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
     environment:
@@ -256,7 +280,10 @@ services:
         ipv4_address: 172.52.0.108
 
 ################################################################################
-
+#
+#     KIBANA
+#
+#
   kibana :
     image: docker.elastic.co/kibana/kibana-oss:6.2.4
     volumes:
@@ -270,7 +297,10 @@ services:
       - elasticsearch
 
 ################################################################################
-
+#
+#     LOGSTASH
+#
+#
   logstash :
     image: docker.elastic.co/logstash/logstash-oss:6.2.4
     volumes:
