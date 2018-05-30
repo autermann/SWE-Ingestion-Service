@@ -319,7 +319,7 @@
                                             </swe:field>
                                             <swe:field name="ftp_filename-pattern">
                                                 <swe:Text definition="https://52north.org/swe-ingestion/ftp#filename-pattern">
-                                                    <swe:value>01001-BEOB.csv</swe:value>
+                                                    <swe:value>10315-BEOB.csv</swe:value>
                                                 </swe:Text>
                                             </swe:field>
                                         </swe:DataRecord>
@@ -576,7 +576,7 @@
                                 <sml:DataInterface>
                                     <sml:data>
                                         <swe:DataStream>
-                                            <swe:elementType name="fluorometerOutputStream">
+                                            <swe:elementType name="outputStream">
                                                 <swe:DataRecord>
                                                     <swe:field name="date">
                                                         <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime#date">
@@ -875,21 +875,8 @@
                         </sml:IdentifierList>
                     </sml:identification>
                     <sml:featuresOfInterest>
-                        <sml:FeatureList definition="http://www.opengis.net/def/featureOfInterest/identifier">
-                            <swe:label>Galway Bay Cable Observatory</swe:label>
-                            <sml:feature>
-                                <sams:SF_SpatialSamplingFeature gml:id="sf_galway-bay-cable-observatory">
-                                    <gml:identifier codeSpace="">Galway Bay Cable Observatory</gml:identifier>
-                                    <gml:name>Galway Bay Cable Observatory</gml:name>
-                                    <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint" />
-                                    <sf:sampledFeature xlink:href="http://www.opengis.net/def/nil/OGC/0/unknown" />
-                                    <sams:shape>
-                                        <gml:Point gml:id="p-galway-bay-cable-observatory">
-                                            <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">53.22733 -9.26629</gml:pos>
-                                        </gml:Point>
-                                    </sams:shape>
-                                </sams:SF_SpatialSamplingFeature>
-                            </sml:feature>
+                        <sml:FeatureList>
+                            <sml:feature xlink:href="Münster-Osnabrück" xlink:title="Airport Münster/Osnabrück (FMO)" />
                         </sml:FeatureList>
                     </sml:featuresOfInterest>
                     <sml:outputs>
@@ -913,19 +900,19 @@
                             <swe:coordinate name="easting">
                                 <swe:Quantity axisID="x">
                                     <swe:uom code="degree"/>
-                                    <swe:value>-9.26629</swe:value>
+                                    <swe:value>7.7</swe:value>
                                 </swe:Quantity>
                             </swe:coordinate>
                             <swe:coordinate name="northing">
                                 <swe:Quantity axisID="y">
                                     <swe:uom code="degree"/>
-                                    <swe:value>53.22733</swe:value>
+                                    <swe:value>52.133333</swe:value>
                                 </swe:Quantity>
                             </swe:coordinate>
                             <swe:coordinate name="altitude">
                                 <swe:Quantity axisID="z">
                                     <swe:uom code="m"/>
-                                    <swe:value>52.0</swe:value>
+                                    <swe:value>53.0</swe:value>
                                 </swe:Quantity>
                             </swe:coordinate>
                         </swe:Vector>
