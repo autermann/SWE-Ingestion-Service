@@ -329,7 +329,7 @@ public class StreamController {
                     streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 }
                 if (sourceName.equalsIgnoreCase("ftp-source")) {
-                    streamSourceDefinition += " --mode=lines --with-markers=true"; 
+                    streamSourceDefinition += " --mode=lines --with-markers=true --time-unit=MINUTES --fixed-delay=15 --initial-delay=0"; 
                 }
                 if (streamSourceDefinition.length() > 0) {
                     streamDefinition = sourceName + streamSourceDefinition + " ";
