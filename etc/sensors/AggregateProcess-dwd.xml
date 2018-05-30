@@ -296,16 +296,6 @@
                                                     <swe:value>guest</swe:value>
                                                 </swe:Text>
                                             </swe:field>
-                                            <swe:field name="ftp_mode">
-                                                <swe:Text definition="https://52north.org/swe-ingestion/ftp#mode">
-                                                    <swe:value>lines</swe:value>
-                                                </swe:Text>
-                                            </swe:field>
-                                            <swe:field name="ftp_with-markers">
-                                                <swe:Text definition="https://52north.org/swe-ingestion/ftp#with-markers">
-                                                    <swe:value>true</swe:value>
-                                                </swe:Text>
-                                            </swe:field>
                                             <!-- optional, default: anonymous -->
                                             <swe:field name="ftp_username">
                                                 <swe:Text definition="https://52north.org/swe-ingestion/ftp#username">
