@@ -186,7 +186,7 @@ services:
     environment:
       - ELASTIC_PASSWORD=changeme
     volumes:
-      - "${PWD}/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
+      - "${PWD}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
       - "${PWD}/elasticsearch/data:/usr/share/elasticsearch/data"
     ports:
       - 9300:9300
@@ -200,9 +200,7 @@ services:
   kibana :
     image: docker.elastic.co/kibana/kibana-oss:6.2.4
     volumes:
-      - "${PWD}/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml"
-    ports:
-      - 5601:5601
+      - "${PWD}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml"
     networks:
       network:
         ipv4_address: 172.52.0.109 
@@ -214,10 +212,8 @@ services:
   logstash :
     image: docker.elastic.co/logstash/logstash-oss:6.2.4
     volumes:
-      - "${PWD}/logstash/config/logstash.yml/:/usr/share/logstash/config/logstash.yml"
-      - "${PWD}/logstash/pipeline:/usr/share/logstash/pipeline"
-    ports:
-      - 5000:5000
+      - "${PWD}/logstash/logstash.yml/:/usr/share/logstash/config/logstash.yml"
+      - "${PWD}/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
     networks:
       network:
         ipv4_address: 172.52.0.110
