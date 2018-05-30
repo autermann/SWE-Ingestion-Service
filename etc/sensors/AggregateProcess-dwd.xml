@@ -829,37 +829,25 @@
          
             <sml:component name="sos_input">
                 <sml:PhysicalSystem gml:id="dwd-opendata-weather">
-                    <gml:identifier codeSpace="uniqueID">DWD-OPENDATA-163</gml:identifier>
+                    <gml:identifier codeSpace="uniqueID">DWD-OPENDATA-10315</gml:identifier>
                     <sml:identification>
                         <sml:IdentifierList>
                             <sml:identifier>
                                 <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/">
                                     <sml:label>Long name</sml:label>
-                                    <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
+                                    <sml:value>Muenster Osnabrueck Airport FMO Weatherstation</sml:value>
                                 </sml:Term>
                             </sml:identifier>
                             <sml:identifier>
                                 <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/">
                                     <sml:label>Short name</sml:label>
-                                    <sml:value>Galway Bay Cable Observatory Fluorometer</sml:value>
-                                </sml:Term>
-                            </sml:identifier>
-                            <sml:identifier>
-                                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0012/">
-                                    <sml:label>Manufacturer</sml:label>
-                                    <sml:value>WetLabs</sml:value>
-                                </sml:Term>
-                            </sml:identifier>
-                            <sml:identifier>
-                                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0003/">
-                                    <sml:label>Model name</sml:label>
-                                    <sml:value>ECO-FLNTU</sml:value>
+                                    <sml:value>FMO Weatherstation</sml:value>
                                 </sml:Term>
                             </sml:identifier>
                             <sml:identifier>
                                 <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0005/">
                                     <sml:label>Serial number</sml:label>
-                                    <sml:value>3137</sml:value>
+                                    <sml:value>10315</sml:value>
                                 </sml:Term>
                             </sml:identifier>
                         </sml:IdentifierList>
@@ -871,18 +859,211 @@
                     </sml:featuresOfInterest>
                     <sml:outputs>
                         <sml:OutputList>
-                            <sml:output name="Fluorescence">
-                                <swe:Count definition="http://vocab.nerc.ac.uk/collection/B39/current/fluorescence/">
-                                    <swe:label>Fluorescence</swe:label>
-                                    <swe:description>Chlorophyll fluorometer instrument output (counts) (no units)</swe:description>
-                                </swe:Count>
+                            <sml:output name="cloud_coverage">
+                                <swe:Quantity definition="http://asdfasdf/cloud_coverage">
+                                    <swe:uom code="%" />
+                                </swe:Quantity>
                             </sml:output>
-                            <sml:output name="Turbidity">
-                                <swe:Count definition="http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/">
-                                    <swe:label>Turbidity</swe:label>
-                                    <swe:description>Optical scattering turbidity sensor instrument output (counts) (no units)</swe:description>
-                                </swe:Count>
+                            <sml:output name="daily_mean_temperature_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/daily_mean_temperature_previous_day">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
                             </sml:output>
+                            <sml:output name="depth_of_new_snow">
+                                <swe:Quantity definition="http://asdfasdf/depth_of_new_snow">
+                                    <swe:uom code="cm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="dew_point_temperature_at_2_meter_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/dew_point_temperature_at_2_meter_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="diffuse_solar_radiation_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/diffuse_solar_radiation_last_hour">
+                                    <swe:uom code="W/m²" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="direct_solar_radiation_last_24_hours">
+                                <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_24_hours">
+                                    <swe:uom code="W/m²" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="direct_solar_radiation_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/direct_solar_radiation_last_hour">
+                                    <swe:uom code="W/m²" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="dry_bulb_temperature_at_2_meter_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/dry_bulb_temperature_at_2_meter_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="evaporation_evapotranspiration_last_24_hours">
+                                <swe:Quantity definition="http://asdfasdf/evaporation_evapotranspiration_last_24_hours">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="global_radiation_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/global_radiation_last_hour">
+                                    <swe:uom code="W/m²" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="global_radiation_past_24_hours">
+                                <swe:Quantity definition="http://asdfasdf/global_radiation_past_24_hours">
+                                    <swe:uom code="W/m²" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="height_of_base_of_lowest_cloud_above_station">
+                                <swe:Quantity definition="http://asdfasdf/height_of_base_of_lowest_cloud_above_station">
+                                    <swe:uom code="m" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="horizontal_visibility">
+                                <swe:Quantity definition="http://asdfasdf/horizontal_visibility">
+                                    <swe:uom code="km" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_of_10_minutes_mean_of_wind_speed_for_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/maximum_of_10_minutes_mean_of_wind_speed_for_previous_day">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_of_temperature_for_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/maximum_of_temperature_for_previous_day">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_temperature_last_12_hours_2_meters_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/maximum_temperature_last_12_hours_2_meters_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_wind_speed_as_10_minutes_mean_during_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/maximum_wind_speed_as_10_minutes_mean_during_last_hour">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_wind_speed_during_last_6_hours">
+                                <swe:Quantity definition="http://asdfasdf/maximum_wind_speed_during_last_6_hours">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_wind_speed_for_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/maximum_wind_speed_for_previous_day">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="maximum_wind_speed_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/maximum_wind_speed_last_hour">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="mean_wind_direction_during_last_10_min_at_10_meters_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/mean_wind_direction_during_last_10_min_at_10_meters_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="mean_wind_speed_during_last_10_min_at_10_meters_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/mean_wind_speed_during_last_10_min_at_10_meters_above_ground">
+                                    <swe:uom code="km/h" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="minimum_of_temperature_at_5_cm_above_ground_for_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/minimum_of_temperature_at_5_cm_above_ground_for_previous_day">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="minimum_of_temperature_for_previous_day">
+                                <swe:Quantity definition="http://asdfasdf/minimum_of_temperature_for_previous_day">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="minimum_temperature_last_12_hours_2_meters_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/minimum_temperature_last_12_hours_2_meters_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="minimum_temperature_last_12_hours_5_cm_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/minimum_temperature_last_12_hours_5_cm_above_ground">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="past_weather_1">
+                                <swe:Quantity definition="http://asdfasdf/past_weather_1">
+                                    <swe:uom/>
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="past_weather_2">
+                                <swe:Quantity definition="http://asdfasdf/past_weather_2">
+                                    <swe:uom/>
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="precipitation_amount_last_24_hours">
+                                <swe:Quantity definition="http://asdfasdf/precipitation_amount_last_24_hours">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="precipitation_amount_last_3_hours">
+                                <swe:Quantity definition="http://asdfasdf/precipitation_amount_last_3_hours">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="precipitation_amount_last_6_hours">
+                                <swe:Quantity definition="http://asdfasdf/precipitation_amount_last_6_hours">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="precipitation_amount_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/precipitation_amount_last_hour">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="precipitation_last_12_hours">
+                                <swe:Quantity definition="http://asdfasdf/precipitation_last_12_hours">
+                                    <swe:uom code="mm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="present_weather">
+                                <swe:Quantity definition="http://asdfasdf/present_weather">
+                                    <swe:uom />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="pressure_reduced_to_mean_sea_level">
+                                <swe:Quantity definition="http://asdfasdf/pressure_reduced_to_mean_sea_level">
+                                    <swe:uom code="hPa" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="relative_humidity">
+                                <swe:Quantity definition="http://asdfasdf/relative_humidity">
+                                    <swe:uom code="%" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="sea_water_temperature">
+                                <swe:Quantity definition="http://asdfasdf/sea_water_temperature">
+                                    <swe:uom code="c" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="temperature_at_5_cm_above_ground">
+                                <swe:Quantity definition="http://asdfasdf/temperature_at_5_cm_above_ground">
+                                    <swe:uom code="C" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="total_snow_depth">
+                                <swe:Quantity definition="http://asdfasdf/total_snow_depth">
+                                    <swe:uom code="cm" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="total_time_of_sunshine_during_last_hour">
+                                <swe:Quantity definition="http://asdfasdf/total_time_of_sunshine_during_last_hour">
+                                    <swe:uom code="min" />
+                                </swe:Quantity>
+                            </sml:output>
+                            <sml:output name="total_time_of_sunshine_past_day">
+                                <swe:Quantity definition="http://asdfasdf/total_time_of_sunshine_past_day">
+                                    <swe:uom code="h" />
+                                </swe:Quantity>
+                            </sml:output> 
                         </sml:OutputList>
                     </sml:outputs>
                     <sml:position>
