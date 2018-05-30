@@ -64,8 +64,8 @@ import org.n52.shetland.ogc.ows.service.OwsServiceRequest;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.elements.SmlParameter;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
-import org.n52.shetland.ogc.sensorML.v20.Parameter;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
@@ -395,8 +395,8 @@ public class StreamController {
                 String timestampDefinitions = "";
                 if (sourceName.equals("ftp-source")) {
                     SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
-                    List<Parameter> parameters = csvFileFilter.getParameters();
-                    for (Parameter p : parameters) {
+                    List<SmlParameter> parameters = csvFileFilter.getParameters();
+                    for (SmlParameter p : parameters) {
                         // get csv-file-filter:
                         SweAbstractDataComponent sweComponent = p.getParameter();
                         if (sweComponent instanceof SweCount) {
@@ -405,7 +405,7 @@ public class StreamController {
                         }
                     }
                     boolean hasTimestampFilter = false;
-                    for (Parameter p : parameters) {
+                    for (SmlParameter p : parameters) {
                         // get csv-timestamp-filter:
                         SweAbstractDataComponent sweComponent = p.getParameter();
                         if (sweComponent instanceof SweText) {
