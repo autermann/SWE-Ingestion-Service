@@ -28,10 +28,7 @@
  */
 package org.n52.stream.seadatacloud.cnc;
 
-import org.n52.stream.seadatacloud.cnc.controller.StreamController;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -51,11 +48,9 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(CnCServiceConfiguration.class)
 public class CnCService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StreamController.class);
-    
     @Autowired
     CloudService service;
-    
+
     public static void main(String[] args) {
         new SpringApplicationBuilder(CnCService.class)
                 .properties("server.port", "server.servlet.contextPath",
