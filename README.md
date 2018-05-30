@@ -1084,7 +1084,7 @@ On success, the response status code is 204 - `no content` and the stream is run
   Example Payload cf. POST on ```cnc/api/streams```
 
 
-## Bugs and Feedback **TODO: fix this**
+## Bugs and Feedback
 Developer feedback goes a long way towards making this SWE-Ingestion-Service even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open an issue on this github repository.
 
 ## Documentation
