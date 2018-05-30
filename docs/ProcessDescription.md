@@ -20,15 +20,17 @@ The AggregateProcess contains as a minimum **components** and **connections**.
 
 ### Connections
 
-The Connections contains multiple
+The Connections contains multiple links between the outputs of the source and the sink component to define which 
+
+In the following example the the *@source* is a placeholder for the *gml:id* of the source (first) component and the *@sink* is a placeholder for the *gml:id* of the sink (last) component.
 
 ```
 <sml:connections>
 	<sml:ConnectionList>
 		<sml:connection>
 			<sml:Link>
-				<sml:source ref="components/marine-weather/outputs/AirTemperature"/>
-				<sml:destination ref="components/marine-weather-sos/outputs/AirTemperature"/>
+				<sml:source ref="components/@source/outputs/@name"/>
+				<sml:destination ref="components/@sink/outputs/@name"/>
 			</sml:Link>
 	</sml:connection>
    ...
