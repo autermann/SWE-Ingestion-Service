@@ -64,8 +64,8 @@ import org.n52.shetland.ogc.ows.service.OwsServiceRequest;
 import org.n52.shetland.ogc.sensorML.AbstractProcess;
 import org.n52.shetland.ogc.sensorML.elements.SmlComponent;
 import org.n52.shetland.ogc.sensorML.elements.SmlIo;
+import org.n52.shetland.ogc.sensorML.elements.SmlParameter;
 import org.n52.shetland.ogc.sensorML.v20.AggregateProcess;
-import org.n52.shetland.ogc.sensorML.v20.Parameter;
 import org.n52.shetland.ogc.sensorML.v20.PhysicalSystem;
 import org.n52.shetland.ogc.sensorML.v20.SimpleProcess;
 import org.n52.shetland.ogc.sensorML.v20.SmlDataInterface;
@@ -395,8 +395,8 @@ public class StreamController {
                 String timestampDefinitions = "";
                 if (sourceName.equals("ftp-source")) {
                     SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
-                    List<Parameter> parameters = csvFileFilter.getParameters();
-                    for (Parameter p : parameters) {
+                    List<SmlParameter> parameters = csvFileFilter.getParameters();
+                    for (SmlParameter p : parameters) {
                         // get csv-file-filter:
                         SweAbstractDataComponent sweComponent = p.getParameter();
                         if (sweComponent instanceof SweCount) {
@@ -405,7 +405,7 @@ public class StreamController {
                         }
                     }
                     boolean hasTimestampFilter = false;
-                    for (Parameter p : parameters) {
+                    for (SmlParameter p : parameters) {
                         // get csv-timestamp-filter:
                         SweAbstractDataComponent sweComponent = p.getParameter();
                         if (sweComponent instanceof SweText) {
@@ -701,7 +701,7 @@ public class StreamController {
         return n.toString();
     }
 
-    private String checkCapabilities(String sensor)
+    protected String checkCapabilities(String sensor)
             throws XmlDecodingException,
             DecodingException,
             EncodingException,
@@ -726,14 +726,14 @@ public class StreamController {
         return "";
     }
 
-    private PhysicalSystem getProcess(AggregateProcess aggregateProcess) {
+    protected PhysicalSystem getProcess(AggregateProcess aggregateProcess) {
         List<SmlComponent> componentsList = aggregateProcess.getComponents();
         return componentsList.get(componentsList.size() - 1).getProcess() instanceof PhysicalSystem
                 ? (PhysicalSystem) componentsList.get(componentsList.size() - 1).getProcess()
                 : null;
     }
 
-    private GetDataAvailabilityRequest generateGDARequest(String sensor) {
+    protected GetDataAvailabilityRequest generateGDARequest(String sensor) {
         GetDataAvailabilityRequest request = new GetDataAvailabilityRequest();
         request.setService(Sos2Constants.SOS).setVersion(Sos2Constants.SERVICEVERSION);
         request.setResponseFormat(GetDataAvailabilityConstants.NS_GDA);
@@ -741,7 +741,7 @@ public class StreamController {
         return request;
     }
 
-    private String getDateTime(GetDataAvailabilityResponse respoonse) {
+    protected String getDateTime(GetDataAvailabilityResponse respoonse) {
         if (respoonse != null && respoonse.getDataAvailabilities() != null && !respoonse.getDataAvailabilities().isEmpty()) {
             for (DataAvailability da : respoonse.getDataAvailabilities()) {
                 if (!da.getPhenomenonTime().isReferenced()) {
@@ -752,11 +752,11 @@ public class StreamController {
         return null;
     }
 
-    private InsertSensorRequest generateInsertSensor(PhysicalSystem process) {
+    protected InsertSensorRequest generateInsertSensor(PhysicalSystem process) {
         return generator.generate(process);
     }
 
-    private Object executeRequest(OwsServiceRequest request) throws XmlDecodingException, DecodingException, EncodingException, URISyntaxException {
+    protected Object executeRequest(OwsServiceRequest request) throws XmlDecodingException, DecodingException, EncodingException, URISyntaxException {
         // encode request
         XmlObject xbRequest = encoderHelper.encode(request);
         String insertSensor = xbRequest.xmlText();
