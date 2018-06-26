@@ -6,8 +6,7 @@
 
 The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deploy Data Flow Web application. It utilizes the Spring Cloud DataFlow Server technology and makes use of the Source-Processor-Sink pipelines stream approach.
 
-## Libraries and Licenses
-TODO: ...
+## Libraries and Licenses.
 
 #### Third party libraries and licenses
 
@@ -1050,7 +1049,7 @@ On success, the response status code is 204 - `no content` and the stream is run
 
 	possible Responses:
 
- 	* 201 - Created with json response of the created Stream, e.g.
+* 201 - Created with json response of the created Stream, e.g.
 
       ```
          {
@@ -1085,8 +1084,17 @@ On success, the response status code is 204 - `no content` and the stream is run
   Example Payload cf. POST on ```cnc/api/streams```
 
 
-## Bugs and Feedback **TODO: fix this**
+## Bugs and Feedback
 Developer feedback goes a long way towards making this SWE-Ingestion-Service even better. Submit a bug report or request feature enhancements to [via mail to s.jirka@52north.org](mailto:s.jirka@52north.org?Subject=SWE-Ingestion-Service) or open an issue on this github repository.
 
-## Funding
-**TODO: this**
+## Documentation
+
+* [Process description](https://github.com/52North/SWE-Ingestion-Service/blob/dev/docs/ProcessDescription.md)
+
+## Credits
+
+The development of the 52°North **SWE Ingestion Service** implementation was supported by several organizations and projects. Among other we would like to thank the following organisations and project
+
+| Project/Logo | Description |
+| :-------------: | :------------- |
+| <a target="_blank" href="https://www.seadatanet.org/About-us/SeaDataCloud/"><img alt="SeaDataCloud" align="middle" width="156" src="https://www.seadatanet.org/var/storage/images/media/seadatanet2-media/about-us/seadatacloud/logo_sdc_layer/8700-1-eng-GB/LOGO_SDC_Layer_opengraphimage.png"/></a> | The development of this version of 52&deg;North smle was supported by the <a target="_blank" href="https://ec.europa.eu/programmes/horizon2020/">Horizon 2020</a> research project <a target="_blank" href="https://www.seadatanet.org/About-us/SeaDataCloud/">SeaDataCloud</a> (co-funded by the European Commission under the grant agreement n&deg;730960) |

@@ -31,6 +31,7 @@ package org.n52.stream.seadatacloud.cnc.kibana;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,9 +60,9 @@ public class KibanaControllerTest {
     public void testInitialization() throws IOException {
         Assert.assertThat(kc.getVisualization(), notNullValue());
         JsonNode visualizationNode = kc.getVisualizationNode(new ObjectMapper(), "kibanaTest", "streamTest");
-        Assert.assertThat(visualizationNode, notNullValue());
-        Assert.assertThat(visualizationNode.toString(), containsString("kibanaTest"));
-        Assert.assertThat(visualizationNode.toString(), containsString("streamTest"));
+        assertThat(visualizationNode, notNullValue());
+        assertThat(visualizationNode.toString(), containsString("kibanaTest"));
+        assertThat(visualizationNode.toString(), containsString("streamTest"));
     }
     
     @Test
@@ -69,7 +70,7 @@ public class KibanaControllerTest {
         String response = new BufferedReader(new InputStreamReader(new ClassPathResource("getIndexPattern.json").getInputStream())).lines()
         .collect(Collectors.joining("\n"));
         String indexPatternFromResponse = kc.getIndexPatternFromResponse(new ObjectMapper().readTree(response));
-        Assert.assertThat(indexPatternFromResponse, equalTo("9f1721d0-624c-11e8-979e-815b9bb08403"));
+        assertThat(indexPatternFromResponse, equalTo("9f1721d0-624c-11e8-979e-815b9bb08403"));
     }
     
     @Test
@@ -77,6 +78,6 @@ public class KibanaControllerTest {
         String response = new BufferedReader(new InputStreamReader(new ClassPathResource("createIndexPatter.json").getInputStream())).lines()
         .collect(Collectors.joining("\n"));
         String indexPatternFromResponse = kc.getIndexPatternFromResponse(new ObjectMapper().readTree(response));
-        Assert.assertThat(indexPatternFromResponse, equalTo("48fb88e0-6314-11e8-954a-4da398c3eb77"));
+        assertThat(indexPatternFromResponse, equalTo("48fb88e0-6314-11e8-954a-4da398c3eb77"));
     }
 }
