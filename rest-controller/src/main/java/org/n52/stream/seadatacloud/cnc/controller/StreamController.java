@@ -186,9 +186,9 @@ public class StreamController {
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         dataRecordDefinitions.add("https://52north.org/swe-ingestion/ftp", "ftp-source");
 
-        LOG.info("loading stored streams from file...");
         Set<String> streamNames = new HashSet<>();
         File file = new File(processDescriptionStoreFileName);
+        LOG.info("loading stored streams from file '{}'.", file.getAbsolutePath());
         if (file.exists()) {
             try (ObjectInputStream o = new ObjectInputStream(new FileInputStream(file))) {
                 processDescriptionStore = (ProcessDescriptionStore) o.readObject();
@@ -231,21 +231,28 @@ public class StreamController {
             }
         } else {
             processDescriptionStore = new ProcessDescriptionStore();
+            LOG.info("created NEW processDescriptionStore.");
         }
+        LOG.info("Start kibana init...");
         boolean kibanaInitialized = false;
         do {
             try {
                 Thread.sleep(5000);
                 kibanaInitialized = kibanaController.isInitialized();
             } catch (Exception e) {
+                LOG.error("Error while waiting for kibana: '{}'", e.getMessage());
+                LOG.trace("Exception thrown", e);
             }
         } while (!kibanaInitialized);
+        LOG.info("kibana is available");
         kibanaIndex = kibanaController.getOrCreateIndex();
+        LOG.info("INDEX is available");
         if (!streamNames.isEmpty()) {
             for (String streamName : streamNames) {
                 kibanaController.checkOrCreateVisualization(kibanaIndex, streamName);
             }
         }
+        LOG.info("END kibana init.");
     }
 
     @CrossOrigin(origins = "*")
