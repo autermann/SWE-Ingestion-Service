@@ -101,7 +101,7 @@ import org.n52.stream.seadatacloud.cnc.model.Stream;
 import org.n52.stream.seadatacloud.cnc.model.StreamStatus;
 import org.n52.stream.seadatacloud.cnc.model.Streams;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
-import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
+import org.n52.stream.seadatacloud.cnc.util.DefinitionToSourceAppMapping;
 import org.n52.stream.seadatacloud.cnc.util.ProcessDescriptionStore;
 import org.n52.stream.seadatacloud.cnc.util.RestartStreamThread;
 import org.n52.stream.util.DecoderHelper;
@@ -136,8 +136,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
+ * Controller for stream resources: offers CRUD methods.
  *
  * @author Maurin Radtke <m.radtke@52north.org>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @RestController
 @Component
@@ -166,7 +168,7 @@ public class StreamController {
     private EncoderHelper encoderHelper;
 
     @Autowired
-    private DataRecordDefinitions dataRecordDefinitions;
+    private DefinitionToSourceAppMapping definitionToSourceAppMapping;
 
     @Autowired
     private KibanaController kibanaController;
@@ -175,26 +177,31 @@ public class StreamController {
 
     private String kibanaIndex;
 
-    private InsertSensorGenerator generator;
+    private InsertSensorGenerator generator = new InsertSensorGenerator();
 
     private static final String processDescriptionStoreFileName = "pds.dat";
 
     @PostConstruct
     public void init() {
-        generator = new InsertSensorGenerator();
-        dataRecordDefinitions = new DataRecordDefinitions();
-        dataRecordDefinitions.add("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
-        dataRecordDefinitions.add("https://52north.org/swe-ingestion/ftp", "ftp-source");
+        definitionToSourceAppMapping = new DefinitionToSourceAppMapping();
+        definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
+        definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/ftp", "ftp-source");
 
+        Set<String> streamNames = loadStoredStreams();
+        initKibana(streamNames);
+    }
+
+    private Set<String> loadStoredStreams() {
         Set<String> streamNames = new HashSet<>();
         File file = new File(processDescriptionStoreFileName);
         LOG.info("loading stored streams from file '{}'.", file.getAbsolutePath());
-        if (file.exists()) {
+        if (file.exists() && !file.isDirectory() && file.canRead() && file.length() > 0) {
             try (ObjectInputStream o = new ObjectInputStream(new FileInputStream(file))) {
                 processDescriptionStore = (ProcessDescriptionStore) o.readObject();
                 LOG.info("...finished loading processDescriptionStore.");
                 // TODO: iterate streams: create & deploy:
-                HashMap<String, AbstractMap.SimpleEntry<String, String>> map = processDescriptionStore.getDescriptions();
+                HashMap<String, AbstractMap.SimpleEntry<String, String>> map =
+                        processDescriptionStore.getDescriptions();
                 ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList<>();
                 for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
                     String streamName = entry.getKey();
@@ -228,11 +235,20 @@ public class StreamController {
                     rst.start();
                 }
             } catch (Exception e) {
+                LOG.error("Could not load streams from store! Exception thrown '{}': {}",
+                        e.getClass().getName(),
+                        e.getMessage());
+                LOG.debug("Stack trace:", e);
+                createNewProcessDescriptionStore();
             }
         } else {
-            processDescriptionStore = new ProcessDescriptionStore();
-            LOG.info("created NEW processDescriptionStore.");
+            createNewProcessDescriptionStore();
         }
+        LOG.info("finished loading stored streams.");
+        return streamNames;
+    }
+
+    private void initKibana(Set<String> streamNames) {
         LOG.info("Start kibana init...");
         boolean kibanaInitialized = false;
         do {
@@ -253,6 +269,11 @@ public class StreamController {
             }
         }
         LOG.info("END kibana init.");
+    }
+
+    private void createNewProcessDescriptionStore() {
+        processDescriptionStore = new ProcessDescriptionStore();
+        LOG.info("created NEW processDescriptionStore.");
     }
 
     @CrossOrigin(origins = "*")
@@ -279,40 +300,29 @@ public class StreamController {
                             CONTENT_TYPE_APPLICATION_JSON,
                             HttpStatus.BAD_REQUEST);
                 }
-                AbstractProcess asml = (AbstractProcess) comp.getProcess();
-                ArrayList<SmlIo> smlOutputs = (ArrayList<SmlIo>) asml.getOutputs();
-                SmlIo smlIo = smlOutputs.get(0);
-                SmlDataInterface smlDataInterface = (SmlDataInterface) smlIo.getIoValue();
-                SweDataRecord sdr = smlDataInterface.getInterfaceParameters();
+                SweDataRecord sdr = ((SmlDataInterface) ((ArrayList<SmlIo>) ((AbstractProcess) comp.getProcess())
+                        .getOutputs()).get(0).getIoValue()).getInterfaceParameters();
 
-                String sdrDefinition = sdr.getDefinition();
-                String sourceName = "";
-                Source source = null;
-
-                if (dataRecordDefinitions.hasDataRecordDefinition(sdrDefinition)) {
-                    source = appController.getSourceByName(dataRecordDefinitions.getSourceType(sdrDefinition));
-                } else {
-                    return new ResponseEntity<>("{\"error\":\"No supported Source found for DataRecord definition '"
-                            + sdrDefinition
+                String sourceDefinition = sdr.getDefinition();
+                if (!definitionToSourceAppMapping.hasSourceAppForDefinition(sourceDefinition)) {
+                    return new ResponseEntity<>("{\"error\":\"No Source found for DataRecord definition '"
+                            + sourceDefinition
                             + "'\"}",
                             HttpStatus.NOT_FOUND);
                 }
+                String sourceAppName = definitionToSourceAppMapping.getSourceAppName(sourceDefinition);
+                Source source = appController.getSourceByName(sourceAppName);
                 if (source == null) {
-                    return new ResponseEntity<>("{ \"error\": \"DataRecord definition '" + sdrDefinition
-                            + "' is supposed to be supported by Source '"
-                            + sourceName
-                            + "', but Source '"
-                            + sourceName
-                            + "' not found.\"}",
+                    return new ResponseEntity<>("{\"error\":\"No supported Source found for DataRecord definition '"
+                            + sourceDefinition
+                            + "' with name '"
+                            + sourceAppName
+                            + "' found.\"}",
                             HttpStatus.NOT_FOUND);
                 }
-                sourceName = source.getName();
-
-                LinkedList<SweField> sweFields = (LinkedList<SweField>) sdr.getFields();
-
-                String streamSourceDefinition = "";
-                String streamDefinition = "";
-                for (SweField current : sweFields) {
+                String sourceName = source.getName();
+                String streamSourceDefinition = sourceName;
+                for (SweField current : (LinkedList<SweField>) sdr.getFields()) {
                     SweText sweText = (SweText) current.getElement();
                     String optionUrl = sweText.getDefinition();
                     String appOptionName;
@@ -336,13 +346,13 @@ public class StreamController {
                     streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 }
                 if (sourceName.equalsIgnoreCase("ftp-source")) {
-                    streamSourceDefinition += " --mode=lines --with-markers=true --time-unit=MINUTES --fixed-delay=15 --initial-delay=0";
+                    streamSourceDefinition += " --mode=lines "
+                            + "--with-markers=true "
+                            + "--time-unit=MINUTES "
+                            + "--fixed-delay=15 "
+                            + "--initial-delay=0";
                 }
-                if (streamSourceDefinition.length() > 0) {
-                    streamDefinition = sourceName + streamSourceDefinition + " ";
-                } else {
-                    streamDefinition = sourceName + " ";
-                }
+                String streamDefinition = streamSourceDefinition + " ";
 
                 PhysicalSystem process = getProcess((AggregateProcess) decodedProcessDescription);
                 String sensor = process.getIdentifier();
@@ -364,7 +374,8 @@ public class StreamController {
                         // SOS error message returned
                         CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
                         if (compositeOwsException.getCause() instanceof CodedException
-                                && ((CodedException) compositeOwsException.getCause()).getLocator().equalsIgnoreCase("offeringIdentifier")) {
+                                && ((CodedException) compositeOwsException.getCause()).getLocator().
+                                equalsIgnoreCase("offeringIdentifier")) {
                             offering = compositeOwsException.getCause().getMessage().split("'")[1];
                             sensor = process.getIdentifier();
                         }
@@ -400,7 +411,7 @@ public class StreamController {
                     }
                 }
                 String timestampDefinitions = "";
-                if (sourceName.equals("ftp-source")) {
+                if (source.getName().equals("ftp-source")) {
                     SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
                     List<SmlParameter> parameters = csvFileFilter.getParameters();
                     for (SmlParameter p : parameters) {
@@ -444,7 +455,11 @@ public class StreamController {
                     if (hasTimestampFilter) {
                         timestampDefinitions += " ";
                     } else {
-                        return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess sensorML description. AggregateProcess of '" + sdrDefinition + "' requires either date-column-format and time-column-format or datetime-column-format parameters, but found none of them.\"}", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess "
+                                + "sensorML description. AggregateProcess of '" + sourceDefinition +
+                                "' requires either date-column-format and time-column-format or "
+                                + "datetime-column-format parameters, but found none of them.\"}",
+                                HttpStatus.BAD_REQUEST);
                     }
                     List<SmlIo> inputs = csvFileFilter.getInputs();
                     SmlIo ftpSmlIo = inputs.get(0);
@@ -478,7 +493,9 @@ public class StreamController {
                     SweAbstractEncoding encoding = dataStream.getEncoding();
                     if (encoding instanceof SweTextEncoding) {
                         SweTextEncoding textEncoding = (SweTextEncoding) encoding;
-                        streamDefinition += timestampDefinitions + " --column-seperator=" + textEncoding.getTokenSeparator();
+                        streamDefinition += timestampDefinitions
+                                + " --column-seperator="
+                                + textEncoding.getTokenSeparator();
                     }
 
                 } else if (sourceName.equals("mqtt-source-rabbit")) {
@@ -501,32 +518,31 @@ public class StreamController {
                         + " --username=" + properties.getDatasource().getUsername()
                         + " --password=" + properties.getDatasource().getPassword() + " ";
 
-                Stream createdStream = null;
                 Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
 
-                createdStream = futureStream.get(15, TimeUnit.SECONDS);
+                Stream createdStream = futureStream.get(30, TimeUnit.SECONDS);
 
-                if (createdStream != null) {
-                    processDescriptionStore.addProcessDescription(streamName, processDescription, streamDefinition);
-                    // InserObservation:
-
-                    // store latest updates processDescriptionStore into file:
-                    FileOutputStream f = new FileOutputStream(new File(processDescriptionStoreFileName));
-                    ObjectOutputStream o = new ObjectOutputStream(f);
-                    o.writeObject(processDescriptionStore);
-                    o.close();
-                    f.close();
-
-                    kibanaController.checkOrCreateVisualization(kibanaIndex, streamName);
-
-                    return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
-                } else {
+                if (createdStream == null) {
                     return new ResponseEntity<>("{\"error\": \"A stream with the name '"
                             + streamName
                             + " already exists.'\"}",
                             CONTENT_TYPE_APPLICATION_JSON,
                             HttpStatus.CONFLICT);
                 }
+
+                processDescriptionStore.addProcessDescription(streamName, processDescription, streamDefinition);
+                // InserObservation:
+
+                // store latest updates processDescriptionStore into file:
+                FileOutputStream f = new FileOutputStream(new File(processDescriptionStoreFileName));
+                ObjectOutputStream o = new ObjectOutputStream(f);
+                o.writeObject(processDescriptionStore);
+                o.close();
+                f.close();
+
+                kibanaController.checkOrCreateVisualization(kibanaIndex, streamName);
+
+                return new ResponseEntity<>(createdStream, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
                         + "aggregateProcess sensorML description.\"}",
@@ -535,21 +551,20 @@ public class StreamController {
             }
         } catch (Exception e) {
             LOG.error("Exception thrown:", e);
-            LOG.error("Exception thrown:", e.getMessage());
-            return new ResponseEntity<>("{\"error\": \"The xml request body is no valid "
-                    + "aggregateProcess sensorML description. " + e.getMessage() + "\"}",
+            return new ResponseEntity<>("{\"error\": \"Exception during stream creation!"
+                    + " Exception Message: '"
+                    + e.getMessage()
+                    + "'. Check the server logs for more details.\"}",
                     CONTENT_TYPE_APPLICATION_JSON,
-                    HttpStatus.BAD_REQUEST);
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @CrossOrigin(origins = "*")
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody
-    ) {
-        String streamName = "s" + UUID.randomUUID().toString();
-        return this.createStream(requestBody, streamName);
+    public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
+        return createStream(requestBody, "s" + UUID.randomUUID().toString());
     }
 
     @CrossOrigin(origins = "*")

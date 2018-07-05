@@ -66,7 +66,7 @@ import org.n52.shetland.ogc.sos.request.InsertObservationRequest;
 import org.n52.shetland.ogc.sos.response.InsertSensorResponse;
 import org.n52.stream.seadatacloud.cnc.kibana.KibanaControllerMock;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
-import org.n52.stream.seadatacloud.cnc.util.DataRecordDefinitions;
+import org.n52.stream.seadatacloud.cnc.util.DefinitionToSourceAppMapping;
 import org.n52.stream.util.DecoderHelper;
 import org.n52.stream.util.EncoderHelper;
 import org.n52.svalbard.decode.exception.DecodingException;
@@ -84,7 +84,7 @@ import com.google.common.collect.Sets;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { StreamController.class, DecoderHelper.class, EncoderHelper.class, CloudService.class,
-        ObjectMapper.class, AppController.class, DataRecordDefinitions.class, KibanaControllerMock.class })
+        ObjectMapper.class, AppController.class, DefinitionToSourceAppMapping.class, KibanaControllerMock.class })
 @ActiveProfiles("sos")
 @Ignore
 public class StreamControllerSosXInsertTest {

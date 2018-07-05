@@ -29,30 +29,31 @@
 package org.n52.stream.seadatacloud.cnc.util;
 
 import java.util.HashMap;
+
 import org.springframework.stereotype.Component;
 
 /**
+ * Maintains mappings between SensorML .. <code>interfaceParameters</code> &rarr; <code>DataRecord::definitions</code>
+ * and Spring Cloud Data Flow Source apps.
+ *
  * @author Maurin Radtke <m.radtke@52north.org>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 @Component
-public class DataRecordDefinitions {
+public class DefinitionToSourceAppMapping {
 
-    private HashMap<String, String> dataRecordDefinitions;
+    private HashMap<String, String> mappings = new HashMap<>();
 
-    public DataRecordDefinitions() {
-        dataRecordDefinitions = new HashMap<>();
+    public boolean hasSourceAppForDefinition(String definition) {
+        return mappings.containsKey(definition);
     }
 
-    public boolean hasDataRecordDefinition(String dataRecordDefinition) {
-        return dataRecordDefinitions.containsKey(dataRecordDefinition);
+    public String getSourceAppName(String definition) {
+        return mappings.get(definition);
     }
 
-    public String getSourceType(String dataRecordDefinition) {
-        return dataRecordDefinitions.get(dataRecordDefinition);
-    }
-
-    public void add(String dataRecordDefinition, String appName) {
-        dataRecordDefinitions.put(dataRecordDefinition, appName);
+    public void addMapping(String definition, String appName) {
+        mappings.put(definition, appName);
     }
 
 }
