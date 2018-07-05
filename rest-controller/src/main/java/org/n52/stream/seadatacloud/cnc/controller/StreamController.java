@@ -183,6 +183,7 @@ public class StreamController {
 
     @PostConstruct
     public void init() {
+        // TODO inject these values via configuration!
         definitionToSourceAppMapping = new DefinitionToSourceAppMapping();
         definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/ftp", "ftp-source");
@@ -230,7 +231,7 @@ public class StreamController {
                             && !sinks.getSinks().isEmpty();
                 } while (!appRegistered);
 
-                // TODO: ThreadPool mit ExecutorService.
+                // TODO: ThreadPool with ExecutorService!
                 for (RestartStreamThread rst : restartStreamThreads) {
                     rst.start();
                 }
@@ -283,6 +284,10 @@ public class StreamController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    // FIXME split this method! 284 lines of code in one method!
+    // FIXME Use Stream Java DSL for creation and not own String Concatenation stuff
+    // https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/
+    //                                                                        #spring-cloud-dataflow-stream-java-dsl
     private ResponseEntity<?> createStream(byte[] requestBody, String streamName) {
         try {
             String processDescription = new String(requestBody);
@@ -309,6 +314,7 @@ public class StreamController {
                             + sourceDefinition
                             + "'\"}",
                             HttpStatus.NOT_FOUND);
+                    // TODO which http status here? not found not really, because a resource is not requested...
                 }
                 String sourceAppName = definitionToSourceAppMapping.getSourceAppName(sourceDefinition);
                 Source source = appController.getSourceByName(sourceAppName);
@@ -319,6 +325,7 @@ public class StreamController {
                             + sourceAppName
                             + "' found.\"}",
                             HttpStatus.NOT_FOUND);
+                    // TODO which http status here? not found not really, because a resource is not requested...
                 }
                 String sourceName = source.getName();
                 String streamSourceDefinition = sourceName;
@@ -346,6 +353,7 @@ public class StreamController {
                     streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 }
                 if (sourceName.equalsIgnoreCase("ftp-source")) {
+                    // FIXME why is this here hardcoded?
                     streamSourceDefinition += " --mode=lines "
                             + "--with-markers=true "
                             + "--time-unit=MINUTES "
@@ -356,7 +364,7 @@ public class StreamController {
 
                 PhysicalSystem process = getProcess((AggregateProcess) decodedProcessDescription);
                 String sensor = process.getIdentifier();
-                // check capabilites if sensor is occurs in contents section
+                // check capabilities if sensor is occurs in contents section
                 String offering = checkCapabilities(sensor);
                 // if sensor occurs in contents section, offering is not empty
                 String lastSeenDateTime = "";
@@ -499,6 +507,7 @@ public class StreamController {
                     }
 
                 } else if (sourceName.equals("mqtt-source-rabbit")) {
+                    // FIXME do we want to have such a block for each supported source app in the future!?
                 }
                 String commonAppProperties = " --sensormlurl="
                         + properties.getBaseurl()
@@ -520,9 +529,11 @@ public class StreamController {
 
                 Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
 
+                // TODO inject this setting in future versions
                 Stream createdStream = futureStream.get(30, TimeUnit.SECONDS);
 
                 if (createdStream == null) {
+                    // FIXME is this correct? what about any exception during creation
                     return new ResponseEntity<>("{\"error\": \"A stream with the name '"
                             + streamName
                             + " already exists.'\"}",
@@ -564,6 +575,7 @@ public class StreamController {
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<?> createStream(@RequestBody byte[] requestBody) {
+        // TODO switch to sha256sum of the requestbody, hence requesting with the same file will result in same id
         return createStream(requestBody, "s" + UUID.randomUUID().toString());
     }
 
