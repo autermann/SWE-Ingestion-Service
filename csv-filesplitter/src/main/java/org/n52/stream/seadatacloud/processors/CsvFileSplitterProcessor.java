@@ -28,12 +28,10 @@
  */
 package org.n52.stream.seadatacloud.processors;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -85,7 +83,7 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
                 properties.getDelimiter() + "");
         propertiesDelimiter = properties.getDelimiter();
         propertiesUrl = properties.getUrl();
-        propertiesMaxMessages = properties.getMaxMessages();
+        propertiesMaxMessages = properties.getMaxmessages();
         LOG.info("CsvFileSplitter initialized");
         lastPolledLine = -1;
     }
@@ -98,7 +96,7 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
         LOG.debug("list size before removing items: " + list.size());
         // add START & END marker:
         int endRow = Math.min(lastPolledLine + propertiesMaxMessages, list.size()-1);
-        Message<String> endMsg = MessageBuilder.withPayload(list.get(endRow))
+        Message<String> endMsg = MessageBuilder.withPayload(list.get(endRow-1))
                 .setHeader("file_marker", "END")
                 .setHeader(FILE_NAME, propertiesUrl)
                 .copyHeadersIfAbsent(csvFileMessage.getHeaders())
@@ -106,7 +104,7 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
         
         int listSize = list.size();
         for (int i = endRow + 1; i < listSize; i++) {
-            list.remove(endRow);
+            list.remove(endRow+1);
         }
         Message<String> startMsg = MessageBuilder.withPayload(list.get(lastPolledLine+1))
                 .setHeader("file_marker", "START")

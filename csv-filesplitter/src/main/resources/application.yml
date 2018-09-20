@@ -20,6 +20,7 @@ org.n52.stream:
     processors:
       delimiter: "\n"  
   delimiter: "\n"
+  maxMessages: "\n"
 
 logging:
   level:

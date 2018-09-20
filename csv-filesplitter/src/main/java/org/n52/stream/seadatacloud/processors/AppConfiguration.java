@@ -52,7 +52,7 @@ public class AppConfiguration {
     /**
      * number of maximum messages to forward to the output channel per poll.
      */
-    private int maxMessages = Integer.MAX_VALUE;
+    private int maxmessages = Integer.MAX_VALUE;
 
     public String getDelimiter() {
         return delimiter;
@@ -70,12 +70,12 @@ public class AppConfiguration {
         this.url = url;
     }
 
-    public int getMaxMessages() {
-        return maxMessages;
+    public int getMaxmessages() {
+        return maxmessages;
     }
 
-    public void setMaxMessages(int maxMessages) {
-        this.maxMessages = maxMessages;
+    public void setMaxmessages(int maxmessages) {
+        this.maxmessages = maxmessages;
     }
     
 }
