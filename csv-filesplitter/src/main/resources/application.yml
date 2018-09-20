@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: csv-filesplitter-processor
+
+  cloud:
+    stream:
+      bindings:
+        input:
+          group: haliho
+          destination: demo
+        output:
+          group: haliho
+          destination: log
+
+server:
+  port: 8083
+
+org.n52.stream:
+  seadatacloud:
+    processors:
+      delimiter: "\n"  
+  delimiter: "\n"
+
+logging:
+  level:
+    org.n52.stream.seadatacloud.processors: TRACE
