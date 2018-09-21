@@ -71,7 +71,7 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
             getLogger(CsvFileSplitterProcessor.class);
 
     private int lastPolledLine;
-    
+
     public static void main(String[] args) {
         SpringApplication.run(CsvFileSplitterProcessor.class, args);
     }
@@ -95,18 +95,20 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
                         .split(propertiesDelimiter)));
         LOG.debug("list size before removing items: " + list.size());
         // add START & END marker:
-        int endRow = Math.min(lastPolledLine + propertiesMaxMessages, list.size()-1);
-        Message<String> endMsg = MessageBuilder.withPayload(list.get(endRow-1))
+        int endRow = Math.min(lastPolledLine + propertiesMaxMessages, list.size() - 1);
+        Message<String> endMsg = MessageBuilder.withPayload(list.get(endRow - 1))
                 .setHeader("file_marker", "END")
                 .setHeader(FILE_NAME, propertiesUrl)
                 .copyHeadersIfAbsent(csvFileMessage.getHeaders())
                 .build();
-        
+
         int listSize = list.size();
         for (int i = endRow + 1; i < listSize; i++) {
-            list.remove(endRow+1);
+            if (list.size() > endRow + 1) {
+                list.remove(endRow + 1);
+            }
         }
-        Message<String> startMsg = MessageBuilder.withPayload(list.get(lastPolledLine+1))
+        Message<String> startMsg = MessageBuilder.withPayload(list.get(lastPolledLine + 1))
                 .setHeader("file_marker", "START")
                 .setHeader(FILE_NAME, propertiesUrl)
                 .copyHeadersIfAbsent(csvFileMessage.getHeaders())
@@ -125,7 +127,7 @@ public class CsvFileSplitterProcessor extends AbstractIngestionServiceApp {
                 }).collect(Collectors.toList());
         msgList.add(0, startMsg);
         msgList.add(msgList.size(), endMsg);
-        LOG.debug("splitted '" + (msgList.size()-2) + "' messages for file '" + propertiesUrl + "' for rows '" + (lastPolledLine+1) + "' to '" + (lastPolledLine + propertiesMaxMessages)  + "'.");
+        LOG.debug("splitted '" + (msgList.size() - 2) + "' messages for file '" + propertiesUrl + "' for rows '" + (lastPolledLine + 1) + "' to '" + (lastPolledLine + propertiesMaxMessages) + "'.");
         lastPolledLine = endRow;
         return msgList;
     }

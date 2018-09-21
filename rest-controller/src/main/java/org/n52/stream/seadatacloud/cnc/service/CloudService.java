@@ -53,6 +53,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.logging.Level;
 
 /**
  *
@@ -198,6 +199,7 @@ public class CloudService {
 
     public Stream deployStream(String streamName) {
         Stream stream = null;
+        StringBuilder res = new StringBuilder();
         try {
             URL url = new URL(properties.getDataflowhost() + "/streams/deployments/" + streamName);
 
@@ -210,20 +212,23 @@ public class CloudService {
             sb.append("\"-DSTREAM_ID=").append(streamName).append("\"}");
             conn.getOutputStream().write(sb.toString().getBytes());
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer res = new StringBuffer();
-            while ((line = in.readLine()) != null) {
-                res.append(line);
-                res.append("\n");
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    res.append(line);
+                    res.append("\n");
+                }
             }
-            in.close();
             conn.disconnect();
-            String response = res.toString();
-            stream = objectMapper.readValue(response, Stream.class);
         } catch (IOException e) {
             LOG.error(e.getMessage());
             LOG.debug("Exception thrown: ", e);
+        }
+        String response = res.toString();
+        try {
+            stream = objectMapper.readValue(response, Stream.class);
+        } catch (IOException ex) {
+            LOG.debug("Exception thrown: ", ex);
         }
         return stream;
     }

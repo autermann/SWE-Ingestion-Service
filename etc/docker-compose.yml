@@ -96,7 +96,9 @@ services:
       - "${PWD}/log-sink/target/log-sink-0.0.1-SNAPSHOT.jar:/tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar"
       - "ADJUST_ME/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar:/tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar"
       - "ADJUST_ME/ftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar:/tmp/apps/sources/ftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar"
-      - "ADJUST_ME/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOTT.jar:/tmp/apps/sources/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar"
+      - "ADJUST_ME/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar:/tmp/apps/sources/sftp-source-rabbit-1.3.2.BUILD-SNAPSHOT.jar"
+      - "ADJUST_ME/time-source-rabbit-2.0.2.BUILD-SNAPSHOT.jar:/tmp/apps/sources/time-source-rabbit-2.0.2.BUILD-SNAPSHOT.jar"
+      - "ADJUST_ME/httpclient-processor-rabbit-2.0.2.BUILD-SNAPSHOT.jar:/tmp/apps/processors/httpclient-processor-rabbit-2.0.2.BUILD-SNAPSHOT.jar"
     depends_on:
       - rabbitmq
     networks:
@@ -133,7 +135,7 @@ services:
       - 8081:8080
       - 8000:8000
     volumes:
-      - "ADJUST_ME/webapp/target/52n-sos-webapp:/usr/local/tomcat/webapps/52n-sos-webapp"
+      - "ADJUST_ME/52n-sos-webapp/:/usr/local/tomcat/webapps/52n-sos-webapp"
       - "${PWD}/etc/sos/datasource.properties:/usr/local/tomcat/webapps/52n-sos-webapp/WEB-INF/datasource.properties"
       - "${PWD}/etc/sos/configuration.json:/usr/local/tomcat/webapps/52n-sos-webapp/configuration.json"
       - "${PWD}/etc/sos/settings.json:/usr/local/tomcat/webapps/52n-sos-webapp/static/client/helgoland/settings.json"
@@ -231,6 +233,10 @@ services:
         ## https://github.com/spring-cloud-stream-app-starters/mqtt/tree/master/spring-cloud-starter-stream-source-mqtt
         wget -qO- 'http://dataflow:9393/apps/source/mqtt-source-rabbit' --post-data='uri=file:///tmp/apps/sources/mqtt-source-rabbit-2.0.0.BUILD-SNAPSHOT.jar&force=true';
         echo 'MQTT Source Rabbit app imported'
+        wget -qO- 'http://dataflow:9393/apps/source/time-source-rabbit' --post-data='uri=file:///tmp/apps/sources/time-source-rabbit-2.0.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'TIME Source Rabbit app imported'
+        wget -qO- 'http://dataflow:9393/apps/processor/httpclient-processor-rabbit' --post-data='uri=file:///tmp/apps/processors/httpclient-processor-rabbit-2.0.2.BUILD-SNAPSHOT.jar&force=true';
+        echo 'HTTPClient Processor app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-processor' --post-data='uri=file:///tmp/apps/processors/csv-processor-0.0.1-SNAPSHOT.jar&force=true';
         echo 'CsvProcessor app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-file-filter' --post-data='uri=file:///tmp/apps/processors/csv-file-filter-0.0.1-SNAPSHOT.jar&force=true';
@@ -240,7 +246,7 @@ services:
         wget -qO- 'http://dataflow:9393/apps/sink/db-sink' --post-data='uri=file:///tmp/apps/sinks/db-sink-0.0.1-SNAPSHOT.jar&force=true';
         echo 'DbSink app imported'
         wget -qO- 'http://dataflow:9393/apps/sink/log-sink' --post-data='uri=file:///tmp/apps/sinks/log-sink-0.0.1-SNAPSHOT.jar&force=true';
-        echo 'LogSink app imported'"
+        echo 'LogSink app imported'
         wget -qO- 'http://dataflow:9393/apps/processor/csv-filesplitter' --post-data='uri=file:///tmp/apps/processors/csv-filesplitter-0.0.1-SNAPSHOT.jar&force=true';
         echo 'CsvFileSplitter app imported'"
     networks:

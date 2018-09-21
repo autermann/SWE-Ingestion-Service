@@ -86,7 +86,7 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
 
     private static final Logger LOG = LoggerFactory.
             getLogger(CsvFileFilter.class);
-    private static final Object FILE_NAME = "file_name";
+    private static final String FILE_NAME = "file_name";
 
     public static void main(String[] args) {
         SpringApplication.run(CsvFileFilter.class, args);
@@ -112,7 +112,7 @@ public class CsvFileFilter extends AbstractIngestionServiceApp {
      */
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public Message<String> process(Message<?> csvFileLineMessage) {
+    public Message<String> process(Message<String> csvFileLineMessage) {
         msgCount++;
         if (csvFileLineMessage == null) {
             throw logErrorAndCreateException(

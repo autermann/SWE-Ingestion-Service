@@ -134,12 +134,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.stream.seadatacloud.cnc.model.Processor;
 
 /**
  * Controller for stream resources: offers CRUD methods.
  *
  * @author Maurin Radtke <m.radtke@52north.org>
- * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike
+ * Hinderk</a>
  */
 @RestController
 @Component
@@ -187,6 +189,7 @@ public class StreamController {
         definitionToSourceAppMapping = new DefinitionToSourceAppMapping();
         definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/mqtt/3.1", "mqtt-source-rabbit");
         definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/ftp", "ftp-source");
+        definitionToSourceAppMapping.addMapping("https://52north.org/swe-ingestion/http", "time-source-rabbit");
 
         Set<String> streamNames = loadStoredStreams();
         initKibana(streamNames);
@@ -201,8 +204,8 @@ public class StreamController {
                 processDescriptionStore = (ProcessDescriptionStore) o.readObject();
                 LOG.info("...finished loading processDescriptionStore.");
                 // TODO: iterate streams: create & deploy:
-                HashMap<String, AbstractMap.SimpleEntry<String, String>> map =
-                        processDescriptionStore.getDescriptions();
+                HashMap<String, AbstractMap.SimpleEntry<String, String>> map
+                        = processDescriptionStore.getDescriptions();
                 ArrayList<RestartStreamThread> restartStreamThreads = new ArrayList<>();
                 for (Map.Entry<String, SimpleEntry<String, String>> entry : map.entrySet()) {
                     String streamName = entry.getKey();
@@ -231,7 +234,7 @@ public class StreamController {
                             && !sinks.getSinks().isEmpty();
                 } while (!appRegistered);
 
-                // TODO: ThreadPool with ExecutorService!
+                // TODO: fixed ThreadPool with ExecutorService!
                 for (RestartStreamThread rst : restartStreamThreads) {
                     rst.start();
                 }
@@ -287,7 +290,7 @@ public class StreamController {
     // FIXME split this method! 284 lines of code in one method!
     // FIXME Use Stream Java DSL for creation and not own String Concatenation stuff
     // https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/
-    //                                                                        #spring-cloud-dataflow-stream-java-dsl
+    // #spring-cloud-dataflow-stream-java-dsl
     private ResponseEntity<?> createStream(byte[] requestBody, String streamName) {
         try {
             String processDescription = new String(requestBody);
@@ -299,7 +302,7 @@ public class StreamController {
                         .getComponents();
                 SmlComponent comp = al.get(0);
                 if (!(comp.getProcess() instanceof AbstractProcess)) {
-                    return new ResponseEntity<>("{ \"error\": \"Process Descritiopn not containing instance of '"
+                    return new ResponseEntity<>("{ \"error\": \"Process Description not containing instance of '"
                             + AbstractProcess.class.getName()
                             + "'.\"}",
                             CONTENT_TYPE_APPLICATION_JSON,
@@ -313,8 +316,7 @@ public class StreamController {
                     return new ResponseEntity<>("{\"error\":\"No Source found for DataRecord definition '"
                             + sourceDefinition
                             + "'\"}",
-                            HttpStatus.NOT_FOUND);
-                    // TODO which http status here? not found not really, because a resource is not requested...
+                            HttpStatus.INTERNAL_SERVER_ERROR);
                 }
                 String sourceAppName = definitionToSourceAppMapping.getSourceAppName(sourceDefinition);
                 Source source = appController.getSourceByName(sourceAppName);
@@ -324,33 +326,43 @@ public class StreamController {
                             + "' with name '"
                             + sourceAppName
                             + "' found.\"}",
-                            HttpStatus.NOT_FOUND);
-                    // TODO which http status here? not found not really, because a resource is not requested...
+                            HttpStatus.INTERNAL_SERVER_ERROR);
                 }
                 String sourceName = source.getName();
                 String streamSourceDefinition = sourceName;
-                for (SweField current : (LinkedList<SweField>) sdr.getFields()) {
-                    SweText sweText = (SweText) current.getElement();
-                    String optionUrl = sweText.getDefinition();
-                    String appOptionName;
-                    if (optionUrl.indexOf('#') > -1) {
-                        appOptionName = optionUrl.substring(optionUrl.lastIndexOf('#') + 1);
-                    } else {
-                        return new ResponseEntity<>("{ \"error\": \"swe:Text definition '"
-                                + optionUrl
-                                + "' requires a hashtag ( # ) option.\"}",
-                                HttpStatus.BAD_REQUEST);
+
+                if (sourceName.equals("time-source-rabbit")) {
+                    // sensorDesctiption for time-source-rabbit also contains important 
+                    // httpClientProcessor appOptions+
+                    Object rabbitSourceDefinition = getTimeSourceDefinition(al, (LinkedList<SweField>) sdr.getFields());
+                    if (rabbitSourceDefinition instanceof ResponseEntity) {
+                        return (ResponseEntity) rabbitSourceDefinition;
                     }
-                    AppOption ao = appController.getSourceOptionByName(source, appOptionName);
-                    if (ao == null) {
-                        return new ResponseEntity<>("{ \"error\": \"Option '"
-                                + appOptionName
-                                + "' is not supported by source '"
-                                + sourceName
-                                + "'.\"}",
-                                HttpStatus.BAD_REQUEST);
+                    streamSourceDefinition = (String) rabbitSourceDefinition;
+                } else {
+                    for (SweField current : (LinkedList<SweField>) sdr.getFields()) {
+                        SweText sweText = (SweText) current.getElement();
+                        String optionUrl = sweText.getDefinition();
+                        String appOptionName;
+                        if (optionUrl.indexOf('#') > -1) {
+                            appOptionName = optionUrl.substring(optionUrl.lastIndexOf('#') + 1);
+                        } else {
+                            return new ResponseEntity<>("{ \"error\": \"swe:Text definition '"
+                                    + optionUrl
+                                    + "' requires a hashtag ( # ) option.\"}",
+                                    HttpStatus.BAD_REQUEST);
+                        }
+                        AppOption ao = appController.getSourceOptionByName(source, appOptionName);
+                        if (ao == null) {
+                            return new ResponseEntity<>("{ \"error\": \"Option '"
+                                    + appOptionName
+                                    + "' is not supported by source '"
+                                    + sourceName
+                                    + "'.\"}",
+                                    HttpStatus.BAD_REQUEST);
+                        }
+                        streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                     }
-                    streamSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
                 }
                 if (sourceName.equalsIgnoreCase("ftp-source")) {
                     // FIXME why is this here hardcoded?
@@ -359,6 +371,7 @@ public class StreamController {
                             + "--time-unit=MINUTES "
                             + "--fixed-delay=15 "
                             + "--initial-delay=0";
+                    // -FIXME because that's our current work procedures and instructions.
                 }
                 String streamDefinition = streamSourceDefinition + " ";
 
@@ -383,7 +396,7 @@ public class StreamController {
                         CompositeOwsException compositeOwsException = (CompositeOwsException) decodedResponse;
                         if (compositeOwsException.getCause() instanceof CodedException
                                 && ((CodedException) compositeOwsException.getCause()).getLocator().
-                                equalsIgnoreCase("offeringIdentifier")) {
+                                        equalsIgnoreCase("offeringIdentifier")) {
                             offering = compositeOwsException.getCause().getMessage().split("'")[1];
                             sensor = process.getIdentifier();
                         }
@@ -419,7 +432,10 @@ public class StreamController {
                     }
                 }
                 String timestampDefinitions = "";
-                if (source.getName().equals("ftp-source")) {
+                if (sourceName.equals("time-source-rabbit")) {
+                    // FIXME do we want to have such a block for each supported source app in the future!?
+                    // -FIXME ask simon. the current status is: yes
+
                     SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
                     List<SmlParameter> parameters = csvFileFilter.getParameters();
                     for (SmlParameter p : parameters) {
@@ -439,7 +455,7 @@ public class StreamController {
                                 streamDefinition += "| csv-timestamp-filter";
                                 if (lastSeenDateTime != null
                                         && !lastSeenDateTime.isEmpty()) {
-                                        streamDefinition += " --last-seen-timestamp=" + lastSeenDateTime;
+                                    streamDefinition += " --last-seen-timestamp=" + lastSeenDateTime;
                                 }
                                 hasTimestampFilter = true;
                             }
@@ -448,15 +464,15 @@ public class StreamController {
                                 // case date:
                                 String dateColumnFormat = csvTimestampFilter.getValue();
                                 timestampDefinitions += " --date-column-format=" + dateColumnFormat;
-                            } else if (csvTimestampFilter.getDefinition().endsWith("time-column-format")) {
-                                // case time:
-                                String timeColumnFormat = csvTimestampFilter.getValue();
-                                timestampDefinitions += " --time-column-format=" + timeColumnFormat;
                             } else if (csvTimestampFilter.getDefinition().endsWith("datetime-column-format")) {
                                 // case datetime:
                                 String datetimeColumnFormat = csvTimestampFilter.getValue();
                                 timestampDefinitions += " --date-column-format=" + datetimeColumnFormat
                                         + " --time-column-format=" + datetimeColumnFormat;
+                            } else if (csvTimestampFilter.getDefinition().endsWith("time-column-format")) {
+                                // case time:
+                                String timeColumnFormat = csvTimestampFilter.getValue();
+                                timestampDefinitions += " --time-column-format=" + timeColumnFormat;
                             }
                         }
                     }
@@ -464,8 +480,8 @@ public class StreamController {
                         timestampDefinitions += " ";
                     } else {
                         return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess "
-                                + "sensorML description. AggregateProcess of '" + sourceDefinition +
-                                "' requires either date-column-format and time-column-format or "
+                                + "sensorML description. AggregateProcess of '" + sourceDefinition
+                                + "' requires either date-column-format and time-column-format or "
                                 + "datetime-column-format parameters, but found none of them.\"}",
                                 HttpStatus.BAD_REQUEST);
                     }
@@ -495,6 +511,9 @@ public class StreamController {
                                     default:
                                         break;
                                 }
+                            } else if (sweFieldDefinition.contains("PhenomenonTime")) {
+                                timestampDefinitions += " --date-column-index=" + i
+                                        + " --time-column-index=" + i;
                             }
                         }
                     }
@@ -502,10 +521,98 @@ public class StreamController {
                     if (encoding instanceof SweTextEncoding) {
                         SweTextEncoding textEncoding = (SweTextEncoding) encoding;
                         streamDefinition += timestampDefinitions
-                                + " --column-seperator="
+                                + " --column-separator="
                                 + textEncoding.getTokenSeparator();
                     }
-
+                } else if (source.getName().equals("ftp-source")) {
+                    SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
+                    List<SmlParameter> parameters = csvFileFilter.getParameters();
+                    for (SmlParameter p : parameters) {
+                        // get csv-file-filter:
+                        SweAbstractDataComponent sweComponent = p.getParameter();
+                        if (sweComponent instanceof SweCount) {
+                            int headerLineCount = ((SweCount) sweComponent).getValue();
+                            streamDefinition += "| csv-file-filter --number-of-header-lines=" + headerLineCount + " ";
+                        }
+                    }
+                    boolean hasTimestampFilter = false;
+                    for (SmlParameter p : parameters) {
+                        // get csv-timestamp-filter:
+                        SweAbstractDataComponent sweComponent = p.getParameter();
+                        if (sweComponent instanceof SweText) {
+                            if (!hasTimestampFilter) {
+                                streamDefinition += "| csv-timestamp-filter";
+                                if (lastSeenDateTime != null
+                                        && !lastSeenDateTime.isEmpty()) {
+                                    streamDefinition += " --last-seen-timestamp=" + lastSeenDateTime;
+                                }
+                                hasTimestampFilter = true;
+                            }
+                            SweText csvTimestampFilter = (SweText) sweComponent;
+                            if (csvTimestampFilter.getDefinition().endsWith("date-column-format")) {
+                                // case date:
+                                String dateColumnFormat = csvTimestampFilter.getValue();
+                                timestampDefinitions += " --date-column-format=" + dateColumnFormat;
+                            } else if (csvTimestampFilter.getDefinition().endsWith("time-column-format")) {
+                                // case time:
+                                String timeColumnFormat = csvTimestampFilter.getValue();
+                                timestampDefinitions += " --time-column-format=" + timeColumnFormat;
+                            } else if (csvTimestampFilter.getDefinition().endsWith("datetime-column-format")) {
+                                // case datetime:
+                                String datetimeColumnFormat = csvTimestampFilter.getValue();
+                                timestampDefinitions += " --date-column-format=" + datetimeColumnFormat
+                                        + " --time-column-format=" + datetimeColumnFormat;
+                            }
+                        }
+                    }
+                    if (hasTimestampFilter) {
+                        timestampDefinitions += " ";
+                    } else {
+                        return new ResponseEntity<>("{\"error\": \"The xml request body is no valid aggregateProcess "
+                                + "sensorML description. AggregateProcess of '" + sourceDefinition
+                                + "' requires either date-column-format and time-column-format or "
+                                + "datetime-column-format parameters, but found none of them.\"}",
+                                HttpStatus.BAD_REQUEST);
+                    }
+                    List<SmlIo> inputs = csvFileFilter.getInputs();
+                    SmlIo ftpSmlIo = inputs.get(0);
+                    SmlDataInterface dataInterface = (SmlDataInterface) ftpSmlIo.getIoValue();
+                    SweDataStream dataStream = dataInterface.getData();
+                    SweDataRecord dataRecord = (SweDataRecord) dataStream.getElementType();
+                    LinkedList<SweField> recordFields = (LinkedList<SweField>) dataRecord.getFields();
+                    for (int i = 0; i < recordFields.size(); i++) {
+                        SweField sweField = recordFields.get(i);
+                        if (sweField.getElement() instanceof SweTime) {
+                            SweTime timeField = (SweTime) sweField.getElement();
+                            String sweFieldDefinition = timeField.getDefinition();
+                            if (sweFieldDefinition.contains("PhenomenonTime#")) {
+                                switch (sweFieldDefinition.substring(sweFieldDefinition.lastIndexOf('#') + 1)) {
+                                    case "date":
+                                        timestampDefinitions += " --date-column-index=" + i;
+                                        break;
+                                    case "time":
+                                        timestampDefinitions += " --time-column-index=" + i;
+                                        break;
+                                    case "datetime":
+                                        timestampDefinitions += " --date-column-index=" + i
+                                                + " --time-column-index=" + i;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            } else if (sweFieldDefinition.contains("PhenomenonTime")) {
+                                timestampDefinitions += " --date-column-index=" + i
+                                        + " --time-column-index=" + i;
+                            }
+                        }
+                    }
+                    SweAbstractEncoding encoding = dataStream.getEncoding();
+                    if (encoding instanceof SweTextEncoding) {
+                        SweTextEncoding textEncoding = (SweTextEncoding) encoding;
+                        streamDefinition += timestampDefinitions
+                                + " --column-separator="
+                                + textEncoding.getTokenSeparator();
+                    }
                 } else if (sourceName.equals("mqtt-source-rabbit")) {
                     // FIXME do we want to have such a block for each supported source app in the future!?
                 }
@@ -533,10 +640,9 @@ public class StreamController {
                 Stream createdStream = futureStream.get(30, TimeUnit.SECONDS);
 
                 if (createdStream == null) {
-                    // FIXME is this correct? what about any exception during creation
-                    return new ResponseEntity<>("{\"error\": \"A stream with the name '"
+                    return new ResponseEntity<>("{\"error\": \"The stream '"
                             + streamName
-                            + " already exists.'\"}",
+                            + " could not be created. Check the server logs for more details.'\"}",
                             CONTENT_TYPE_APPLICATION_JSON,
                             HttpStatus.CONFLICT);
                 }
@@ -637,10 +743,14 @@ public class StreamController {
             o.close();
             f.close();
             return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
+
         } catch (FileNotFoundException ex) {
-            java.util.logging.Logger.getLogger(StreamController.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(StreamController.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(StreamController.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(StreamController.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         return new ResponseEntity<>(result, CONTENT_TYPE_APPLICATION_JSON, HttpStatus.NO_CONTENT);
     }
@@ -792,11 +902,13 @@ public class StreamController {
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
             headers.setContentType(MediaType.APPLICATION_XML);
             HttpEntity<String> entity = new HttpEntity<>(insertSensor, headers);
-            responseDocument = sosClient.exchange(sosEndpoint, HttpMethod.POST, entity, String.class);
+            responseDocument
+                    = sosClient.exchange(sosEndpoint, HttpMethod.POST, entity, String.class
+                    );
         } catch (RestClientException e) {
             logAndThrowException(sosEndpoint, request, e);
         }
-        if (!responseDocument.getStatusCode().is2xxSuccessful()) {
+        if (responseDocument != null && !responseDocument.getStatusCode().is2xxSuccessful()) {
             logAndThrowException(sosEndpoint, request, new RuntimeException("HttpResponseCode != 2xx."));
         }
         return decoderHelper.decode(responseDocument.getBody());
@@ -804,6 +916,61 @@ public class StreamController {
 
     protected JsonNodeFactory nodeFactory() {
         return Json.nodeFactory();
+    }
+
+    private Object getTimeSourceDefinition(ArrayList<SmlComponent> al, LinkedList<SweField> sweFields) {
+        Source timeSourceRabbit = appController.getSourceByName("time-source-rabbit");
+        Processor httpClientProcessor = appController.getProcessorByName("httpclient-processor-rabbit");
+        Processor fileSplitterProcessor = appController.getProcessorByName("csv-filesplitter");
+        String timeSourceDefinition = timeSourceRabbit.getName();
+        String httpClientDefinition = httpClientProcessor.getName();
+        String fileSplitterDefinition = fileSplitterProcessor.getName();
+        for (SweField current : sweFields) {
+            SweText sweText = (SweText) current.getElement();
+            String sweOptionDefinition = sweText.getDefinition();
+            String appOptionName;
+            if (sweOptionDefinition.indexOf('#') > -1) {
+                appOptionName = sweOptionDefinition.substring(sweOptionDefinition.lastIndexOf('#') + 1);
+            } else {
+                return new ResponseEntity<>("{ \"error\": \"swe:Text definition '"
+                        + sweOptionDefinition
+                        + "' requires a hashtag ( # ) option.\"}",
+                        HttpStatus.BAD_REQUEST);
+            }
+            if (appOptionName.equals("url")) {
+                fileSplitterDefinition += " --url=" + sweText.getValue();
+            }
+            AppOption ao = appController.getSourceOptionByName(timeSourceRabbit, appOptionName);
+            if (ao != null) {
+                timeSourceDefinition += " --" + ao.getName() + "=" + sweText.getValue();
+            } else {
+                ao = appController.getProcessorOptionByName(httpClientProcessor, appOptionName);
+                if (ao == null) {
+                    return new ResponseEntity<>("{ \"error\": \"Option '"
+                            + appOptionName
+                            + "' is not supported by source '"
+                            + timeSourceRabbit.getName()
+                            + "'. not by processor '" + httpClientProcessor.getName() + "'\"}",
+                            HttpStatus.BAD_REQUEST);
+                }
+                httpClientDefinition += " --" + ao.getName() + "=" + sweText.getValue();
+            }
+        }
+        timeSourceDefinition += " --initial-delay=0 --time-unit=MINUTES --fixed-delay=5";
+
+        SimpleProcess csvFileFilter = (SimpleProcess) al.get(1).getProcess();
+        List<SmlIo> inputs = csvFileFilter.getInputs();
+        SmlIo ftpSmlIo = inputs.get(0);
+        SmlDataInterface dataInterface = (SmlDataInterface) ftpSmlIo.getIoValue();
+        SweDataStream dataStream = dataInterface.getData();
+        SweAbstractEncoding encoding = dataStream.getEncoding();
+        if (encoding instanceof SweTextEncoding) {
+            SweTextEncoding textEncoding = (SweTextEncoding) encoding;
+            fileSplitterDefinition += " --delimiter=" + textEncoding.getBlockSeparator();
+        }
+        fileSplitterDefinition += " --maxmessages=1500";
+        return (String) timeSourceDefinition + " | " + httpClientDefinition + " | "
+                + fileSplitterDefinition;
     }
 
 }
