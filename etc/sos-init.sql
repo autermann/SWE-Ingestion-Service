@@ -8,15 +8,23 @@ CREATE TABLE public.category (
     category_id bigint NOT NULL,
     identifier character varying(255) NOT NULL,
     name character varying(255),
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.category OWNER TO postgres;
+CREATE TABLE public.category_i18n (
+    category_i18n_id bigint NOT NULL,
+    fk_category_id bigint NOT NULL,
+    locale character varying(255),
+    name character varying(255),
+    description character varying(2048)
+);
+ALTER TABLE public.category_i18n OWNER TO postgres;
 CREATE TABLE public.category_i18 (
     category_i18n_id bigint NOT NULL,
     fk_category_id bigint NOT NULL,
     locale character varying(255),
     name character varying(255),
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.category_i18 OWNER TO postgres;
 CREATE TABLE public.codespace (
@@ -55,7 +63,7 @@ CREATE TABLE public.dataset (
     fk_identifier_codespace_id bigint,
     name character varying(255),
     fk_name_codespace_id bigint,
-    description character varying(255),
+    description character varying(2048),
     fk_first_observation_id bigint,
     fk_last_observation_id bigint,
     decimals integer,
@@ -86,7 +94,7 @@ CREATE TABLE public.feature (
     fk_identifier_codespace_id bigint,
     name character varying(255),
     fk_name_codespace_id bigint,
-    description character varying(255),
+    description character varying(2048),
     xml text,
     url character varying(255),
     geom public.geometry
@@ -102,7 +110,7 @@ CREATE TABLE public.feature_i18n (
     fk_feature_id bigint NOT NULL,
     locale character varying(255),
     name character varying(255),
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.feature_i18n OWNER TO postgres;
 CREATE TABLE public.feature_parameter (
@@ -126,7 +134,7 @@ CREATE TABLE public.observation (
     fk_identifier_codespace_id bigint,
     name character varying(255),
     fk_name_codespace_id bigint,
-    description character varying(255),
+    description character varying(2048),
     is_deleted smallint DEFAULT 0 NOT NULL,
     valid_time_start timestamp without time zone,
     valid_time_end timestamp without time zone,
@@ -135,7 +143,7 @@ CREATE TABLE public.observation (
     sampling_geometry public.geometry,
     value_identifier character varying(255),
     value_name character varying(255),
-    value_description character varying(255),
+    value_description character varying(2048),
     vertical_from numeric(19,2) DEFAULT '-99999.00'::numeric NOT NULL,
     vertical_to numeric(19,2) DEFAULT '-99999.00'::numeric NOT NULL,
     value_quantity numeric(29,2),
@@ -162,7 +170,7 @@ CREATE TABLE public.offering (
     fk_identifier_codespace_id bigint,
     name character varying(255),
     fk_name_codespace_id bigint,
-    description character varying(255),
+    description character varying(2048),
     sampling_time_start timestamp without time zone,
     sampling_time_end timestamp without time zone,
     result_time_start timestamp without time zone,
@@ -187,7 +195,7 @@ CREATE TABLE public.offering_i18n (
     fk_offering_id bigint NOT NULL,
     locale character varying(255),
     name character varying(255),
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.offering_i18n OWNER TO postgres;
 CREATE TABLE public.offering_observation_type (
@@ -223,7 +231,7 @@ CREATE TABLE public.phenomenon (
     fk_identifier_codespace_id bigint,
     name character varying(255),
     fk_name_codespace_id bigint,
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.phenomenon OWNER TO postgres;
 CREATE TABLE public.phenomenon_i18n (
@@ -231,7 +239,7 @@ CREATE TABLE public.phenomenon_i18n (
     fk_phenomenon_id bigint NOT NULL,
     locale character varying(255),
     name character varying(255),
-    description character varying(255)
+    description character varying(2048)
 );
 ALTER TABLE public.phenomenon_i18n OWNER TO postgres;
 CREATE TABLE public.procedure (
@@ -242,7 +250,7 @@ CREATE TABLE public.procedure (
     is_insitu smallint,
     fk_identifier_codespace_id bigint,
     fk_name_codespace_id bigint,
-    description character varying(255),
+    description character varying(2048),
     is_deleted smallint DEFAULT 0 NOT NULL,
     description_file text,
     is_reference smallint DEFAULT 0,
@@ -273,7 +281,7 @@ CREATE TABLE public.procedure_i18n (
     fk_procedure_id bigint NOT NULL,
     locale character varying(255),
     name character varying(255),
-    description character varying(255),
+    description character varying(2048),
     short_name character varying(255),
     long_name character varying(255)
 );
@@ -312,7 +320,7 @@ ALTER TABLE public.result_template OWNER TO postgres;
 CREATE TABLE public.service (
     service_id bigint NOT NULL,
     name character varying(255) NOT NULL,
-    description character varying(255),
+    description character varying(2048),
     url character varying(255),
     type character varying(255),
     version character varying(255)
@@ -351,8 +359,10 @@ CREATE TABLE public.value_profile (
     fk_vertical_unit_id bigint NOT NULL
 );
 ALTER TABLE public.value_profile OWNER TO postgres;
-ALTER TABLE ONLY public.category_i18
+ALTER TABLE ONLY public.category_i18n
     ADD CONSTRAINT category_i18_pkey PRIMARY KEY (category_i18n_id);
+-- ALTER TABLE ONLY public.category_i18
+--     ADD CONSTRAINT category_i18_pkey PRIMARY KEY (category_i18n_id);
 ALTER TABLE ONLY public.category
     ADD CONSTRAINT category_pkey PRIMARY KEY (category_id);
 ALTER TABLE ONLY public.codespace
@@ -471,6 +481,8 @@ CREATE INDEX sampling_time_start_idx ON public.observation USING btree (sampling
 ALTER TABLE ONLY public.value_blob
     ADD CONSTRAINT fk_blob_value FOREIGN KEY (fk_observation_id) REFERENCES public.observation(observation_id);
 ALTER TABLE ONLY public.category_i18
+    ADD CONSTRAINT fk_category FOREIGN KEY (fk_category_id) REFERENCES public.category(category_id);
+ALTER TABLE ONLY public.category_i18n
     ADD CONSTRAINT fk_category FOREIGN KEY (fk_category_id) REFERENCES public.category(category_id);
 ALTER TABLE ONLY public.composite_observation
     ADD CONSTRAINT fk_composite_observation FOREIGN KEY (fk_parent_observation_id) REFERENCES public.observation(observation_id);
