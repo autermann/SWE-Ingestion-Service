@@ -55,7 +55,7 @@ services:
     image: rabbitmq:3-management
     networks:
       network:
-        ipv4_address: 172.52.0.101
+        ipv4_address: 172.23.25.101
 
 ################################################################################
 #
@@ -75,7 +75,7 @@ services:
       - logstash
     networks:
       network:
-        ipv4_address: 172.52.0.102
+        ipv4_address: 172.23.25.102
 
 ################################################################################
 #
@@ -93,7 +93,7 @@ services:
       - "${PWD}/database/pgdata:/var/lib/postgresql/data"
     networks:
       network:
-        ipv4_address: 172.52.0.103
+        ipv4_address: 172.23.25.103
 
 ################################################################################
 #
@@ -114,7 +114,7 @@ services:
       - database
     networks:
       network:
-        ipv4_address: 172.52.0.104
+        ipv4_address: 172.23.25.104
 
 ################################################################################
 #
@@ -147,7 +147,7 @@ services:
       - logstash
     networks:
       network:
-        ipv4_address: 172.52.0.105
+        ipv4_address: 172.23.25.105
 
 ################################################################################
 #
@@ -182,7 +182,7 @@ services:
         echo 'CsvTimestampFilter app imported'
     networks:
       network:
-        ipv4_address: 172.52.0.106
+        ipv4_address: 172.23.25.106
 
 ################################################################################
 #
@@ -199,7 +199,7 @@ services:
       - "${PWD}/smle/smle_nginx.conf:/etc/nginx/conf.d/default.conf"
     networks:
       network:
-        ipv4_address: 172.52.0.107
+        ipv4_address: 172.23.25.107
 
 ################################################################################
 #
@@ -215,7 +215,7 @@ services:
       - "${PWD}/elasticsearch/data:/usr/share/elasticsearch/data"
     networks:
       network:
-        ipv4_address: 172.52.0.108
+        ipv4_address: 172.23.25.108
 
 ################################################################################
 #
@@ -228,7 +228,7 @@ services:
       - "${PWD}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml"
     networks:
       network:
-        ipv4_address: 172.52.0.109
+        ipv4_address: 172.23.25.109
     depends_on:
       - elasticsearch
 
@@ -244,7 +244,7 @@ services:
       - "${PWD}/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
     networks:
       network:
-        ipv4_address: 172.52.0.110
+        ipv4_address: 172.23.25.110
     depends_on:
       - elasticsearch
 
@@ -266,7 +266,7 @@ services:
       - 443:443
     networks:
       network:
-        ipv4_address: 172.52.0.111
+        ipv4_address: 172.23.25.111
     depends_on:
       - sos
       - cnc
@@ -284,7 +284,7 @@ networks:
     driver: bridge
     ipam:
       config:
-      - subnet: 172.52.0.0/24
+      - subnet: 172.23.25.0/24
 
 
 ################################################################################
