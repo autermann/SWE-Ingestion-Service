@@ -56,12 +56,15 @@ public class RestartStreamThread extends Thread {
     @Override
     public void run() {
         try {
-            Future<Stream> futureStream = service.createStream(streamName, streamDefinition, true);
+            Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
             Stream createdStream = futureStream.get(120, TimeUnit.SECONDS);
             if (createdStream == null) {
                 LOG.error("Restarting stream '"
                         + streamName
                         + "' failed.");
+            }
+            if (createdStream != null) {
+                service.deployStream(streamName);
             }
         } catch (Exception e) {
             LOG.error("Restarting stream '"
