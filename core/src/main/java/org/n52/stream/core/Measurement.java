@@ -51,6 +51,9 @@ public class Measurement<T> implements Cloneable, Serializable {
 
     @JsonProperty("phenomenonTime")
     private OffsetDateTime phenomenonTime = null;
+    
+    @JsonProperty("resultGeometry")
+    private GeometryPoint resultGeometry = null;
 
     @JsonProperty("value")
     @JsonTypeInfo(use=Id.CLASS, include=As.PROPERTY, property="type", defaultImpl = Object.class)
@@ -99,6 +102,20 @@ public class Measurement<T> implements Cloneable, Serializable {
         this.value = value;
     }
 
+    public GeometryPoint getResultGeometry() {
+        return resultGeometry;
+    }
+
+    public void setResultGeometry(GeometryPoint resultGeometry) {
+        this.resultGeometry = resultGeometry;
+    }
+    
+    public boolean hasResultGeometry() {
+        return (getResultGeometry() != null &&
+                getResultGeometry().getLatitude() != null &&
+                getResultGeometry().getLongitude() != null);
+    }
+
     @Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -110,12 +127,13 @@ public class Measurement<T> implements Cloneable, Serializable {
         Measurement<?> measurement = (Measurement<?>) o;
         return Objects.equals(resultTime, measurement.resultTime) &&
                 Objects.equals(phenomenonTime, measurement.phenomenonTime) &&
+                Objects.equals(resultGeometry, measurement.resultGeometry) &&
                 Objects.equals(value, measurement.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resultTime, phenomenonTime, value);
+        return Objects.hash(resultTime, phenomenonTime, resultGeometry, value);
     }
 
     @Override
@@ -134,6 +152,7 @@ public class Measurement<T> implements Cloneable, Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("class Measurement {\n");
         sb.append("    resultTime    : ").append(toIndentedString(resultTime)).append("\n");
+        sb.append("    resultGeometry: ").append(toIndentedString(resultGeometry)).append("\n");
         sb.append("    phenomenonTime: ").append(toIndentedString(phenomenonTime)).append("\n");
         sb.append("    value         : ").append(toIndentedString(value)).append("\n");
         sb.append("}");

@@ -33,11 +33,9 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -76,6 +74,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Arrays;
+import org.n52.stream.core.GeometryPoint;
 
 /**
  *
@@ -94,8 +94,14 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private static final String DEFINITION_RESULT_TIME = "http://www.opengis.net/def/property/OGC/0/ResultTime";
 
+    private static final String DEFINITION_RESULT_GEOMETRY = "http://52north.org/geometry/point";
+
     private int msgCount = 0;
     private int processedMsgCount = 0;
+
+    private int resultGeometryLatitudeIndex = -1;
+    private int resultGeometryLongitudeIndex = -1;
+    private int resultGeometryHeightIndex = -1;
 
     @Autowired
     private AppConfiguration properties;
@@ -163,13 +169,32 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
             isReplaceDecimalSeparator = true;
         }
         storeTokenAssignments(dataInterface);
-        if (properties.getDateColumnIndex() == -1){
+        if (properties.getDateColumnIndex() == -1) {
             Integer extractedIndex = extractTimestampIndex();
             properties.setDateColumnIndex(extractedIndex);
             properties.setTimeColumnIndex(extractedIndex);
         }
+        extractResultGeometryIndices();
         fillTemplateDataMessage();
         LOG.info("CsvProcessor initialized for procedure: {}", properties.getSensor());
+    }
+
+    private void extractResultGeometryIndices() {
+        List<SweField> sweFields = tokenAssigments.getFields();
+        for (int i = 0; i < sweFields.size(); i++) {
+            SweAbstractDataComponent sweElement = sweFields.get(i).getElement();
+            if (sweElement != null
+                    && sweElement.getDefinition() != null
+                    && sweElement.getDefinition().contains(DEFINITION_RESULT_GEOMETRY)) {
+                if (sweElement.getDefinition().toLowerCase().endsWith("latitude")) {
+                    resultGeometryLatitudeIndex = i;
+                } else if (sweElement.getDefinition().toLowerCase().endsWith("longitude")) {
+                    resultGeometryLongitudeIndex = i;
+                } else if (sweElement.getDefinition().toLowerCase().endsWith("height")) {
+                    resultGeometryHeightIndex = i;
+                }
+            }
+        }
     }
 
     private Integer extractTimestampIndex() {
@@ -191,7 +216,7 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         boolean phenTimeSet = false;
         for (SweField field : tokenAssigments.getFields()) {
             SweAbstractDataComponent sweElement = field.getElement();
-            if (!sweElement.isSetDefinition() || sweElement.getDefinition().contains(DEFINITION_RESULT_TIME)) {
+            if (sweElement == null || !sweElement.isSetDefinition() || sweElement.getDefinition().contains(DEFINITION_RESULT_TIME)) {
                 continue;
             } else if (sweElement.getDefinition().contains(DEFINITION_PHENOMENON_TIME)) {
                 phenTimeSet = true;
@@ -287,7 +312,6 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 //        }
 //        feature = new Feature().withId(featuresOfInterest.iterator().next());
 //    }
-
     private AbstractProcessV20 checkAndExtractProcess() throws IllegalArgumentException {
         if (!processDescription.isSetComponents() || processDescription.getComponents().isEmpty()) {
             throw logErrorAndCreateException("AggregateProcess does not contain any component!");
@@ -325,13 +349,13 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
 
     private DataMessage processPayload(String messagePayload) {
         LOG.trace("Message-Payload received: {}", messagePayload);
-        List<String> payloadBlocks = tokenize(messagePayload, textEncoding.getBlockSeparator());
+        List<String> payloadBlocks = Arrays.asList(messagePayload.split(textEncoding.getBlockSeparator()));
         if (payloadBlocks.isEmpty()) {
             return null;
         }
         DataMessage dataMessage = templateDataMessage.clone();
         for (String block : payloadBlocks) {
-            List<String> tokens = tokenize(block, textEncoding.getTokenSeparator());
+            List<String> tokens = Arrays.asList(block.split(textEncoding.getTokenSeparator()));
             if (tokens.isEmpty()) {
                 continue;
             }
@@ -342,22 +366,35 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
                 throw logErrorAndCreateException(
                         "Number of values in message does NOT match number of values in stream definition.");
             }
+            GeometryPoint resultGeometry = getCsvResultGeometry(block);
             for (int i = 0; i < tokens.size(); i++) {
                 String token = tokens.get(i);
                 SweAbstractDataComponent tokenSpecification = tokenAssigments.getFields().get(i).getElement();
-                if (!tokenSpecification.isSetDefinition()) {
-                    continue;
-                }
-                String definition = tokenSpecification.getDefinition();
-                if (!definition.contains(DEFINITION_RESULT_TIME) &&
-                        !definition.contains(DEFINITION_PHENOMENON_TIME) &&
-                         isNoDataValueSet && !noDataValue.equalsIgnoreCase(token) || !isNoDataValueSet) {
+//                if ((tokenSpecification == null) || (!tokenSpecification.isSetDefinition())) {
+//                    continue;
+//                }
+                String definition = null;
+                if (tokenSpecification != null && tokenSpecification.isSetDefinition()) {
+                    definition = tokenSpecification.getDefinition();
+                    if (!definition.contains(DEFINITION_RESULT_TIME)
+                            && !definition.contains(DEFINITION_PHENOMENON_TIME)
+                            && !definition.contains(DEFINITION_RESULT_GEOMETRY)
+                            && isNoDataValueSet && !noDataValue.equalsIgnoreCase(token) || !isNoDataValueSet) {
                         processDataValue(dataMessage, measurements, token, tokenSpecification, definition);
+                    } else {
+                        continue;
+                    }
                 } else {
+                    processDataValue(dataMessage, measurements, token, tokenSpecification, definition);
                     continue;
                 }
             }
             setTimestamps(resultTime, phenTime, measurements);
+            if (resultGeometry != null
+                    && resultGeometry.hasLongitude()
+                    && resultGeometry.hasLatitude()) {
+                setResultGeometry(resultGeometry, measurements);
+            }
         }
         return dataMessage;
     }
@@ -366,20 +403,57 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
      * We can suppress these warnings because we know the type of the values from the specification. If something
      * fails, the input MUST be invalid and an exception is okay!
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void processDataValue(DataMessage dataMessage, List<Measurement<?>> measurements, String token,
             SweAbstractDataComponent tokenSpecification, String definition)
             throws IllegalArgumentException, NumberFormatException {
         Optional<Timeseries<?>> ts = dataMessage.getTimeseriesForPhenomenon(definition);
         if (!ts.isPresent()) {
-            logErrorAndCreateException(String.format("Could not get timeseries for phenomenon '%s'!",
-                    definition));
+            LOG.trace("Could not get timeseries for phenomenon '%s'!",
+                    definition);
+            return;
         }
         Timeseries<?> timeseries = ts.get();
         SweDataComponentType sweType = tokenSpecification.getDataComponentType();
         Measurement<?> measurementsItem = createMeasurement(token, sweType);
+        if (measurementsItem == null) {
+            LOG.trace("Could not create measurement for token '" + token + "'.");
+            return;
+        }
         timeseries.addMeasurementsItem((Measurement) measurementsItem);
         measurements.add(measurementsItem);
+    }
+
+    private GeometryPoint getCsvResultGeometry(String csvLine) {
+        GeometryPoint result = null;
+        String latitude = null;
+        String longitude = null;
+        String height = null;
+        String[] split = csvLine.split(textEncoding.getTokenSeparator());
+        if (resultGeometryLatitudeIndex > -1
+                && resultGeometryLongitudeIndex > -1) {
+            result = new GeometryPoint();
+            latitude = split[resultGeometryLatitudeIndex];
+            longitude = split[resultGeometryLongitudeIndex];
+            if (resultGeometryHeightIndex > -1) {
+                height = split[resultGeometryHeightIndex];
+                try {
+                    Double alt = Double.parseDouble(height.replace(textEncoding.getDecimalSeparator(), "."));
+                    result.setHeight(alt);
+                } catch (IllegalArgumentException iae) {
+                    LOG.debug("No height given for csvLine " + msgCount);
+                }
+            }
+            try {
+                Double lat = Double.parseDouble(latitude.replace(textEncoding.getDecimalSeparator(), "."));
+                result.setLatitude(lat);
+                Double lng = Double.parseDouble(longitude.replace(textEncoding.getDecimalSeparator(), "."));
+                result.setLongitude(lng);
+            } catch (IllegalArgumentException iae) {
+                LOG.debug("No latitude or longitude given for csvLine " + msgCount);
+            }
+        }
+        return result;
     }
 
     private OffsetDateTime getCsvTimestamp(String csvLine) {
@@ -421,6 +495,10 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
     private Measurement<?> createMeasurement(String token, SweDataComponentType sweType)
             throws NumberFormatException, IllegalArgumentException {
         Measurement<?> measurementsItem = null;
+        if (token.isEmpty()) {
+            LOG.trace("Data value is empty.");
+            return null;
+        }
         switch (sweType) {
             case Boolean:
                 Measurement<Boolean> booleanMeasurement = new Measurement<>();
@@ -466,16 +544,10 @@ public class CsvProcessor extends AbstractIngestionServiceApp {
         }
     }
 
-    private List<String> tokenize(String messagePayload, String delimeter) {
-        List<String> tokens = new LinkedList<>();
-        StringTokenizer tokenizer = new StringTokenizer(messagePayload, delimeter);
-        while (tokenizer.hasMoreTokens()) {
-            tokens.add(tokenizer.nextToken());
+    private void setResultGeometry(GeometryPoint geometryPoint, List<Measurement<?>> measurements) {
+        for (Measurement<?> measurement : measurements) {
+            measurement.setResultGeometry(geometryPoint);
         }
-        if (tokens.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return tokens;
     }
 
     @VisibleForTesting
