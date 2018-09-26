@@ -1,0 +1,486 @@
+<!--
+
+    Copyright (C) 2018-2018 52°North Initiative for Geospatial Open Source
+    Software GmbH
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 as published
+    by the Free Software Foundation.
+
+    If the program is linked with libraries which are licensed under one of
+    the following licenses, the combination of the program with the linked
+    library is not considered a "derivative work" of the program:
+
+        - Apache License, version 2.0
+        - Apache Software License, version 1.0
+        - GNU Lesser General Public License, version 3
+        - Mozilla Public License, versions 1.0, 1.1 and 2.0
+        - Common Development and Distribution License (CDDL), version 1.0
+
+    Therefore the distribution of the program linked with libraries licensed
+    under the aforementioned licenses, is permitted by the copyright holders
+    if the distribution is compliant with both the GNU General Public
+    License version 2 and the aforementioned licenses.
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    Public License for more details.
+
+-->
+<sml:AggregateProcess
+  xmlns:swe="http://www.opengis.net/swe/2.0"
+  xmlns:sml="http://www.opengis.net/sensorml/2.0"
+  xmlns:gml="http://www.opengis.net/gml/3.2"
+  xmlns:om="http://www.opengis.net/om/2.0"
+  xmlns:sams="http://www.opengis.net/samplingSpatial/2.0"
+  xmlns:sf="http://www.opengis.net/sampling/2.0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:gco="http://www.isotc211.org/2005/gco"
+  xmlns:gmd="http://www.isotc211.org/2005/gmd" gml:id="sdc"   
+  xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorML/2.0/sensorML.xsd http://www.opengis.net/samplingSpatial/2.0 http://schemas.opengis.net/samplingSpatial/2.0/spatialSamplingFeature.xsd">
+  <sml:components>
+    <sml:ComponentList>
+      <sml:component name="source_output_component">
+        <sml:PhysicalSystem gml:id="SeabirdHydrocatSurface">
+          <gml:identifier codeSpace="uniqueID">SeabirdHydrocatSurface</gml:identifier>
+          <sml:identification>
+            <sml:IdentifierList>
+              <sml:identifier>
+                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/">
+                  <sml:label>Long name</sml:label>
+                  <sml:value>SeabirdHydrocatSurface</sml:value>
+                </sml:Term>
+              </sml:identifier>
+              <sml:identifier>
+                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/">
+                  <sml:label>Short name</sml:label>
+                  <sml:value>SeabirdHydrocatSurface</sml:value>
+                </sml:Term>
+              </sml:identifier>
+            </sml:IdentifierList>
+          </sml:identification>
+          <sml:featuresOfInterest>
+            <sml:FeatureList>
+              <sml:feature xlink:href="SeabirdHydrocatSurface" xlink:title="SeabirdHydrocatSurface"/>
+            </sml:FeatureList>
+          </sml:featuresOfInterest>
+          <sml:outputs>
+            <sml:OutputList>
+              <sml:output name="streamOutput">
+                <sml:DataInterface>
+                  <sml:data>
+                    <swe:DataStream>
+                      <swe:elementType name="weatherOutputStream">
+                        <swe:DataRecord>
+                          <swe:field name="platform">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="datetime">
+                            <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
+                              <swe:label>Date and time</swe:label>
+                              <swe:description>Date-time is a time stamp from a Global Positioning System receiver at the cable observatory shore station in the format YYYY-MM-DDThh:mm:ss.sss.</swe:description>
+                              <swe:uom/>
+                            </swe:Time>
+                          </swe:field>
+                          <swe:field name="latitude">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="longitude">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="source">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="instrument_name">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="sms">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="nbm">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="channels">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="sea_water_temperature">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0335/">
+                              <swe:label>sea_water_temperature</swe:label>
+                              <swe:description>Sea water temperature is the in situ temperature of the sea water. To specify the depth at which the temperature applies use a vertical coordinate variable or scalar coordinate variable. There are standard names for sea_surface_temperature, sea_surface_skin_temperature, sea_surface_subskin_temperature and sea_surface_foundation_temperature which can be used to describe data located at the specified surfaces. For observed data, depending on the period during which the observation was made, the measured in situ temperature was recorded against standard "scales". These historical scales include the International Practical Temperature Scale of 1948 (IPTS-48; 1948-1967), the International Practical Temperature Scale of 1968 (IPTS-68, Barber, 1969; 1968-1989) and the International Temperature Scale of 1990 (ITS-90, Saunders 1990; 1990 onwards). Conversion of data between these scales follows t68 = t48 - (4.4 x 10e-6) * t48(100 - t - 48); t90 = 0.99976 * t68. Observations made prior to 1948 (IPTS-48) have not been documented and therefore a conversion cannot be certain. Differences between t90 and t68 can be up to 0.01 at temperatures of 40 C and above; differences of 0.002-0.007 occur across the standard range of ocean temperatures (-10 - 30 C). The International Equation of State of Seawater 1980 (EOS-80, UNESCO, 1981) and the Practical Salinity Scale (PSS-78) were both based on IPTS-68, while the Thermodynamic Equation of Seawater 2010 (TEOS-10) is based on ITS-90. References: Barber, 1969, doi: 10.1088/0026-1394/5/2/001; UNESCO, 1981; Saunders, 1990, WOCE Newsletter, 10, September 1990.</swe:description>
+                              <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_electrical_conductivity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/conduct/">
+                              <swe:label>sea surface conductivity</swe:label>
+                              <swe:description>Sea Water Electrical Conductivity.</swe:description>
+                              <!--
+                                mS/cm -> P06/current/MSCM/
+                                mS/m  -> P06/current/MSPM/
+                                S/m   -> P06/current/UECA/
+                              -->
+                              <swe:uom code="uS/cm" />
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_pressure">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CF12N584/">
+                              <swe:label>sea_water_pressure_at_sea_water_surface</swe:label>
+                              <swe:description>The surface called "surface" means the lower boundary of the atmosphere. "Sea water pressure" is the pressure that exists in the medium of sea water. It includes the pressure due to overlying sea water, sea ice, air and any other medium that may be present.</swe:description>
+                              <swe:uom code="dbar" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPDB/" xlink:title="Decibars"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="DOX1">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P09/current/DOX1/">
+                              <swe:label>DISSOLVED OXYGEN</swe:label>
+                              <swe:description>Volume of oxygen dissolved per unit volume of the water column.</swe:description>
+                              <swe:uom code="ml/l" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UMLL/" xlink:title="Millilitres per litre"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_salinity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0331/">
+                              <swe:label>sea_water_salinity</swe:label>
+                              <swe:description>Sea water salinity is the salt content of sea water, often on the Practical Salinity Scale of 1978. However, the unqualified term &amp;apos;salinity&amp;apos; is generic and does not necessarily imply any particular method of calculation. The units of salinity are dimensionless and the units attribute should normally be given as 1e-3 or 0.001 i.e. parts per thousand. There are standard names for the more precisely defined salinity quantities: sea_water_knudsen_salinity, S_K (used for salinity observations between 1901 and 1966), sea_water_cox_salinity, S_C (used for salinity observations between 1967 and 1977), sea_water_practical_salinity, S_P (used for salinity observations from 1978 to the present day), sea_water_absolute_salinity, S_A, sea_water_preformed_salinity, S_*, and sea_water_reference_salinity. Practical Salinity is reported on the Practical Salinity Scale of 1978 (PSS-78), and is usually based on the electrical conductivity of sea water in observations since the 1960s. Conversion of data between the observed scales follows: S_P = (S_K - 0.03) * (1.80655 / 1.805) and S_P = S_C, however the accuracy of the latter is dependent on whether chlorinity or conductivity was used to determine the S_C value, with this inconsistency driving the development of PSS-78. The more precise standard names should be used where appropriate for both modelled and observed salinities. In particular, the use of sea_water_salinity to describe salinity observations made from 1978 onwards is now deprecated in favor of the term sea_water_practical_salinity which is the salinity quantity stored by national data centers for post-1978 observations. The only exception to this is where the observed salinities are definitely known not to be recorded on the Practical Salinity Scale. The unit "parts per thousand" was used for sea_water_knudsen_salinity and sea_water_cox_salinity.</swe:description>
+                              <swe:uom code="psu" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UUUU/" xlink:title="Practical Salinity Units"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sound_speed">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0316/">
+                              <swe:label>speed_of_sound_in_sea_water</swe:label>
+                              <swe:description>Speed is the magnitude of velocity.</swe:description>
+                              <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="qc">
+                            <!-- ignore -->
+                          </swe:field>
+                        </swe:DataRecord>
+                      </swe:elementType>
+                      <swe:encoding>
+                        <swe:TextEncoding decimalSeparator="." tokenSeparator="," blockSeparator="\n"/>
+                      </swe:encoding>
+                      <swe:values/>
+                    </swe:DataStream>
+                  </sml:data>
+                  <sml:interfaceParameters>
+                    <swe:DataRecord definition="https://52north.org/swe-ingestion/http">
+                      <swe:field name="http_file_url">
+                        <swe:Text definition="https://52north.org/swe-ingestion/http#url">
+                          <swe:value>http://www.ifremer.fr/co/co05010807/SeabirdHydrocatSurface.csv</swe:value>
+                        </swe:Text>
+                      </swe:field>
+                      <!-- TIME POLLING OPTIONS FOR A MORE GENERIC INTERFACE
+                      <swe:field name="http_polling_interval_unit">
+                        <swe:Text definition="https://52north.org/swe-ingestion/http#time-unit">
+                          <swe:value>MINUTES</swe:value>
+                        </swe:Text>
+                      </swe:field>
+                      <swe:field name="http_polling_interval">
+                        <swe:Text definition="https://52north.org/swe-ingestion/http#fixed-delay">
+                          <swe:value>15</swe:value>
+                        </swe:Text>
+                      </swe:field>
+                      -->
+                    </swe:DataRecord>
+                  </sml:interfaceParameters>
+                </sml:DataInterface>
+              </sml:output>
+            </sml:OutputList>
+          </sml:outputs>
+        </sml:PhysicalSystem>
+      </sml:component>
+      <sml:component name="csv_process_component">
+        <sml:SimpleProcess gml:id="csv_process">
+          <sml:inputs>
+            <sml:InputList>
+              <sml:input name="streamInput">
+                <sml:DataInterface>
+                  <sml:data>
+                    <swe:DataStream>
+                      <swe:elementType name="inputStream">
+                        <swe:DataRecord>
+                          <swe:field name="platform">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="datetime">
+                            <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
+                              <swe:label>Date and time</swe:label>
+                              <swe:description>Date-time is a time stamp from a Global Positioning System receiver at the cable observatory shore station in the format YYYY-MM-DDThh:mm:ss.sss.</swe:description>
+                              <swe:uom/>
+                            </swe:Time>
+                          </swe:field>
+                          <swe:field name="latitude">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="longitude">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="source">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="instrument_name">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="sms">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="nbm">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="channels">
+                            <!-- ignored -->
+                          </swe:field>
+                          <swe:field name="sea_water_temperature">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0335/">
+                              <swe:label>sea_water_temperature</swe:label>
+                              <swe:description>Sea water temperature is the in situ temperature of the sea water. To specify the depth at which the temperature applies use a vertical coordinate variable or scalar coordinate variable. There are standard names for sea_surface_temperature, sea_surface_skin_temperature, sea_surface_subskin_temperature and sea_surface_foundation_temperature which can be used to describe data located at the specified surfaces. For observed data, depending on the period during which the observation was made, the measured in situ temperature was recorded against standard "scales". These historical scales include the International Practical Temperature Scale of 1948 (IPTS-48; 1948-1967), the International Practical Temperature Scale of 1968 (IPTS-68, Barber, 1969; 1968-1989) and the International Temperature Scale of 1990 (ITS-90, Saunders 1990; 1990 onwards). Conversion of data between these scales follows t68 = t48 - (4.4 x 10e-6) * t48(100 - t - 48); t90 = 0.99976 * t68. Observations made prior to 1948 (IPTS-48) have not been documented and therefore a conversion cannot be certain. Differences between t90 and t68 can be up to 0.01 at temperatures of 40 C and above; differences of 0.002-0.007 occur across the standard range of ocean temperatures (-10 - 30 C). The International Equation of State of Seawater 1980 (EOS-80, UNESCO, 1981) and the Practical Salinity Scale (PSS-78) were both based on IPTS-68, while the Thermodynamic Equation of Seawater 2010 (TEOS-10) is based on ITS-90. References: Barber, 1969, doi: 10.1088/0026-1394/5/2/001; UNESCO, 1981; Saunders, 1990, WOCE Newsletter, 10, September 1990.</swe:description>
+                              <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_electrical_conductivity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/conduct/">
+                              <swe:label>sea surface conductivity</swe:label>
+                              <swe:description>Sea Water Electrical Conductivity.</swe:description>
+                              <!--
+                                mS/cm -> P06/current/MSCM/
+                                mS/m  -> P06/current/MSPM/
+                                S/m   -> P06/current/UECA/
+                              -->
+                              <swe:uom code="uS/cm" />
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_pressure">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CF12N584/">
+                              <swe:label>sea_water_pressure_at_sea_water_surface</swe:label>
+                              <swe:description>The surface called "surface" means the lower boundary of the atmosphere. "Sea water pressure" is the pressure that exists in the medium of sea water. It includes the pressure due to overlying sea water, sea ice, air and any other medium that may be present.</swe:description>
+                              <swe:uom code="dbar" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPDB/" xlink:title="Decibars"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="DOX1">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P09/current/DOX1/">
+                              <swe:label>DISSOLVED OXYGEN</swe:label>
+                              <swe:description>Volume of oxygen dissolved per unit volume of the water column.</swe:description>
+                              <swe:uom code="ml/l" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UMLL/" xlink:title="Millilitres per litre"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_salinity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0331/">
+                              <swe:label>sea_water_salinity</swe:label>
+                              <swe:description>Sea water salinity is the salt content of sea water, often on the Practical Salinity Scale of 1978. However, the unqualified term &amp;apos;salinity&amp;apos; is generic and does not necessarily imply any particular method of calculation. The units of salinity are dimensionless and the units attribute should normally be given as 1e-3 or 0.001 i.e. parts per thousand. There are standard names for the more precisely defined salinity quantities: sea_water_knudsen_salinity, S_K (used for salinity observations between 1901 and 1966), sea_water_cox_salinity, S_C (used for salinity observations between 1967 and 1977), sea_water_practical_salinity, S_P (used for salinity observations from 1978 to the present day), sea_water_absolute_salinity, S_A, sea_water_preformed_salinity, S_*, and sea_water_reference_salinity. Practical Salinity is reported on the Practical Salinity Scale of 1978 (PSS-78), and is usually based on the electrical conductivity of sea water in observations since the 1960s. Conversion of data between the observed scales follows: S_P = (S_K - 0.03) * (1.80655 / 1.805) and S_P = S_C, however the accuracy of the latter is dependent on whether chlorinity or conductivity was used to determine the S_C value, with this inconsistency driving the development of PSS-78. The more precise standard names should be used where appropriate for both modelled and observed salinities. In particular, the use of sea_water_salinity to describe salinity observations made from 1978 onwards is now deprecated in favor of the term sea_water_practical_salinity which is the salinity quantity stored by national data centers for post-1978 observations. The only exception to this is where the observed salinities are definitely known not to be recorded on the Practical Salinity Scale. The unit "parts per thousand" was used for sea_water_knudsen_salinity and sea_water_cox_salinity.</swe:description>
+                              <swe:uom code="psu" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UUUU/" xlink:title="Practical Salinity Units"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sound_speed">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0316/">
+                              <swe:label>speed_of_sound_in_sea_water</swe:label>
+                              <swe:description>Speed is the magnitude of velocity.</swe:description>
+                              <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="qc">
+                            <!-- ignore -->
+                          </swe:field>
+                        </swe:DataRecord>
+                      </swe:elementType>
+                      <swe:encoding>
+                        <swe:TextEncoding tokenSeparator="," blockSeparator="\n" decimalSeparator="."/>
+                      </swe:encoding>
+                      <swe:values/>
+                    </swe:DataStream>
+                  </sml:data>
+                </sml:DataInterface>
+              </sml:input>
+            </sml:InputList>
+          </sml:inputs>
+          <sml:outputs>
+            <sml:OutputList>
+              <sml:output name="streamOutput">
+                <sml:DataInterface>
+                  <sml:data>
+                    <swe:DataStream>
+                      <swe:elementType name="streamOutputDataType">
+                        <swe:DataRecord>
+                          <swe:field name="datetime">
+                            <swe:Time definition="http://www.opengis.net/def/property/OGC/0/PhenomenonTime">
+                              <swe:label>Date and time</swe:label>
+                              <swe:description>Date-time is a time stamp from a Global Positioning System receiver at the cable observatory shore station in the format YYYY-MM-DDThh:mm:ss.sss.</swe:description>
+                              <swe:uom/>
+                            </swe:Time>
+                          </swe:field>
+                          <swe:field name="sea_water_temperature">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0335/">
+                              <swe:label>sea_water_temperature</swe:label>
+                              <swe:description>Sea water temperature is the in situ temperature of the sea water. To specify the depth at which the temperature applies use a vertical coordinate variable or scalar coordinate variable. There are standard names for sea_surface_temperature, sea_surface_skin_temperature, sea_surface_subskin_temperature and sea_surface_foundation_temperature which can be used to describe data located at the specified surfaces. For observed data, depending on the period during which the observation was made, the measured in situ temperature was recorded against standard "scales". These historical scales include the International Practical Temperature Scale of 1948 (IPTS-48; 1948-1967), the International Practical Temperature Scale of 1968 (IPTS-68, Barber, 1969; 1968-1989) and the International Temperature Scale of 1990 (ITS-90, Saunders 1990; 1990 onwards). Conversion of data between these scales follows t68 = t48 - (4.4 x 10e-6) * t48(100 - t - 48); t90 = 0.99976 * t68. Observations made prior to 1948 (IPTS-48) have not been documented and therefore a conversion cannot be certain. Differences between t90 and t68 can be up to 0.01 at temperatures of 40 C and above; differences of 0.002-0.007 occur across the standard range of ocean temperatures (-10 - 30 C). The International Equation of State of Seawater 1980 (EOS-80, UNESCO, 1981) and the Practical Salinity Scale (PSS-78) were both based on IPTS-68, while the Thermodynamic Equation of Seawater 2010 (TEOS-10) is based on ITS-90. References: Barber, 1969, doi: 10.1088/0026-1394/5/2/001; UNESCO, 1981; Saunders, 1990, WOCE Newsletter, 10, September 1990.</swe:description>
+                              <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_electrical_conductivity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/conduct/">
+                              <swe:label>sea surface conductivity</swe:label>
+                              <swe:description>Sea Water Electrical Conductivity.</swe:description>
+                              <!--
+                                mS/cm -> P06/current/MSCM/
+                                mS/m  -> P06/current/MSPM/
+                                S/m   -> P06/current/UECA/
+                              -->
+                              <swe:uom code="uS/cm" />
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_pressure">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CF12N584/">
+                              <swe:label>sea_water_pressure_at_sea_water_surface</swe:label>
+                              <swe:description>The surface called "surface" means the lower boundary of the atmosphere. "Sea water pressure" is the pressure that exists in the medium of sea water. It includes the pressure due to overlying sea water, sea ice, air and any other medium that may be present.</swe:description>
+                              <swe:uom code="dbar" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPDB/" xlink:title="Decibars"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="DOX1">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P09/current/DOX1/">
+                              <swe:label>DISSOLVED OXYGEN</swe:label>
+                              <swe:description>Volume of oxygen dissolved per unit volume of the water column.</swe:description>
+                              <swe:uom code="ml/l" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UMLL/" xlink:title="Millilitres per litre"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sea_water_salinity">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0331/">
+                              <swe:label>sea_water_salinity</swe:label>
+                              <swe:description>Sea water salinity is the salt content of sea water, often on the Practical Salinity Scale of 1978. However, the unqualified term &amp;apos;salinity&amp;apos; is generic and does not necessarily imply any particular method of calculation. The units of salinity are dimensionless and the units attribute should normally be given as 1e-3 or 0.001 i.e. parts per thousand. There are standard names for the more precisely defined salinity quantities: sea_water_knudsen_salinity, S_K (used for salinity observations between 1901 and 1966), sea_water_cox_salinity, S_C (used for salinity observations between 1967 and 1977), sea_water_practical_salinity, S_P (used for salinity observations from 1978 to the present day), sea_water_absolute_salinity, S_A, sea_water_preformed_salinity, S_*, and sea_water_reference_salinity. Practical Salinity is reported on the Practical Salinity Scale of 1978 (PSS-78), and is usually based on the electrical conductivity of sea water in observations since the 1960s. Conversion of data between the observed scales follows: S_P = (S_K - 0.03) * (1.80655 / 1.805) and S_P = S_C, however the accuracy of the latter is dependent on whether chlorinity or conductivity was used to determine the S_C value, with this inconsistency driving the development of PSS-78. The more precise standard names should be used where appropriate for both modelled and observed salinities. In particular, the use of sea_water_salinity to describe salinity observations made from 1978 onwards is now deprecated in favor of the term sea_water_practical_salinity which is the salinity quantity stored by national data centers for post-1978 observations. The only exception to this is where the observed salinities are definitely known not to be recorded on the Practical Salinity Scale. The unit "parts per thousand" was used for sea_water_knudsen_salinity and sea_water_cox_salinity.</swe:description>
+                              <swe:uom code="psu" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UUUU/" xlink:title="Practical Salinity Units"/>
+                            </swe:Quantity>
+                          </swe:field>
+                          <swe:field name="sound_speed">
+                            <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0316/">
+                              <swe:label>speed_of_sound_in_sea_water</swe:label>
+                              <swe:description>Speed is the magnitude of velocity.</swe:description>
+                              <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second"/>
+                            </swe:Quantity>
+                          </swe:field>
+                        </swe:DataRecord>
+                      </swe:elementType>
+                      <swe:encoding>
+                        <swe:TextEncoding tokenSeparator="," blockSeparator="\n" decimalSeparator="."/>
+                      </swe:encoding>
+                      <swe:values/>
+                    </swe:DataStream>
+                  </sml:data>
+                </sml:DataInterface>
+              </sml:output>
+            </sml:OutputList>
+          </sml:outputs>
+          <sml:parameters>
+            <sml:ParameterList>
+              <sml:parameter name="file-filter-config">
+                <swe:Count definition="https://52north.org/swe-ingestion/csv-file-filter#header-line-count">
+                  <swe:label>Header Line Count</swe:label>
+                  <swe:description>The number of lines to strip from the csv file</swe:description>
+                  <swe:value>1</swe:value>
+                </swe:Count>
+              </sml:parameter>
+              <sml:parameter name="datetime-column-format">
+                <swe:Text definition="https://52north.org/swe-ingestion/csv-timestamp-filter#datetime-column-format">
+                  <swe:label>Format of datetime</swe:label>
+                  <swe:description>The format of the datetime</swe:description>
+                  <swe:value>yyyy-MM-dd'T'HH:mm:ssX</swe:value>
+                </swe:Text>
+              </sml:parameter>
+            </sml:ParameterList>
+          </sml:parameters>
+          <sml:method xlink:href="https://52north.org/swe-ingestion/csv-file-filter"/>
+        </sml:SimpleProcess>
+      </sml:component>
+      <sml:component name="sos_input_component">
+        <sml:PhysicalSystem gml:id="dwd-opendata-weather">
+          <gml:identifier codeSpace="uniqueID">SeabirdHydrocatSurface</gml:identifier>
+          <sml:identification>
+            <sml:IdentifierList>
+              <sml:identifier>
+                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/">
+                  <sml:label>Long name</sml:label>
+                  <sml:value>SeabirdHydrocatSurface</sml:value>
+                </sml:Term>
+              </sml:identifier>
+              <sml:identifier>
+                <sml:Term definition="http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/">
+                  <sml:label>Short name</sml:label>
+                  <sml:value>SeabirdHydrocatSurface</sml:value>
+                </sml:Term>
+              </sml:identifier>
+            </sml:IdentifierList>
+          </sml:identification>
+          <sml:featuresOfInterest>
+            <sml:FeatureList>
+              <sml:feature xlink:href="SeabirdHydrocatSurface" xlink:title="SeabirdHydrocatSurface"/>
+            </sml:FeatureList>
+          </sml:featuresOfInterest>
+          <sml:outputs>
+            <sml:OutputList>
+              <sml:output name="sea_water_temperature">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0335/">
+                  <swe:label>sea_water_temperature</swe:label>
+                  <swe:description>Sea water temperature is the in situ temperature of the sea water. To specify the depth at which the temperature applies use a vertical coordinate variable or scalar coordinate variable. There are standard names for sea_surface_temperature, sea_surface_skin_temperature, sea_surface_subskin_temperature and sea_surface_foundation_temperature which can be used to describe data located at the specified surfaces. For observed data, depending on the period during which the observation was made, the measured in situ temperature was recorded against standard "scales". These historical scales include the International Practical Temperature Scale of 1948 (IPTS-48; 1948-1967), the International Practical Temperature Scale of 1968 (IPTS-68, Barber, 1969; 1968-1989) and the International Temperature Scale of 1990 (ITS-90, Saunders 1990; 1990 onwards). Conversion of data between these scales follows t68 = t48 - (4.4 x 10e-6) * t48(100 - t - 48); t90 = 0.99976 * t68. Observations made prior to 1948 (IPTS-48) have not been documented and therefore a conversion cannot be certain. Differences between t90 and t68 can be up to 0.01 at temperatures of 40 C and above; differences of 0.002-0.007 occur across the standard range of ocean temperatures (-10 - 30 C). The International Equation of State of Seawater 1980 (EOS-80, UNESCO, 1981) and the Practical Salinity Scale (PSS-78) were both based on IPTS-68, while the Thermodynamic Equation of Seawater 2010 (TEOS-10) is based on ITS-90. References: Barber, 1969, doi: 10.1088/0026-1394/5/2/001; UNESCO, 1981; Saunders, 1990, WOCE Newsletter, 10, September 1990.</swe:description>
+                  <swe:uom code="degT" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UABB/" xlink:title="Degrees True"/>
+                </swe:Quantity>
+              </sml:output>
+              <sml:output name="sea_water_electrical_conductivity">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/B39/current/conduct/">
+                  <swe:label>sea surface conductivity</swe:label>
+                  <swe:description>Sea Water Electrical Conductivity.</swe:description>
+                  <!--
+                    mS/cm -> P06/current/MSCM/
+                    mS/m  -> P06/current/MSPM/
+                    S/m   -> P06/current/UECA/
+                  -->
+                  <swe:uom code="uS/cm" />
+                </swe:Quantity>
+              </sml:output>
+              <sml:output name="sea_water_pressure">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CF12N584/">
+                  <swe:label>sea_water_pressure_at_sea_water_surface</swe:label>
+                  <swe:description>The surface called "surface" means the lower boundary of the atmosphere. "Sea water pressure" is the pressure that exists in the medium of sea water. It includes the pressure due to overlying sea water, sea ice, air and any other medium that may be present.</swe:description>
+                  <swe:uom code="dbar" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UPDB/" xlink:title="Decibars"/>
+                </swe:Quantity>
+              </sml:output>
+              <sml:output name="DOX1">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P09/current/DOX1/">
+                  <swe:label>DISSOLVED OXYGEN</swe:label>
+                  <swe:description>Volume of oxygen dissolved per unit volume of the water column.</swe:description>
+                  <swe:uom code="ml/l" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UMLL/" xlink:title="Millilitres per litre"/>
+                </swe:Quantity>
+              </sml:output>
+              <sml:output name="sea_water_salinity">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0331/">
+                  <swe:label>sea_water_salinity</swe:label>
+                  <swe:description>Sea water salinity is the salt content of sea water, often on the Practical Salinity Scale of 1978. However, the unqualified term &amp;apos;salinity&amp;apos; is generic and does not necessarily imply any particular method of calculation. The units of salinity are dimensionless and the units attribute should normally be given as 1e-3 or 0.001 i.e. parts per thousand. There are standard names for the more precisely defined salinity quantities: sea_water_knudsen_salinity, S_K (used for salinity observations between 1901 and 1966), sea_water_cox_salinity, S_C (used for salinity observations between 1967 and 1977), sea_water_practical_salinity, S_P (used for salinity observations from 1978 to the present day), sea_water_absolute_salinity, S_A, sea_water_preformed_salinity, S_*, and sea_water_reference_salinity. Practical Salinity is reported on the Practical Salinity Scale of 1978 (PSS-78), and is usually based on the electrical conductivity of sea water in observations since the 1960s. Conversion of data between the observed scales follows: S_P = (S_K - 0.03) * (1.80655 / 1.805) and S_P = S_C, however the accuracy of the latter is dependent on whether chlorinity or conductivity was used to determine the S_C value, with this inconsistency driving the development of PSS-78. The more precise standard names should be used where appropriate for both modelled and observed salinities. In particular, the use of sea_water_salinity to describe salinity observations made from 1978 onwards is now deprecated in favor of the term sea_water_practical_salinity which is the salinity quantity stored by national data centers for post-1978 observations. The only exception to this is where the observed salinities are definitely known not to be recorded on the Practical Salinity Scale. The unit "parts per thousand" was used for sea_water_knudsen_salinity and sea_water_cox_salinity.</swe:description>
+                  <swe:uom code="psu" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UUUU/" xlink:title="Practical Salinity Units"/>
+                </swe:Quantity>
+              </sml:output>
+              <sml:output name="sound_speed">
+                <swe:Quantity definition="http://vocab.nerc.ac.uk/collection/P07/current/CFSN0316/">
+                  <swe:label>speed_of_sound_in_sea_water</swe:label>
+                  <swe:description>Speed is the magnitude of velocity.</swe:description>
+                  <swe:uom code="m/s" xlink:href="http://vocab.nerc.ac.uk/collection/P06/current/UVAA/" xlink:title="Metres per second"/>
+                </swe:Quantity>
+              </sml:output>
+            </sml:OutputList>
+          </sml:outputs>
+        </sml:PhysicalSystem>
+      </sml:component>
+    </sml:ComponentList>
+  </sml:components>
+  <sml:connections>
+    <sml:ConnectionList>
+      <sml:connection>
+        <sml:Link>
+          <sml:source ref="components/source_output_component/outputs/streamOutput"/>
+          <sml:destination ref="components/csv_process_component/inputs/streamInput"/>
+        </sml:Link>
+      </sml:connection>
+      <sml:connection>
+        <sml:Link>
+          <sml:source ref="components/csv_process_component/outputs/streamOutput"/>
+          <sml:destination ref="components/sos_input_component/inputs"/>
+        </sml:Link>
+      </sml:connection>
+    </sml:ConnectionList>
+  </sml:connections>
+</sml:AggregateProcess>

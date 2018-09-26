@@ -5,27 +5,31 @@
     "aggregateServices": true,
     "saveStatus": true,
     "restApiUrls": {
-        "http://localhost:8081/52n-sos-webapp/api/": "Ocean Data Servvice"
+        "http://localhost:8080/52n-sos-webapp/api/": "Ocean Data Service"
     },
     "defaultProvider": {
         "serviceID": "1",
-        "apiUrl": "http://localhost:8081/52n-sos-webapp/api/"
+        "url": "http://localhost:8080/52n-sos-webapp/api/"
     },
     "chartOptions": {
         "yaxis": {
             "tickDecimals": 2
+        },
+        "points": {
+            "show": true,
+            "fill": true
         }
     },
-    "supportedLanguages": [
-        {
+    "supportedLanguages": [{
             "code": "de",
             "label": "Deutsch"
-        },
-        {
+        }, {
             "code": "en",
             "label": "English"
-        }
-    ],
+        }, {
+            "code": "pt",
+            "label": "Portuguese"
+        }],
     "selectColorFromList": true,
     "colorList": [
         "#078D53",
@@ -90,5 +94,17 @@
             "group": "Raster"
         }
     },
-    "showScale": true
+    "showScale": true,
+    "timebufferFactor": 0.1,
+    "solveLabels": false,
+    "proxyUrl": "https://cors-anywhere.herokuapp.com/",
+    "menuItems": [
+        "diagram",
+        "map",
+        "favorite",
+        "provider",
+        "listSelection",
+        "settings"
+    ],
+    "datelineMarkerGrouping": false
 }

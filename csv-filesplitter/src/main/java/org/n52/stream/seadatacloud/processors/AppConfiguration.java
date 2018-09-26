@@ -26,25 +26,56 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.stream.seadatacloud.cnc.model;
+package org.n52.stream.seadatacloud.processors;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
+ * @author <a href="mailto:m.radtke@52north.org">Maurin Radtke</a>
  *
- * @author Maurin Radtke <m.radtke@52north.org>
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class StreamStatus {
+@Validated
+@ConfigurationProperties("org.n52.stream")
+public class AppConfiguration {
 
-    private String status;
+    /**
+     * delimiter to split one multi lines message into multiple single line messages.
+     */
+    private String delimiter = ";";
+    
+    /**
+     * url to mark the file_name by url
+     */
+    private String url = "";
+    
+    /**
+     * number of maximum messages to forward to the output channel per poll.
+     */
+    private int maxmessages = Integer.MAX_VALUE;
 
-    public String getStatus() {
-        return status;
+    public String getDelimiter() {
+        return delimiter;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getMaxmessages() {
+        return maxmessages;
+    }
+
+    public void setMaxmessages(int maxmessages) {
+        this.maxmessages = maxmessages;
+    }
+    
 }

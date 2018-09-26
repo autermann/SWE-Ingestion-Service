@@ -46,7 +46,7 @@ public class CnCServiceSecurityConfiguration extends WebSecurityConfigurerAdapte
     private CnCAuthenticationEntryPoint cncAuthEntryPoint;
 
 //    // TODO add bean for this
-//    private String allowedIp = "172.52.0.102/32";
+//    private String allowedIp = "172.23.25.102/32";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

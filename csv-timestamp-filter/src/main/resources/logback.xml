@@ -38,7 +38,7 @@
     </appender>
     
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>172.52.0.110:5000</destination>
+        <destination>172.23.25.110:5000</destination>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <pattern>

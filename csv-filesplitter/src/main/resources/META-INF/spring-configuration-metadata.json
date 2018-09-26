@@ -1,0 +1,27 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "org.n52.stream.seadatacloud.processors.AppConfiguration",
+      "name": "org.n52.stream",
+      "type": "org.n52.stream.seadatacloud.processors.AppConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "org.n52.stream.seadatacloud.processors.AppConfiguration",
+      "defaultValue": "\n",
+      "name": "org.n52.stream.delimiter",
+      "description": "delimiter to split one multi lines message into multiple single line messages.",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.n52.stream.seadatacloud.processors.AppConfiguration",
+      "defaultValue": "",
+      "name": "org.n52.stream.url",
+      "description": "url to mark the file_name by url.",
+      "type": "java.lang.String"
+    }
+    
+  ]
+}

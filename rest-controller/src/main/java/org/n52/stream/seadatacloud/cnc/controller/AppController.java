@@ -30,6 +30,7 @@ package org.n52.stream.seadatacloud.cnc.controller;
 
 import java.util.List;
 import org.n52.stream.seadatacloud.cnc.model.AppOption;
+import org.n52.stream.seadatacloud.cnc.model.Processor;
 import org.n52.stream.seadatacloud.cnc.model.Processors;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
 import org.n52.stream.seadatacloud.cnc.model.Source;
@@ -105,6 +106,26 @@ public class AppController {
     public AppOption getSourceOptionByName(Source source, String appOptionName) {
         List<AppOption> sourceOptions = source.getOptions();
         for (AppOption current : sourceOptions) {
+            if (current.getName().equalsIgnoreCase(appOptionName)) {
+                return current;
+            }
+        }
+        return null;
+    }
+
+    public Processor getProcessorByName(String processorName) {
+        Processors registeredProcessors = service.getProcessors();
+        for (Processor current : registeredProcessors.getProcessors()) {
+            if (current.getName().equalsIgnoreCase(processorName)) {
+                return current;
+            }
+        }
+        return null;
+    }
+
+    public AppOption getProcessorOptionByName(Processor processor, String appOptionName) {
+        List<AppOption> processorOptions = processor.getOptions();
+        for (AppOption current : processorOptions) {
             if (current.getName().equalsIgnoreCase(appOptionName)) {
                 return current;
             }
