@@ -93,6 +93,7 @@ import org.n52.stream.generate.InsertSensorGenerator;
 import org.n52.stream.seadatacloud.cnc.CnCServiceConfiguration;
 import org.n52.stream.seadatacloud.cnc.kibana.KibanaController;
 import org.n52.stream.seadatacloud.cnc.model.AppOption;
+import org.n52.stream.seadatacloud.cnc.model.Processor;
 import org.n52.stream.seadatacloud.cnc.model.Processors;
 import org.n52.stream.seadatacloud.cnc.model.Sinks;
 import org.n52.stream.seadatacloud.cnc.model.Source;
@@ -134,7 +135,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.stream.seadatacloud.cnc.model.Processor;
 
 /**
  * Controller for stream resources: offers CRUD methods.
@@ -332,7 +332,7 @@ public class StreamController {
                 String streamSourceDefinition = sourceName;
 
                 if (sourceName.equals("time-source-rabbit")) {
-                    // sensorDesctiption for time-source-rabbit also contains important 
+                    // sensorDesctiption for time-source-rabbit also contains important
                     // httpClientProcessor appOptions+
                     Object rabbitSourceDefinition = getTimeSourceDefinition(al, (LinkedList<SweField>) sdr.getFields());
                     if (rabbitSourceDefinition instanceof ResponseEntity) {
@@ -969,7 +969,7 @@ public class StreamController {
             fileSplitterDefinition += " --delimiter=" + textEncoding.getBlockSeparator();
         }
         fileSplitterDefinition += " --maxmessages=1500";
-        return (String) timeSourceDefinition + " | " + httpClientDefinition + " | "
+        return timeSourceDefinition + " | " + httpClientDefinition + " | "
                 + fileSplitterDefinition;
     }
 
