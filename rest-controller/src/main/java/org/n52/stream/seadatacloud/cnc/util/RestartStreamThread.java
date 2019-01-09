@@ -30,6 +30,7 @@ package org.n52.stream.seadatacloud.cnc.util;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 import org.n52.stream.seadatacloud.cnc.model.Stream;
 import org.n52.stream.seadatacloud.cnc.service.CloudService;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Maurin Radtke <m.radtke@52north.org>
+ * @author <a href="mailto:e.h.juerrens@52north.org">J&uuml;rrens, Eike Hinderk</a>
  */
 public class RestartStreamThread extends Thread {
 
@@ -59,19 +61,19 @@ public class RestartStreamThread extends Thread {
             Future<Stream> futureStream = service.createStream(streamName, streamDefinition, false);
             Stream createdStream = futureStream.get(120, TimeUnit.SECONDS);
             if (createdStream == null) {
-                LOG.error("Restarting stream '"
-                        + streamName
-                        + "' failed.");
+                LOG.error("Restarting stream '{}' failed. Could not CREATE stream.",
+                        streamName);
+                return;
             }
-            if (createdStream != null) {
-                service.deployStream(streamName);
+            if (service.deployStream(streamName) == null) {
+                LOG.error("Restarting stream '{}' failed. Could not DEPLOY stream.",
+                        streamName);
+            } else {
+                LOG.info("Restarted stream '{}'.", streamName);
             }
         } catch (Exception e) {
-            LOG.error("Restarting stream '"
-                    + streamName
-                    + "' failed. Reason: "
-                    + e + " : "
-                    + e.getMessage());
+            LOG.error("Restarting stream '{}' failed. Reason: {} : {}.",
+                    streamName, e, e.getMessage());
         }
     }
 }
