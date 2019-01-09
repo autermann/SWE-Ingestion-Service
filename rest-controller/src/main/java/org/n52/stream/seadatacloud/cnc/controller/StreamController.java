@@ -235,6 +235,8 @@ public class StreamController {
                 } while (!appRegistered);
 
                 // TODO: fixed ThreadPool with ExecutorService!
+                // FIXME: start the threads after THIS Spring Boot App is fully started
+                // see https://stackoverflow.com/a/38668148
                 for (RestartStreamThread rst : restartStreamThreads) {
                     rst.start();
                 }
