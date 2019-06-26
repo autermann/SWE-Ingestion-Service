@@ -335,8 +335,6 @@ services:
     image: helgoland
     volumes:
       - "${PWD}/helgoland/nginx.conf:/etc/nginx/conf.d/default.conf"
-    ports:
-      - 8090:80
 
 ################################################################################
 #                                                                              #
