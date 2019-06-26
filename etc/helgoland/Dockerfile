@@ -7,7 +7,8 @@ RUN apt-get update && \
     cd helgoland && \
     git checkout feature/sea-data-cloud && \
     npm install && \
-    npm run build
+    npm run build && \
+    sed -i 's@base href="/"@base href="/helgoland/"@g' /tmp/helgoland/dist/complete/index.html
 
 FROM nginx:alpine
 # COPY ${PWD}/helgoland/nginx.conf /etc/nginx/conf.d/default.conf
