@@ -39,7 +39,7 @@ The SensorWebEnabled-Ingestion-Service is an easy to configure and easy to deplo
    {
      "name": "sb68a63d8-cc63-4ce3-9212-09b7a1f47740",
      "status": "undeployed",
-     "definition": "mqtt-source-rabbit --url=tcp://nexos.dev.52north.org:1883 --topics=spiddal-fluorometer | csv-processor | db-sink"
+     "definition": "mqtt-source-rabbit --url=mqtt://mosca --topics=spiddal-fluorometer | csv-processor | db-sink"
    }
 	```
     The `"name"`-field value contains the `streamId` of the created stream. Use this value in order to start the streaming process of the stream as described in the next step.
@@ -277,12 +277,12 @@ On success, the response status code is 204 - `no content` and the stream is run
             {
                 "name": "s27219dc2-a962-4566-85e9-fc24f0ef8aef",
                 "status": "deployed",
-                "definition": "mqtt-source-rabbit --url=tcp://nexos.dev.52north.org:1884 --topics=airmar-rinville-1 | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
+                "definition": "mqtt-source-rabbit --url=mqtt://mosca --topics=airmar-rinville-1 | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
             },
             {
                 "name": "s8e72442f-9102-4f1b-a3cf-367053765e92",
                 "status": "deployed",
-                "definition": "mqtt-source-rabbit --url=tcp://nexos.dev.52north.org:1884 --topics=airmar-rinville-1-generated | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s8e72442f-9102-4f1b-a3cf-367053765e92 --offering=AIRMAR-RINVILLE-1/observations --sensor=AIRMAR-RINVILLE-1 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s8e72442f-9102-4f1b-a3cf-367053765e92 --offering=AIRMAR-RINVILLE-1/observations --sensor=AIRMAR-RINVILLE-1 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
+                "definition": "mqtt-source-rabbit --url=mqtt://mosca --topics=airmar-rinville-1-generated | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s8e72442f-9102-4f1b-a3cf-367053765e92 --offering=AIRMAR-RINVILLE-1/observations --sensor=AIRMAR-RINVILLE-1 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s8e72442f-9102-4f1b-a3cf-367053765e92 --offering=AIRMAR-RINVILLE-1/observations --sensor=AIRMAR-RINVILLE-1 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
             }
         ]
     }
@@ -293,7 +293,7 @@ On success, the response status code is 204 - `no content` and the stream is run
     {
         "name": "s27219dc2-a962-4566-85e9-fc24f0ef8aef",
         "status": "deployed",
-        "definition": "mqtt-source-rabbit --url=tcp://nexos.dev.52north.org:1884 --topics=airmar-rinville-1 | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
+        "definition": "mqtt-source-rabbit --url=mqtt://mosca --topics=airmar-rinville-1 | csv-processor --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 | db-sink --sensormlurl=http://cnc:8082/cnc/api/streams/s27219dc2-a962-4566-85e9-fc24f0ef8aef --offering=AIRMAR-RINVILLE-2/observations --sensor=AIRMAR-RINVILLE-2 --url=jdbc:postgresql://database:5432/sos --username=postgres --password=****** "
 	}
     ```
     possible Responses:
@@ -476,7 +476,7 @@ On success, the response status code is 204 - `no content` and the stream is run
                                             <swe:DataRecord definition="https://52north.org/swe-ingestion/mqtt/3.1">
                                                 <swe:field name="mqtt_broker_url">
                                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#url">
-                                                        <swe:value>tcp://nexos.dev.52north.org:1884</swe:value>
+                                                        <swe:value>mqtt://mosca</swe:value>
                                                     </swe:Text>
                                                 </swe:field>
                                                 <swe:field name="mqtt_broker_topics">
@@ -852,7 +852,7 @@ On success, the response status code is 204 - `no content` and the stream is run
                                             <swe:DataRecord definition="https://52north.org/swe-ingestion/mqtt/3.1">
                                                 <swe:field name="mqtt_broker_url">
                                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#url">
-                                                        <swe:value>tcp://nexos.dev.52north.org:1884</swe:value>
+                                                        <swe:value>mqtt://mosca</swe:value>
                                                     </swe:Text>
                                                 </swe:field>
                                                 <swe:field name="mqtt_broker_topics">
@@ -1055,7 +1055,7 @@ On success, the response status code is 204 - `no content` and the stream is run
          {
              "name": "sb68a63d8-cc63-4ce3-9212-09b7a1f47740",
              "status": "undeployed",
-             "definition": "mqtt-source-rabbit --url=tcp://nexos.dev.52north.org:1883 --topics=spiddal-fluorometer | csv-processor | db-sink"
+             "definition": "mqtt-source-rabbit --url=mqtt://mosca --topics=spiddal-fluorometer | csv-processor | db-sink"
          }
       ```
 	* 400 - BAD REQUEST: "swe:Text definition `optionUrl` requires a hashtag ( # ) option."

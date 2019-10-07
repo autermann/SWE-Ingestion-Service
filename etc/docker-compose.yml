@@ -326,16 +326,43 @@ services:
 
 ################################################################################
 #
+#     MOSCA
+#
+#
+  mosca:
+    image: matteocollina/mosca:v2.8.3
+    container_name: mosca
+    #ports:
+    #  - 1883:1883
+
+
+################################################################################
+#
+#     MQTT TRANSLATOR
+#
+#
+  mqtt-translator:
+    image: mqtt-translator:2019-10
+    container_name: mqtt-translator
+    # for development only
+    #ports:
+    #   - 9229:9229
+    depends_on:
+      - mosca
+
+
+################################################################################
+#
 #     Helgoland
 #
 #
-  helgoland:
-    build:
-      context: ./helgoland
-    image: helgoland
-    volumes:
-      - "${PWD}/helgoland/nginx.conf:/etc/nginx/conf.d/default.conf"
-
+#  helgoland:
+#    build:
+#      context: ./helgoland
+#    image: helgoland
+#    volumes:
+#      - "${PWD}/helgoland/nginx.conf:/etc/nginx/conf.d/default.conf"
+#
 ################################################################################
 #                                                                              #
 #                     Networks                                                 #

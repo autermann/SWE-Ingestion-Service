@@ -158,7 +158,7 @@
                               <swe:DataRecord definition="https://52north.org/swe-ingestion/mqtt/3.1">
                                  <swe:field name="mqtt_broker_url">
                                     <swe:Text definition="https://52north.org/swe-ingestion/mqtt/3.1#url">
-                                       <swe:value>tcp://nexos.dev.52north.org:1884</swe:value>
+                                       <swe:value>mqtt://mosca</swe:value>
                                     </swe:Text>
                                  </swe:field>
                                  <swe:field name="mqtt_broker_password">
