@@ -13,11 +13,14 @@
     {
       "name": "Jürrens, Eike Hinderk",
       "email": "e.h.juerrens@52north.org"
+    },
+    {
+      "name": "Christian Autermann",
+      "email": "c.autermann@52north.org"
     }
   ],
   "dependencies": {
-    "mosca": "^2.8.0",
-    "redis": "^2.8.0",
-    "log-timestamp": "0.3.0"
+    "log-timestamp": "0.3.0",
+    "mosca": "^2.8.3"
   }
 }

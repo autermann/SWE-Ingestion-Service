@@ -4,12 +4,14 @@ services:
     mqtt-translator:
         image: mqtt-translator:2019-10
         container_name: mqtt-translator
-        ports:
-            - 9229:9229
+        # for development only
+        # ports:
+        #     - 9229:9229
         depends_on:
             - mosca
 
     mosca:
-        image: matteocollina/mosca
+        image: matteocollina/mosca:v2.8.3
+        container_name: mosca
         ports:
             - 1883:1883

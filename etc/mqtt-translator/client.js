@@ -5,7 +5,8 @@
 const mqttUrl = 'mqtt://mosca';
 const mqttTopic = 'airmar-rinville-1';
 var messageGeneratorFrequencyInMillis = 5000;
-require('log-timestamp');
+// next is only required when NOT running in docker as docker adds timestamps to logs by default
+// require('log-timestamp');
 
 const client = require('mqtt').connect(mqttUrl);
 
@@ -58,7 +59,7 @@ client.on('connect', () => {
       setTimeout(function () {
           var msg = generateDataMessage();
           client.publish(mqttTopic, msg, null, function() {
-            console.log("message published", ...arguments);
+            console.log("message published in " + mqttTopic + ": " + msg, ...arguments);
           })
           generateData(generateCounter + 1);
       }, messageGeneratorFrequencyInMillis);

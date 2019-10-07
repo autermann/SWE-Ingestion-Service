@@ -11,7 +11,8 @@ var redisHost = 'localhost';
 const redisPort = 6379;
 var messageGeneratorFrequencyInMillis = 1000;
 const moscaPort = 1883;
-require('log-timestamp');
+// next is only required when NOT running in docker as docker adds timestamps to logs by default
+// require('log-timestamp');
 // We skip the client if message generation is requested
 let generate = false;
 var myArgs = process.argv.slice(2);
