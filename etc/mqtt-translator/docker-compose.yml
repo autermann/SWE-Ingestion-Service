@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    mqtt-translator:
+        image: mqtt-translator:2019-10
+        container_name: mqtt-translator
+        ports:
+            - 1884:1884
+            #- 9229:9229
+        depends_on:
+            - redis
+    redis:
+        image: redis:4.0.9
+        container_name: redis
+        ports:
+            - 6379:6379

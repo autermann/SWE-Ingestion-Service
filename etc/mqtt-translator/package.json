@@ -1,0 +1,23 @@
+{
+  "name": "mqtt-weather-translator",
+  "version": "1.0.0",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "Maurin Radtke <m.radtke@52north.org>",
+  "contributors": [
+    {
+      "name": "Jürrens, Eike Hinderk",
+      "email": "e.h.juerrens@52north.org"
+    }
+  ],
+  "dependencies": {
+    "mosca": "^2.8.0",
+    "redis": "^2.8.0",
+    "log-timestamp": "0.3.0"
+  }
+}
