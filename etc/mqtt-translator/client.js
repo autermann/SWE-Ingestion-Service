@@ -45,18 +45,18 @@ const values = initValues({
 setTimeout(() => {
   mqtt.connect(mqttUrl).on("connect", () => {
     console.log("Message generation activated.");
-    sendMessage(0);
+    sendMessage();
   });
 }, rampUpTime);
 
-function sendMessage(id) {
+function sendMessage() {
   var msg = createMessage(updateValues(values));
 
   client.publish(mqttTopic, msg, null, () => {
-    console.log(`message published in ${mqttTopic}: ${msg}`, ...argument);
+    console.log(`message published in ${mqttTopic}: ${msg}`, ...arguments);
   });
 
-  setTimeout(() => sendMessage(id + 1), frequency);
+  setTimeout(() => sendMessage, frequency);
 }
 
 function updateValues(values) {
@@ -114,7 +114,7 @@ function createMessage(values) {
   msg += `${values.humidity.value};`;
   msg += `${values.dewPoint.value};`;
   msg += `${values.windDirection.value};`;
-  msg +=  values.windSpeed.value;
+  msg += values.windSpeed.value;
   return msg;
 }
 
