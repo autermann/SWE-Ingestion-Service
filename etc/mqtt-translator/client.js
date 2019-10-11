@@ -43,13 +43,14 @@ const values = initValues({
 });
 
 setTimeout(() => {
-  mqtt.connect(mqttUrl).on("connect", () => {
+  const client = mqtt.connect(mqttUrl);
+  client.on("connect", () => {
     console.log("Message generation activated.");
-    sendMessage();
+    sendMessage(client);
   });
 }, rampUpTime);
 
-function sendMessage() {
+function sendMessage(client) {
   var msg = createMessage(updateValues(values));
 
   client.publish(mqttTopic, msg, null, () => {
