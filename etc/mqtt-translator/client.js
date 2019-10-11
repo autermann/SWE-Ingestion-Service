@@ -57,7 +57,7 @@ function sendMessage(client) {
     console.log(`message published in ${mqttTopic}: ${msg}`, ...arguments);
   });
 
-  setTimeout(() => sendMessage, frequency);
+  setTimeout(() => sendMessage(client), frequency);
 }
 
 function updateValues(values) {
